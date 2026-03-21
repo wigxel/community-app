@@ -4,9 +4,9 @@ import { mutation } from "./_generated/server";
 export const createUser = mutation({
   args: {
     email: v.string(),
-    firstName: v.string(),
-    username: v.string(),
-    lastName: v.string(),
+    firstName: v.optional(v.string()),
+    username: v.optional(v.string()),
+    lastName: v.optional(v.string()),
     phone: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -25,7 +25,11 @@ export const createUser = mutation({
       emailVerificationTime: Date.now(),
       phone: args.phone,
       isAnonymous: false,
-      name: `${args.firstName} ${args.lastName}`,
+      // name: `${args.firstName} ${args.lastName}`,
+      name:
+        `${args.firstName ?? ""} ${args.lastName ?? ""}`.trim() ||
+        args.username ||
+        args.email,
     });
 
     const profile = await ctx.db
@@ -41,12 +45,12 @@ export const createUser = mutation({
       await ctx.db.insert("profile", {
         userId: user_id,
         email: args.email,
-        firstName: args.firstName,
-        lastName: args.lastName,
+        firstName: args.firstName ?? "",
+        lastName: args.lastName ?? "",
         phoneNumbers: args.phone ? [args.phone] : [],
         title: null,
         profileImage: null,
-        username: args.username,
+        username: args.username ?? args.email.split("@")[0],
         links: [],
       });
     }

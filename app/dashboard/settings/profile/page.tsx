@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"; // Adjust path as needed
 import { Button } from "~/components/ui/button"; // Adjust path as needed
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -21,6 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form"; // Adjust path as needed
+import { INTERESTS } from "~/constants/interests";
 import { api } from "~/convex/_generated/api";
 import { useTitles } from "~/hooks/useTitles";
 
@@ -35,7 +37,10 @@ const formSchema = z.object({
     message: "Please enter a valid email address.",
   }),
   phonenumbers: z.string().optional(), // Can be extended for stricter validation
-  title: z.string({}),
+  title: z.string(),
+  interests: z.array(z.string()).min(1, {
+    message: "Please select at least one interest.",
+  }),
 });
 
 export default function Profile() {
@@ -45,18 +50,21 @@ export default function Profile() {
     <div>
       <h1 className="text-4xl font-semibold mb-8">Edit Profile</h1>
 
-      {profile ? (
+      {profile === undefined ? (
+        <div className="text-center">Loading...</div>
+      ) : profile === null ? (
+        <div className="text-center">No profile found.</div>
+      ) : (
         <ProfileForm
           initialData={{
             firstname: profile.firstName,
             lastname: profile.lastName,
             email: profile.email,
             phonenumbers: profile.phoneNumbers.join(","),
-            title: profile?.title,
+            title: profile.title,
+            interests: profile.interests ?? [],
           }}
         />
-      ) : (
-        <div className="text-center">Loading...</div>
       )}
     </div>
   );
@@ -70,7 +78,14 @@ export function ProfileForm({
   const { titles } = useTitles();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { ...initialData },
+    defaultValues: {
+      firstname: initialData.firstname ?? "",
+      lastname: initialData.lastname ?? "",
+      email: initialData.email ?? "",
+      phonenumbers: initialData.phonenumbers ?? "",
+      title: initialData.title ?? "",
+      interests: initialData.interests ?? [],
+    },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -167,13 +182,66 @@ export function ProfileForm({
                   </FormControl>
                   <SelectContent>
                     {titles.map((title) => (
-                      <SelectItem key={title} value={title}>
+                      <SelectItem key={title.name} value={title.name}>
                         {title.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <FormDescription>Select your preferred title.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="interests"
+            render={() => (
+              <FormItem>
+                <div className="mb-4">
+                  <FormLabel className="text-base">Interests</FormLabel>
+                  <FormDescription>
+                    Select your interests (choose at least one).
+                  </FormDescription>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {INTERESTS.map((interest) => (
+                    <FormField
+                      key={interest}
+                      control={form.control}
+                      name="interests"
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={interest}
+                            className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-3"
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(interest)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...field.value, interest])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== interest,
+                                        ),
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              {interest}
+                            </FormLabel>
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
+
                 <FormMessage />
               </FormItem>
             )}
