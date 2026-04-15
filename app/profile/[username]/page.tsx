@@ -53,9 +53,50 @@ export async function generateMetadata({
     };
   }
 
+  const fullName = `${profile.firstName} ${profile.lastName}`;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "https://community-app-wigxel.vercel.app";
+  const profileUrl = `${baseUrl}/${username}`;
+  const ogImageUrl = `${baseUrl}/api/og-image/${username}`;
+
   return {
-    title: `${profile.firstName} ${profile.lastName} | Profile`,
-    description: `View the profile of ${profile.firstName} ${profile.lastName}`,
+    title: `${fullName} | Profile`,
+    description:
+      profile.shortBio || `View ${fullName}'s profile on Wigxel Community`,
+    openGraph: {
+      title: `${fullName} (@${profile.username})`,
+      description:
+        profile.shortBio ||
+        `Check out ${fullName}'s profile on Wigxel Community`,
+      url: profileUrl,
+      siteName: "Wigxel Community",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${fullName}'s profile picture`,
+        },
+      ],
+      type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${fullName} (@${profile.username})`,
+      description:
+        profile.shortBio ||
+        `Check out ${fullName}'s profile on Wigxel Community`,
+      images: [ogImageUrl],
+      creator: `@${profile.username}`,
+    },
+    alternates: {
+      canonical: profileUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
   };
 }
 

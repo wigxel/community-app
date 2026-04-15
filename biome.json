@@ -25,6 +25,18 @@
       "recommended": true
     }
   },
+  "overrides": [
+    {
+      "includes": ["app/api/og-image/**"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noImgElement": "off"
+          }
+        }
+      }
+    }
+  ],
   "css": {
     "parser": {
       "tailwindDirectives": true
