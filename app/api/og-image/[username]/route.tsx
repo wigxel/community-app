@@ -7,6 +7,74 @@ import type { Profile } from "~/types/models";
 
 export const runtime = "edge";
 
+// Supported image formats by @vercel/og
+const SUPPORTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/gif",
+];
+
+async function isImageLoadable(url: string): Promise<boolean> {
+  try {
+    // First try HEAD request to check content-type
+    const headResponse = await fetch(url, { method: "HEAD" });
+    if (headResponse.ok) {
+      const contentType = headResponse.headers.get("content-type");
+      if (contentType) {
+        const normalizedType = contentType.toLowerCase().split(";")[0];
+        if (SUPPORTED_IMAGE_TYPES.includes(normalizedType)) {
+          return true;
+        }
+        // If we got a content-type that's not supported, don't proceed
+        if (normalizedType.startsWith("image/")) {
+          return false;
+        }
+      }
+    }
+
+    // If HEAD doesn't give us a clear answer, fetch first few bytes to check magic numbers
+    const blobResponse = await fetch(url, {
+      headers: { range: "bytes=0-1024" },
+    });
+
+    if (!blobResponse.ok) {
+      return false;
+    }
+
+    const buffer = await blobResponse.arrayBuffer();
+    const uint8Array = new Uint8Array(buffer);
+
+    // Check magic numbers for common image formats
+    // PNG: 89 50 4E 47
+    if (
+      uint8Array[0] === 0x89 &&
+      uint8Array[1] === 0x50 &&
+      uint8Array[2] === 0x4e &&
+      uint8Array[3] === 0x47
+    ) {
+      return true;
+    }
+    // JPEG: FF D8
+    if (uint8Array[0] === 0xff && uint8Array[1] === 0xd8) {
+      return true;
+    }
+    // GIF: 47 49 46
+    if (
+      uint8Array[0] === 0x47 &&
+      uint8Array[1] === 0x49 &&
+      uint8Array[2] === 0x46
+    ) {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Failed to check image loadability:", error);
+    return false;
+  }
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ username: string }> },
@@ -36,10 +104,16 @@ export async function GET(
       );
     }
 
-    return new ImageResponse(<OGImageComponent profile={profile} />, {
-      width: 1200,
-      height: 630,
-    });
+    // Check if the image is loadable by actually testing it
+    let hasValidImage = false;
+    if (profile.profileImage && profile.profileImage !== "/file.svg") {
+      hasValidImage = await isImageLoadable(profile.profileImage);
+    }
+
+    return new ImageResponse(
+      <OGImageComponent profile={profile} hasValidImage={hasValidImage} />,
+      { width: 1200, height: 630 },
+    );
   } catch (error) {
     console.error("OG Image generation failed:", error);
 
@@ -61,9 +135,15 @@ export async function GET(
   }
 }
 
-function OGImageComponent({ profile }: { profile: Profile }) {
+function OGImageComponent({
+  profile,
+  hasValidImage,
+}: {
+  profile: Profile;
+  hasValidImage: boolean;
+}) {
   const fullName = `${profile.firstName ?? ""} ${profile.lastName ?? ""}`;
-  const hasImage = profile.profileImage && profile.profileImage !== "/file.svg";
+  const initials = `${profile.firstName?.[0] ?? ""}${profile.lastName?.[0] ?? ""}`;
 
   return (
     <div
@@ -126,7 +206,7 @@ function OGImageComponent({ profile }: { profile: Profile }) {
           boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
         }}
       >
-        {hasImage ? (
+        {hasValidImage ? (
           <img
             src={profile.profileImage ?? ""}
             alt={`${fullName}`}
@@ -140,23 +220,7 @@ function OGImageComponent({ profile }: { profile: Profile }) {
             }}
           />
         ) : (
-          <div
-            style={{
-              width: 160,
-              height: 160,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #3b82f6, #2563eb)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 64,
-              fontWeight: "bold",
-              color: "white",
-              marginBottom: 30,
-            }}
-          >
-            {`${profile.firstName?.[0] ?? ""}${profile.lastName?.[0] ?? ""}`}
-          </div>
+          <InitialsAvatar initials={initials} />
         )}
 
         <div
@@ -219,6 +283,28 @@ function OGImageComponent({ profile }: { profile: Profile }) {
         <span>Wigxel</span>
         <span>Community</span>
       </div>
+    </div>
+  );
+}
+
+function InitialsAvatar({ initials }: { initials: string }) {
+  return (
+    <div
+      style={{
+        width: 160,
+        height: 160,
+        borderRadius: "50%",
+        background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 64,
+        fontWeight: "bold",
+        color: "white",
+        marginBottom: 30,
+      }}
+    >
+      {initials || "?"}
     </div>
   );
 }
