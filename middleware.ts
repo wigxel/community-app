@@ -4,6 +4,7 @@ const isPublicRoute = createRouteMatcher([
   "/auth(.*)",
   "/catalog",
   "/profile(.*)",
+  "/api/og-image/(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
