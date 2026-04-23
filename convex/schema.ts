@@ -28,6 +28,24 @@ const project_schema = v.array(
   }),
 );
 
+const work_experience_schema = v.object({
+  userId: v.id("users"),
+  logo: v.optional(v.string()),
+  companyName: v.string(),
+  location: v.union(
+    v.literal("remote"),
+    v.literal("hybrid"),
+    v.literal("onsite"),
+  ),
+  type: v.union(v.literal("contract"), v.literal("full-time")),
+  timeline: v.object({
+    start: v.number(),
+    end: v.optional(v.number()),
+  }),
+  description: v.string(),
+  position: v.string(),
+});
+
 const schema = defineSchema({
   users: authTables.users,
   titles: defineTable({
@@ -51,6 +69,10 @@ const schema = defineSchema({
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])
     .index("by_email", ["email"]),
+
+  workExperience: defineTable(work_experience_schema).index("by_userId", [
+    "userId",
+  ]),
 });
 
 export default schema;

@@ -16,11 +16,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+
 import { GitHub, LinkedIn } from "~/components/icons";
 import ReturnButton from "~/components/profile/return-button";
 import { api } from "~/convex/_generated/api";
 import { safeArray, safeObj } from "~/lib/data.helpers";
 import type { Profile } from "~/types/models";
+import { WorkExperienceSection } from "./_components/WorkExperience";
 
 // Create a cached version of the profile query
 const getProfileByUsername = cache(async (username: string) => {
@@ -448,6 +450,8 @@ export default async function ProfileCard({
             </div>
           </div>
         )}
+
+        <WorkExperienceSection userId={currentProfile.userId} />
       </div>
     </div>
   );
