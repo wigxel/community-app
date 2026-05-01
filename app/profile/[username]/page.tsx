@@ -14,6 +14,8 @@ import {
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { cache } from "react";
+
 import { GitHub, LinkedIn } from "~/components/icons";
 import ReturnButton from "~/components/profile/return-button";
 import { ShareButton } from "~/components/profile/share-button";
@@ -21,6 +23,7 @@ import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeArray, safeObj } from "~/lib/data.helpers";
 import type { Profile } from "~/types/models";
+import { WorkExperienceSection } from "./_components/WorkExperience";
 
 // Helper function to get the appropriate icon for each link type
 const getLinkIcon = (tag: string) => {
@@ -539,6 +542,8 @@ export default async function ProfileCard({
             </div>
           </div>
         )}
+
+        <WorkExperienceSection userId={currentProfile.userId} />
       </div>
     </div>
   );
