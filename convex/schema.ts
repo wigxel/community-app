@@ -27,6 +27,16 @@ const project_schema = v.array(
   }),
 );
 
+const work_experience_schema = v.array(
+  v.object({
+    position: v.string(),
+    company: v.string(),
+    startDate: v.number(),
+    endDate: v.optional(v.union(v.number(), v.null())), // null means current
+    description: v.optional(v.string()),
+  }),
+);
+
 const schema = defineSchema({
   titles: defineTable({
     name: v.string(),
@@ -43,8 +53,10 @@ const schema = defineSchema({
     username: v.string(),
     title: v.nullable(v.id("titles")),
     links: v.optional(link_schema),
-    shortBio: v.optional(v.string()),
+    shortBio: v.optional(v.nullable(v.string())),
     projects: v.optional(project_schema),
+    workExperience: v.optional(work_experience_schema),
+    interests: v.optional(v.array(v.string())),
   })
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])

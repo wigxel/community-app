@@ -1,7 +1,7 @@
-import { fetchQuery } from "convex/nextjs";
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 import { api } from "~/convex/_generated/api";
+import { fetchAuthQuery } from "~/lib/auth-server";
 
 import type { Profile } from "~/types/models";
 
@@ -82,7 +82,7 @@ export async function GET(
   const { username } = await params;
 
   try {
-    const profile = await fetchQuery(api.profiles.getProfileByUsername, {
+    const profile = await fetchAuthQuery(api.profiles.getProfileByUsername, {
       username,
     });
 

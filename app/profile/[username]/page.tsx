@@ -1,4 +1,3 @@
-import { fetchQuery } from "convex/nextjs";
 import { format } from "date-fns";
 import {
   Briefcase,
@@ -15,17 +14,13 @@ import {
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { cache } from "react";
 import { GitHub, LinkedIn } from "~/components/icons";
 import ReturnButton from "~/components/profile/return-button";
+import { ShareButton } from "~/components/profile/share-button";
 import { api } from "~/convex/_generated/api";
+import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeArray, safeObj } from "~/lib/data.helpers";
 import type { Profile } from "~/types/models";
-
-// Create a cached version of the profile query
-const getProfileByUsername = cache(async (username: string) => {
-  return await fetchQuery(api.profiles.getProfileByUsername, { username });
-});
 
 // Helper function to get the appropriate icon for each link type
 const getLinkIcon = (tag: string) => {
@@ -43,7 +38,12 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
-  const currentProfile = await getProfileByUsername(username);
+  const currentProfile = await fetchAuthQuery(
+    api.profiles.getProfileByUsername,
+    {
+      username,
+    },
+  );
   const profile: Profile = safeObj(currentProfile);
 
   if (Object.keys(profile).length < 1) {
@@ -106,7 +106,12 @@ export default async function ProfileCard({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
-  const currentProfile = await getProfileByUsername(username);
+  const currentProfile = await fetchAuthQuery(
+    api.profiles.getProfileByUsername,
+    {
+      username,
+    },
+  );
   const profile: Profile = safeObj(currentProfile);
 
   if (Object.keys(profile).length < 1) {
@@ -121,19 +126,32 @@ export default async function ProfileCard({
         <h1 className="text-white-700 w-fit text-[clamp(14px,7vw,36px)] font-bold">
           User Profile
         </h1>
-        <ReturnButton />
+        <div className="flex items-center gap-3">
+          <ShareButton username={username} />
+          <ReturnButton />
+        </div>
       </div>
       <div className="min-h-100 space-y-6 rounded-3xl bg-linear-to-br from-slate-50/10 to-slate-50/5 p-5 text-white shadow-2xl md:space-y-10 md:p-10 border border-white/10">
         {/* Profile Header */}
         <div className="flex flex-col items-start gap-x-10 gap-y-5 md:flex-row md:items-center">
           <div className="relative aspect-square h-35 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl md:h-50 ring-4 ring-white/10">
-            <Image
-              src={profile.profileImage || "/file.svg"}
-              alt={profile.firstName}
-              width={200}
-              height={200}
-              className="object-cover object-center"
-            />
+            {profile.profileImage?.startsWith("data:") ? (
+              <img
+                src={profile.profileImage}
+                alt={profile.firstName}
+                width={200}
+                height={200}
+                className="object-cover object-center w-full h-full"
+              />
+            ) : (
+              <Image
+                src={profile.profileImage || "/file.svg"}
+                alt={profile.firstName}
+                width={200}
+                height={200}
+                className="object-cover object-center"
+              />
+            )}
           </div>
           <div className="space-y-3">
             <p className="w-fit text-center text-2xl leading-none font-bold tracking-tight">
@@ -142,10 +160,12 @@ export default async function ProfileCard({
             <p className="w-fit text-center text-base font-medium text-blue-300/90">
               @{profile.username}
             </p>
-            <div className="flex w-fit items-center gap-2 rounded-full border border-blue-400/40 bg-linear-to-r from-blue-500/20 to-blue-600/20 px-4 py-2.5 text-center text-sm font-semibold text-blue-100 shadow-lg">
-              <Briefcase size={18} className="text-blue-300" />
-              {profile.title.name}
-            </div>
+            {profile.title && (
+              <div className="flex w-fit items-center gap-2 rounded-full border border-blue-400/40 bg-linear-to-r from-blue-500/20 to-blue-600/20 px-4 py-2.5 text-center text-sm font-semibold text-blue-100 shadow-lg">
+                <Briefcase size={18} className="text-blue-300" />
+                {profile.title.name}
+              </div>
+            )}
           </div>
         </div>
 
@@ -261,6 +281,77 @@ export default async function ProfileCard({
                   </a>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {profile.workExperience && profile.workExperience.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="h-1 w-8 rounded-full bg-linear-to-r from-cyan-400 to-blue-400"></div>
+              <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
+                Work Experience
+              </h2>
+            </div>
+            <div className="space-y-4">
+              {profile.workExperience.map((exp, _index) => {
+                const startDate = new Date(exp.startDate);
+                const endDate = exp.endDate ? new Date(exp.endDate) : null;
+                const startYear = startDate.getFullYear();
+                const endYear = endDate ? endDate.getFullYear() : "Present";
+
+                return (
+                  <div
+                    key={`${exp.company}-${exp.position}-${exp.startDate}`}
+                    className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:border-white/30 hover:shadow-xl md:p-7"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-white tracking-tight">
+                          {exp.position}
+                        </h3>
+                        <p className="text-lg text-blue-300/90 font-medium mt-1">
+                          {exp.company}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 rounded-full border border-cyan-400/30 bg-linear-to-r from-cyan-500/15 to-blue-500/15 px-4 py-2 text-sm font-medium text-cyan-200/90 shadow-lg whitespace-nowrap">
+                        <Calendar size={16} className="text-cyan-300" />
+                        <span>
+                          {startYear} — {endYear}
+                        </span>
+                      </div>
+                    </div>
+                    {exp.description && (
+                      <p className="text-white/80 leading-relaxed">
+                        {exp.description}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {profile.interests && profile.interests.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="h-1 w-8 rounded-full bg-linear-to-r from-pink-400 to-rose-400"></div>
+              <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
+                Interests
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {profile.interests.map((interest) => (
+                <div
+                  key={interest}
+                  className="group rounded-2xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 px-5 py-3 transition-all hover:border-white/30 hover:shadow-lg hover:scale-105"
+                >
+                  <span className="text-base font-semibold text-white/95 group-hover:text-pink-300 transition-colors">
+                    {interest}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         )}

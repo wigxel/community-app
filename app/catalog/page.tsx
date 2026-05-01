@@ -1,4 +1,3 @@
-import { fetchQuery } from "convex/nextjs";
 import { Briefcase } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -6,6 +5,7 @@ import Link from "next/link";
 import { RoleFilter } from "~/components/catalog/role-filter";
 import { SearchInput } from "~/components/catalog/search-input";
 import { api } from "~/convex/_generated/api";
+import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeArray } from "~/lib/data.helpers";
 import { searchParamsCache } from "./search-params";
 
@@ -19,7 +19,7 @@ type PageProps = {
 };
 
 export async function getTitles() {
-  const titles = await fetchQuery(api.titles.listTitles, {});
+  const titles = await fetchAuthQuery(api.titles.listTitles, {});
   const safeTitles = safeArray(titles);
 
   const getTitleId = (role: string) => {
@@ -46,7 +46,7 @@ export default async function Catalog({ searchParams }: PageProps) {
 
   const titleId = getTitleId(role);
 
-  const profiles = await fetchQuery(api.profiles.listProfile, {
+  const profiles = await fetchAuthQuery(api.profiles.listProfile, {
     searchTerm: q || undefined,
     titleId: titleId || undefined,
   });
@@ -91,13 +91,23 @@ export default async function Catalog({ searchParams }: PageProps) {
                   <Link href={`/profile/${profile.username}`}>
                     <div className="h-full flex flex-col overflow-hidden rounded-3xl bg-linear-to-br from-slate-50/10 to-slate-50/5 text-white shadow-xl transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-white/5 hover:from-slate-50/15 hover:to-slate-50/10 border border-white/10 group-hover:border-white/20">
                       <div className="mx-auto my-3 overflow-hidden rounded-full border-2 border-white/20 group-hover:border-white/30 shadow-lg ring-4 ring-white/5 group-hover:ring-white/10 transition-all duration-300">
-                        <Image
-                          src={profile.profileImage || "/file.svg"}
-                          alt={profile.firstName}
-                          width={120}
-                          height={120}
-                          className="object-cover object-center"
-                        />
+                        {profile.profileImage?.startsWith("data:") ? (
+                          <img
+                            src={profile.profileImage}
+                            alt={profile.firstName}
+                            width={120}
+                            height={120}
+                            className="object-cover object-center w-[120px] h-[120px]"
+                          />
+                        ) : (
+                          <Image
+                            src={profile.profileImage || "/file.svg"}
+                            alt={profile.firstName}
+                            width={120}
+                            height={120}
+                            className="object-cover object-center"
+                          />
+                        )}
                       </div>
                       <div className="mt-auto flex flex-col items-center gap-2 rounded-t-[50px] bg-linear-to-t from-white/20 to-white/10 group-hover:from-white/25 group-hover:to-white/15 px-2 py-6 md:px-4 transition-all duration-300 border-t border-white/10">
                         <p className="w-fit max-w-[80%] truncate text-center text-lg leading-none font-bold tracking-tight">

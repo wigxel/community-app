@@ -35,6 +35,19 @@
           }
         }
       }
+    },
+    {
+      "includes": ["app/profile/**", "components/profile/**", "app/catalog/**"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noImgElement": "off"
+          },
+          "a11y": {
+            "useSemanticElements": "off"
+          }
+        }
+      }
     }
   ],
   "css": {

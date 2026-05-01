@@ -12,12 +12,6 @@ import { api } from "~/convex/_generated/api";
 import { authClient } from "~/lib/auth-client";
 import { cn } from "~/lib/utils";
 
-const navigation = [
-  { name: "Home", href: "/dashboard/home", icon: Home },
-  { name: "Profile", href: "/dashboard/profile", icon: User },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
-];
-
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -25,6 +19,16 @@ export default function Sidebar() {
 
   const profile = useQuery(api.profiles.getProfile);
   const { data: session } = authClient.useSession();
+
+  const profileHref = profile?.username
+    ? `/profile/${profile.username}`
+    : "/dashboard/settings/profile";
+
+  const navigation = [
+    { name: "Home", href: "/dashboard/home", icon: Home },
+    { name: "Profile", href: profileHref, icon: User },
+    { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  ];
 
   async function handleSignOut() {
     await authClient.signOut();

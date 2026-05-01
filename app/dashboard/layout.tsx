@@ -9,8 +9,13 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
     redirect("/auth?redirect=/dashboard");
   }
 
-  const profile = await fetchAuthQuery(api.profiles.getForCurrentUser);
-  if (!profile) {
+  try {
+    const profile = await fetchAuthQuery(api.profiles.getForCurrentUser);
+    if (!profile) {
+      redirect("/onboarding?redirect=/dashboard");
+    }
+  } catch (error) {
+    console.error("Error fetching profile:", error);
     redirect("/onboarding?redirect=/dashboard");
   }
 

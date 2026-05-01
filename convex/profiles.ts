@@ -33,7 +33,7 @@ export const listProfile = query({
 
     const enrichedUsers = await Promise.all(
       filteredUsers.map(async (user) => {
-        const title = user.title ? await ctx.db.get(user.title) : "";
+        const title = user.title ? await ctx.db.get(user.title) : null;
 
         return {
           ...user,
@@ -58,7 +58,7 @@ export const getProfileByUsername = query({
 
     if (!user) return null;
 
-    const title = await ctx.db.get(user.title);
+    const title = user.title ? await ctx.db.get(user.title) : null;
     return { ...user, title };
   },
 });
@@ -66,20 +66,23 @@ export const getProfileByUsername = query({
 export const getProfile = query({
   args: {},
   async handler(ctx) {
-    const authUser = await authComponent.getAuthUser(ctx);
-    if (!authUser) return null;
+    try {
+      const authUser = await authComponent.getAuthUser(ctx);
+      if (!authUser) return null;
 
-    const user = await ctx.db
-      .query("profile")
-      .withIndex("by_email", (q) => q.eq("email", authUser.email))
-      .unique();
+      const user = await ctx.db
+        .query("profile")
+        .withIndex("by_email", (q) => q.eq("email", authUser.email))
+        .unique();
 
-    if (!user) return null;
+      if (!user) return null;
 
-    return await ctx.db
-      .get(user.title)
-      .then((title) => ({ ...user, title }))
-      .catch(() => ({ ...user, title: null }));
+      const title = user.title ? await ctx.db.get(user.title) : null;
+      return { ...user, title };
+    } catch (_error) {
+      // If authentication fails, return null instead of throwing
+      return null;
+    }
   },
 });
 
@@ -125,6 +128,59 @@ export const createProfile = mutation({
       shortBio: "",
       links: [],
       projects: [],
+      workExperience: [],
+      interests: [],
     });
+  },
+});
+
+export const updateProfile = mutation({
+  args: {
+    firstName: v.string(),
+    lastName: v.string(),
+    phoneNumbers: v.array(v.string()),
+    title: v.optional(v.union(v.id("titles"), v.null())),
+    shortBio: v.optional(v.string()),
+    profileImage: v.optional(v.union(v.string(), v.null())),
+    workExperience: v.optional(
+      v.array(
+        v.object({
+          position: v.string(),
+          company: v.string(),
+          startDate: v.number(),
+          endDate: v.optional(v.union(v.number(), v.null())),
+          description: v.optional(v.string()),
+        }),
+      ),
+    ),
+    interests: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) throw new Error("Not authenticated");
+
+    const profile = await ctx.db
+      .query("profile")
+      .withIndex("by_email", (q) => q.eq("email", authUser.email))
+      .unique();
+
+    if (!profile) throw new Error("Profile not found");
+
+    await ctx.db.patch(profile._id, {
+      firstName: args.firstName,
+      lastName: args.lastName,
+      phoneNumbers: args.phoneNumbers,
+      ...(args.title !== undefined && { title: args.title }),
+      ...(args.shortBio !== undefined && { shortBio: args.shortBio }),
+      ...(args.profileImage !== undefined && {
+        profileImage: args.profileImage,
+      }),
+      ...(args.workExperience !== undefined && {
+        workExperience: args.workExperience,
+      }),
+      ...(args.interests !== undefined && { interests: args.interests }),
+    });
+
+    return profile._id;
   },
 });
