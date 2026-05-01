@@ -41,10 +41,10 @@
       "linter": {
         "rules": {
           "performance": {
-            "noImgElement": "off"
+            "noImgElement": "on"
           },
           "a11y": {
-            "useSemanticElements": "off"
+            "useSemanticElements": "on"
           }
         }
       }
