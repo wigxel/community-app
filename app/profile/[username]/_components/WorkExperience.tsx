@@ -7,11 +7,10 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { api } from "~/convex/_generated/api";
-import type { Id } from "~/convex/_generated/dataModel";
 import type { WorkExperience } from "~/types/models";
 
 interface WorkExperienceSectionProps {
-  userId: Id<"users">;
+  userId?: string;
 }
 
 const locationLabels: Record<WorkExperience["location"], string> = {
@@ -49,7 +48,14 @@ function getDuration(start: number, end?: number): string {
 }
 
 export function WorkExperienceSection({ userId }: WorkExperienceSectionProps) {
-  const workExperience = useQuery(api.workExperience.getByUserId, { userId });
+  const workExperience = useQuery(
+    api.workExperience.getByUserId,
+    userId ? { userId } : "skip",
+  );
+
+  if (!userId) {
+    return null;
+  }
 
   if (workExperience === undefined) {
     return (
@@ -58,11 +64,7 @@ export function WorkExperienceSection({ userId }: WorkExperienceSectionProps) {
   }
 
   if (workExperience.length === 0) {
-    return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-        <p className="text-white/60 mb-4">No work experience added yet.</p>
-      </div>
-    );
+    return null;
   }
 
   return (

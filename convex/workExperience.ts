@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 
 export const create = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.string(),
     logo: v.optional(v.string()),
     companyName: v.string(),
     location: v.union(
@@ -29,7 +29,7 @@ export const create = mutation({
 
 export const getByUserId = query({
   args: {
-    userId: v.id("users"),
+    userId: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db

@@ -9,11 +9,11 @@ export interface Profile {
   links: Link[];
   shortBio?: string;
   projects?: Project[];
-  workExperience?: WorkExperience[];
+  workExperience?: ProfileWorkExperience[];
   interests?: string[];
 }
 
-export interface WorkExperience {
+export interface ProfileWorkExperience {
   position: string;
   company: string;
   startDate: number;
