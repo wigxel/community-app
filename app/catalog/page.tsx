@@ -92,11 +92,12 @@ export default async function Catalog({ searchParams }: PageProps) {
                     <div className="h-full flex flex-col overflow-hidden rounded-3xl bg-linear-to-br from-slate-50/10 to-slate-50/5 text-white shadow-xl transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-white/5 hover:from-slate-50/15 hover:to-slate-50/10 border border-white/10 group-hover:border-white/20">
                       <div className="mx-auto my-3 overflow-hidden rounded-full border-2 border-white/20 group-hover:border-white/30 shadow-lg ring-4 ring-white/5 group-hover:ring-white/10 transition-all duration-300">
                         {profile.profileImage?.startsWith("data:") ? (
-                          <img
+                          <Image
                             src={profile.profileImage}
                             alt={profile.firstName}
                             width={120}
                             height={120}
+                            unoptimized
                             className="object-cover object-center w-[120px] h-[120px]"
                           />
                         ) : (

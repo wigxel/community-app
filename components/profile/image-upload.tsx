@@ -224,9 +224,8 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
             <div className="flex-1 bg-gray-200 p-4 flex items-center justify-center relative overflow-hidden">
               {imgSrc && (
                 <div className="relative w-full h-full flex items-center justify-center">
-                  <div
-                    role="button"
-                    tabIndex={0}
+                  <button
+                    type="button"
                     className="relative cursor-move select-none"
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
@@ -242,6 +241,7 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
                       transition: isDragging ? "none" : "transform 0.1s ease",
                     }}
                   >
+                    {/* biome-ignore lint/performance/noImgElement: Requires ref for canvas cropping, not compatible with next/image */}
                     <img
                       ref={imgRef}
                       src={imgSrc}
@@ -249,7 +249,7 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
                       draggable={false}
                       className="max-w-[280px] max-h-[280px] object-contain pointer-events-none"
                     />
-                  </div>
+                  </button>
 
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="w-64 h-64 rounded-full border-4 border-white shadow-2xl relative">

@@ -14,7 +14,6 @@ import {
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { cache } from "react";
 
 import { GitHub, LinkedIn } from "~/components/icons";
 import ReturnButton from "~/components/profile/return-button";
@@ -139,11 +138,12 @@ export default async function ProfileCard({
         <div className="flex flex-col items-start gap-x-10 gap-y-5 md:flex-row md:items-center">
           <div className="relative aspect-square h-35 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl md:h-50 ring-4 ring-white/10">
             {profile.profileImage?.startsWith("data:") ? (
-              <img
+              <Image
                 src={profile.profileImage}
                 alt={profile.firstName}
                 width={200}
                 height={200}
+                unoptimized
                 className="object-cover object-center w-full h-full"
               />
             ) : (

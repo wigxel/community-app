@@ -44,10 +44,10 @@ async function submitOnboarding(
       lastName: parsed.data.lastName,
       username: parsed.data.username,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return {
       timestamp: Date.now(),
-      error: err.message ?? "Profile creation failed",
+      error: err instanceof Error ? err.message : "Profile creation failed",
     };
   }
 
