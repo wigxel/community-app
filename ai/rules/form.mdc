@@ -1,0 +1,21 @@
+## Form Generation
+- Use Shadcn Form components
+- Use Zod for validation
+- Each form must be in it's own file
+
+### Form components
+- should be pure.
+- must take in
+    - initialFormData (optional),
+    - isLoading (optional),
+    - onSubmit callback (required)
+    - explicit defaultState,
+    - ref in the events of a form.reset().
+- validation logic and schema must be written in the same module.
+- Form implicit defaultState must be provided and should be placed outside the components scope.
+
+#### Assignment Fields
+- Always use the `@/components/forms/UserDropdownInput.tsx` component for user assignment fields (e.g., assigning lawyers, judges, or other users).
+
+#### Submit Button
+- The submit button must be disabled and its text should reflect the pending state (e.g., "Creating..." instead of "Create Form") when the form is submitting (either via `form.formState.isSubmitting` or `props.isLoading`).

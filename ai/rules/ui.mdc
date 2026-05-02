@@ -1,0 +1,6 @@
+## UI Components
+- Prefer shadcn components over custom ones
+- Use Lucide React icons exclusively
+- Always use appropriate color variables from the theme
+- Add colors to the theme (tailwind css/config file) if they don't already exist there
+- Prefer small, composable components over large monolithic ones

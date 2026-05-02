@@ -1,0 +1,23 @@
+# TypeScript
+- Always type React components with explicit interfaces
+- Never use 'any' unless absolutely necessary
+- Use type instead of interface for simple type definitions
+- Ensure convex functions have proper type definitions
+- Prefer `type import` for Interfaces exported from modules
+- Use path aliases for shorter imports
+-
+## Shared Interfaces
+- Place shared interfaces in the `src/types` folder to maintain a centralized location for type definitions
+- Organize interfaces into separate files based on their domain or feature area
+- Group interfaces by structural relativity and inheritance relationships
+  - Example: `User`, `Person`, `Admin` - all represent person entities and should be grouped together
+  - Example: `Product`, `ProductVariant`, `ProductCategory` - all product-related types
+- Use a naming convention that reflects the relationship between types:
+  - Base types should have simple names (e.g., `Person`)
+  - Extended types should indicate their relationship (e.g., `AdminUser extends Person`)
+- Consider creating an index file (`index.ts`) in `src/types` to re-export commonly used types
+- When interfaces share common properties, consider using:
+  - Intersection types for combining multiple interfaces
+  - Generic types for reusable type patterns
+  - Utility types (`Pick`, `Omit`, `Partial`) to derive variations
+- Use discriminited unions for type safety and clarity

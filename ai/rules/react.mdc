@@ -1,0 +1,6 @@
+## React Patterns
+- Prefer controlled components over uncontrolled ones
+- Implement proper error boundaries
+- Extract reusable hooks for shared logic
+- Prefer abortController.signal over removeEventListener
+- Must not use forwardRef from react 19 up. ref is now automatically injected into the props

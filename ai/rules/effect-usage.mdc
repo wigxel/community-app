@@ -1,0 +1,73 @@
+# Effect Usage Rule
+
+## Overview
+This rule mandates the use of the 'effect' package (Effect-TS library) for handling functions that could return multiple values or indicate absence/error states, replacing traditional null returns and exceptions.
+
+## Rules
+
+### 1. Never Return `null`
+Functions must never return `null`. Instead, use Effect types to represent absence or errors.
+
+### 2. Single Optional Return (2 return statements)
+If a function has exactly 2 return statements (one for success, one for absence), it should return `Effect.Option<T>`:
+- Use `Option.some(value)` for the successful case
+- Use `Option.none` for the absence case
+
+### 3. Multiple Possible Returns (More than 2 return statements)
+If a function has more than 2 return statements (indicating different outcomes or errors), it should return `Effect.Either<Error, T>`:
+- Use `Either.right(value)` for successful outcomes
+- Use `Either.left(new Error("message"))` for error cases, with descriptive error messages
+
+## Examples
+
+### Bad (Violates Rule)
+```typescript
+function findUser(id: string): User | null {
+  if (id === "valid") {
+    return { id, name: "John" };
+  }
+  return null; // ❌ Never return null
+}
+```
+
+### Good (Option for 2 returns)
+```typescript
+import { Option } from "effect";
+
+function findUser(id: string): Option.Option<User> {
+  if (id === "valid") {
+    return Option.some({ id, name: "John" })
+  }
+
+  return Option.none();
+}
+```
+
+### Good (Either for multiple returns)
+```typescript
+import { Either } from "effect";
+
+function processUser(id: string): Either.Either<string, User> {
+  if (!id) {
+    return Either.left("ID is required");
+  }
+
+  if (id === "invalid") {
+    return Either.left("User not found");
+  }
+
+  return Either.right({ id, name: "John" });
+}
+```
+
+## Rationale
+- Eliminates null pointer exceptions
+- Makes error handling explicit and type-safe
+- Improves code reliability and maintainability
+- Follows functional programming principles
+
+## Enforcement
+This rule should be enforced during code reviews and can be checked with ESLint rules or TypeScript strict settings.
+
+## Omissions
+- Doesn't apply to Convex Queries

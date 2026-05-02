@@ -1,0 +1,136 @@
+## Form Dialog Pattern
+
+This pattern describes how to create a form within a dialog, ensuring reusability, proper state management, and adherence to existing UI/UX conventions.
+
+### Components
+
+1.  **`Dialog` (from `@/components/ui/dialog`)**
+    *   **Purpose:** The generic Shadcn UI dialog component. It provides the basic structure for a modal dialog, including `Dialog.Trigger`, `Dialog.Content`, `Dialog.Header`, `Dialog.Title`, `Dialog.Description`, and `Dialog.Footer`.
+    *   **Usage:** Used directly as the foundation for `[FormName]Dialog`.
+
+2.  **`[FormName]Dialog` (e.g., `BusinessFormDialog.tsx` in `src/components/[feature]/`)**
+    *   **Purpose:** A dedicated wrapper component for a specific form dialog. It encapsulates the `Dialog` component, provides the title and description, and renders the `[FormName]Integrated` component. It manages its own internal `open`/`onOpenChange` state for the Shadcn `Dialog`.
+    *   **Props:**
+        *   `children: React.ReactNode`: The Trigger button element (e.g., `<Button>New Business</Button>`).
+    *   **Structure:**
+        ```tsx
+        import {
+          Dialog,
+          DialogContent,
+          DialogDescription,
+          DialogHeader,
+          DialogTitle,
+          DialogTrigger,
+        } from "@/components/ui/dialog";
+        import type * as React from "react";
+        import { [FormName]Integrated } from "./[FormName]Integrated"; // Assuming in the same directory
+
+        interface [FormName]DialogProps {
+          children: React.ReactNode;
+        }
+
+        export function [FormName]Dialog({
+          children,
+        }: [FormName]DialogProps) {
+          return (
+            <Dialog>
+              <DialogTrigger asChild>
+                {children}
+              </DialogTrigger>
+
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New [FormName]</DialogTitle>
+                  <DialogDescription>
+                    Fill in the details to create a new [formName] record.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <DialogContent>
+                  <[FormName]Integrated />
+                </DialogContent>
+              </DialogContent>
+            </Dialog>
+          );
+        }
+        ```
+
+3.  **`[FormName]Integrated` (e.g., `BusinessFormIntegrated.tsx` in `src/components/[feature]/`)**
+    *   **Purpose:** Encapsulates the core form component (`[FormName]Form`) and any logic related to its submission, data handling, and interaction with the `[FormName]Dialog`. It acts as an intermediary between the page and the pure form.
+    *   **Props:**
+        *   `onClose: () => void`: A callback function to close the parent `[FormName]Dialog` upon successful form submission.
+    *   **Structure:**
+        ```tsx
+        import { [FormName]Form } from "@/components/forms/[FormName]Form"; // Assuming pure form component
+        // Import Convex mutations/queries or other data handling hooks
+
+        interface [FormName]IntegratedProps {
+          onClose: () => void;
+        }
+
+        export function [FormName]Integrated({
+          onClose,
+        }: [FormName]IntegratedProps) {
+          // Implement form submission logic, e.g., using a Convex mutation
+          const handleSubmit = (data: [FormName]FormValues) => {
+            // Call Convex mutation
+            // On success, call onClose()
+            onClose();
+          };
+
+          return <[FormName]Form submitHandler={handleSubmit} />;
+        }
+        ```
+
+4.  **`[FormName]Form` (e.g., `BusinessForm.tsx` in `src/components/forms/`)**
+    *   **Purpose:** The pure, standalone form component, as defined in `form.mdc`. It handles form rendering, input management, and validation using `react-hook-form` and `zod`. It should not directly manage dialog state or data submission to the backend.
+    *   **Props:**
+        *   `initialFormData?: [FormName]FormValues`
+        *   `submitHandler: (data: [FormName]FormValues) => void`
+        *   `ref?: React.Ref<HTMLFormElement>`
+    *   **Key Principle:** Keep this component pure and focused solely on form presentation and local validation.
+
+### Integration Steps
+
+1.  **Define `[FormName]FormValues` and `default[FormName]FormState`:**
+    *   Ensure these are correctly defined within or alongside the `[FormName]Form` component.
+
+2.  **Create `[FormName]Dialog.tsx`:**
+    *   Place this in `src/components/[feature]/[FormName]Dialog.tsx` (e.g., `src/components/business/BusinessFormDialog.tsx`).
+    *   Implement the component as per the structure above, managing its own `open` state and passing the `children` as `DialogTrigger`.
+
+3.  **Create `[FormName]Integrated.tsx`:**
+    *   Place this in `src/components/[feature]/[FormName]Integrated.tsx` (e.g., `src/components/business/BusinessFormIntegrated.tsx`).
+    *   Implement the component, importing `[FormName]Form` and handling the submission logic. This component receives an `onClose` prop from `[FormName]Dialog`.
+
+4.  **Update Page/Parent Component (e.g., `_private.businesses.index.tsx`)**
+    *   **Render `[FormName]Dialog`:** Simply render the `[FormName]Dialog` component and pass the button element (or any trigger element) as its `children` prop. No external state management for `open`/`onOpenChange` is needed here.
+
+    ```tsx
+    // In src/routes/(private)/_private.businesses.index.tsx
+    import { Button } from "@/components/ui/button";
+    import { BusinessFormDialog } from "@/components/business/BusinessFormDialog";
+    import { Plus } from "lucide-react";
+
+    function BusinessesPage() {
+      // ... other component logic ...
+
+      return (
+        // ...
+          <BusinessFormDialog>
+           <Button className="bg-cyan-500 hover:bg-cyan-600 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              New Business
+            </Button>
+          </BusinessFormDialog>
+        // ...
+      );
+    }
+    ```
+
+### Rationale
+*   **Separation of Concerns:** Each component has a distinct responsibility: `Dialog` for basic modal functionality, `[FormName]Dialog` for feature-specific dialog styling/context and managing its own open state, `[FormName]Integrated` for form logic and data handling, and `[FormName]Form` for pure form rendering.
+*   **Reusability:** The generic `Dialog` and `[FormName]Form` can be reused independently.
+*   **Maintainability:** Changes to the form's presentation, submission logic, or dialog behavior are isolated to their respective components.
+*   **Adherence to Shadcn:** Leverages existing UI components for consistency.
+*   **Simplified Parent Integration:** The parent component's integration is simplified as it only needs to render `[FormName]Dialog` with its trigger, without managing any dialog-specific state.
