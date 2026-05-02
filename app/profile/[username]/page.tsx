@@ -115,7 +115,7 @@ export default async function ProfileCard({
       username,
     },
   );
-  const profile: Profile = safeObj(currentProfile);
+  const _profile: Profile = safeObj(currentProfile);
 
   if (currentProfile === null) {
     return notFound();
@@ -289,7 +289,7 @@ export default async function ProfileCard({
             </div>
           )}
         </div>
-        
+
         {profile.interests && profile.interests.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-6">

@@ -7,7 +7,6 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { api } from "~/convex/_generated/api";
-import type { Id } from "~/convex/_generated/dataModel";
 import { safeArray } from "~/lib/data.helpers";
 import type { WorkExperience } from "~/types/models";
 import { EmptyStateContent } from "./empty-state";
