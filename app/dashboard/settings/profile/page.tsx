@@ -525,7 +525,7 @@ export function ProfileForm({
                   }
                   className="group flex items-center bg-white border-gray-300"
                 >
-                  <Plus className="h-4 w-4 text-gray-900 group-hover:mr-2 transition-all shrink-0" />
+                  <Plus className="h-4 w-4 text-gray-900 group-hover:mr-2 transition-all flex-shrink-0" />
                   <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap text-gray-900">
                     Add Experience
                   </span>
@@ -641,7 +641,7 @@ export function ProfileForm({
                               className="h-4 w-4"
                             />
                           </FormControl>
-                          <FormLabel className="mt-0!">
+                          <FormLabel className="!mt-0">
                             I currently work here
                           </FormLabel>
                         </FormItem>
