@@ -154,6 +154,15 @@ export const updateProfile = mutation({
       ),
     ),
     interests: v.optional(v.array(v.string())),
+    links: v.optional(
+      v.array(
+        v.object({
+          tag: v.string(),
+          title: v.string(),
+          value: v.string(),
+        }),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);

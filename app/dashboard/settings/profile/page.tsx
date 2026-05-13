@@ -37,16 +37,19 @@ const LINK_TYPES = [
   {
     tag: "linkedin",
     title: "LinkedIn",
-    placeholder: "https://linkedin.com/in/yourname",
+    prefix: "linkedin.com/in/",
+    placeholder: "username",
   },
   {
     tag: "github",
     title: "GitHub",
-    placeholder: "https://github.com/yourname",
+    prefix: "github.com/",
+    placeholder: "username",
   },
   {
     tag: "portfolio",
     title: "Personal Website",
+    prefix: null,
     placeholder: "https://yourwebsite.com",
   },
 ] as const;
@@ -62,6 +65,8 @@ const getLinkIcon = (tag: string) => {
   return iconMap[tag.toLowerCase()] ?? Link;
 };
 
+const usernameOnlyRegex = /^(?!.*(http|https|www\.|\/)).+$/i;
+
 // ─── Schemas ───────────────────────────────────────────────────────────────────
 
 const workExperienceSchema = z.object({
@@ -73,14 +78,36 @@ const workExperienceSchema = z.object({
   isCurrent: z.boolean(),
 });
 
-const linkSchema = z.object({
-  tag: z.enum(["linkedin", "github", "portfolio"]),
-  title: z.string().min(1),
-  value: z
-    .string()
-    .url({ message: "Please enter a valid URL." })
-    .min(1, { message: "URL is required." }),
-});
+const linkSchema = z
+  .object({
+    tag: z.enum(["linkedin", "github", "portfolio"]),
+
+    title: z.string().min(1),
+
+    value: z.string().min(1, {
+      message: "This field is required.",
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      (data.tag === "github" || data.tag === "linkedin") &&
+      !usernameOnlyRegex.test(data.value)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["value"],
+        message: "Enter only your username, not a full URL.",
+      });
+    }
+
+    if (data.tag === "portfolio" && !z.url().safeParse(data.value).success) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["value"],
+        message: "Please enter a valid URL.",
+      });
+    }
+  });
 
 const formSchema = z.object({
   firstname: z.string().min(2, {
@@ -188,9 +215,11 @@ export function ProfileForm({
     name: "links",
   });
 
-  const usedLinkTags = linkFields.map((f) => f.tag);
+  const watchedLinks = form.watch("links") ?? [];
+
+  const usedTags = watchedLinks.map((f) => f.tag);
   const availableLinkTypes = LINK_TYPES.filter(
-    (t) => !usedLinkTags.includes(t.tag),
+    (t) => !usedTags.includes(t.tag),
   );
 
   function addLink(tag: LinkTag) {
@@ -203,6 +232,16 @@ export function ProfileForm({
     setMessage(null);
 
     try {
+      const normalizedLinks = values.links.map((link) => {
+        const type = LINK_TYPES.find((t) => t.tag === link.tag)!;
+        return {
+          ...link,
+          value: type.prefix
+            ? `https://${type.prefix}${link.value}`
+            : link.value,
+        };
+      });
+
       const phoneNumbers = values.phonenumbers
         ? values.phonenumbers
             .split(",")
@@ -238,7 +277,7 @@ export function ProfileForm({
         profileImage: values.profileImage || null,
         workExperience,
         interests,
-        links: values.links,
+        links: normalizedLinks,
       });
 
       setMessage({ type: "success", text: "Profile updated successfully!" });
@@ -453,54 +492,73 @@ export function ProfileForm({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {linkFields.length === 0 ? (
-                <p className="text-sm text-white/60 py-4 text-center border border-dashed border-white/20 rounded-md">
-                  No links added yet. Use "Add Link" to get started.
+              {linkFields.length === 0 && (
+                <p className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded-md">
+                  No links added yet.
                 </p>
-              ) : (
-                linkFields.map((field, index) => {
-                  const Icon = getLinkIcon(field.tag);
-                  const typeConfig = LINK_TYPES.find(
-                    (t) => t.tag === field.tag,
-                  )!;
+              )}
 
-                  return (
-                    <div key={field.id} className="flex items-end gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5">
-                        <Icon className="h-4 w-4 text-white/60" />
-                      </div>
+              {linkFields.map((field, index) => {
+                const Icon = getLinkIcon(field.tag);
+                const typeConfig = LINK_TYPES.find((t) => t.tag === field.tag)!;
 
-                      <FormField
-                        control={form.control}
-                        name={`links.${index}.value`}
-                        render={({ field: inputField }) => (
-                          <FormItem className="flex-1">
-                            <FormLabel>{typeConfig.title}</FormLabel>
-                            <FormControl>
+                return (
+                  <div key={field.id} className="flex items-start gap-3">
+                    <div className="mt-6.25 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted">
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name={`links.${index}.value`}
+                      render={({ field: inputField }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>{typeConfig.title}</FormLabel>
+                          <FormControl>
+                            {typeConfig.prefix ? (
+                              <div className="flex items-center rounded-md border overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+                                <span className="px-3 py-2 text-sm text-muted-foreground bg-muted border-r shrink-0">
+                                  {typeConfig.prefix}
+                                </span>
+                                <Input
+                                  className="border-0 rounded-none shadow-none focus-visible:ring-0"
+                                  placeholder={typeConfig.placeholder}
+                                  {...inputField}
+                                  onChange={(e) => {
+                                    inputField.onChange(e);
+
+                                    form.clearErrors(`links.${index}.value`);
+                                  }}
+                                />
+                              </div>
+                            ) : (
                               <Input
                                 placeholder={typeConfig.placeholder}
                                 {...inputField}
                               />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                            )}
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
-                        onClick={() => removeLink(index)}
-                        aria-label={`Remove ${typeConfig.title} link`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  );
-                })
-              )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive mt-6.25"
+                      onClick={() => {
+                        form.clearErrors(`links.${index}`);
+                        removeLink(index);
+                      }}
+                      aria-label={`Remove ${typeConfig.title} link`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
 
@@ -525,7 +583,7 @@ export function ProfileForm({
                   }
                   className="group flex items-center bg-white border-gray-300"
                 >
-                  <Plus className="h-4 w-4 text-gray-900 group-hover:mr-2 transition-all flex-shrink-0" />
+                  <Plus className="h-4 w-4 text-gray-900 group-hover:mr-2 transition-all shrink-0" />
                   <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap text-gray-900">
                     Add Experience
                   </span>
@@ -641,7 +699,7 @@ export function ProfileForm({
                               className="h-4 w-4"
                             />
                           </FormControl>
-                          <FormLabel className="!mt-0">
+                          <FormLabel className="mt-0!">
                             I currently work here
                           </FormLabel>
                         </FormItem>
