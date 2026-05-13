@@ -7,7 +7,7 @@
     "dev:backend": "convex dev",
     "dev": "next dev --turbopack",
     "build": "next build",
-    "build:ci": "bunx convex deploy --preview-create $(git branch --show-current) --cmd \"bun run build\"",
+    "build:ci": "bunx convex deploy --preview-create $GITHUB_HEAD_REF --cmd \"bun run build\"",
     "start": "next start",
     "svg:convert": "npx @svgr/cli --icon --typescript --ignore-existing --memo --out-dir ./components/Icons -- public/assets/icons",
     "watch": "watch 'clear && npm run -s lint' pages components",
