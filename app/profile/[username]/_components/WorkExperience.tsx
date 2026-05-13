@@ -7,7 +7,9 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { api } from "~/convex/_generated/api";
+import { safeArray } from "~/lib/data.helpers";
 import type { WorkExperience } from "~/types/models";
+import { EmptyStateContent } from "./empty-state";
 
 interface WorkExperienceSectionProps {
   userId?: string;
@@ -48,46 +50,39 @@ function getDuration(start: number, end?: number): string {
 }
 
 export function WorkExperienceSection({ userId }: WorkExperienceSectionProps) {
-  const workExperience = useQuery(
-    api.workExperience.getByUserId,
-    userId ? { userId } : "skip",
+  const workExperiences = safeArray(
+    useQuery(api.workExperience.getByUserId, userId ? { userId } : "skip"),
   );
-
-  if (!userId) {
-    return null;
-  }
-
-  if (workExperience === undefined) {
-    return (
-      <div className="text-sm text-white/50">Loading work experience...</div>
-    );
-  }
-
-  if (workExperience.length === 0) {
-    return null;
-  }
 
   return (
     <div>
       <div className="flex items-center gap-2 mb-6">
-        <div className="h-1 w-8 rounded-full bg-linear-to-r from-cyan-400 to-sky-400"></div>
+        <div className="h-8 w-1 rounded-full bg-linear-to-r from-cyan-400 to-sky-400"></div>
         <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
           Work Experience
         </h2>
       </div>
 
       <div className="relative space-y-0">
-        <div className="absolute left-6.75 top-0 bottom-0 w-px bg-linear-to-b from-cyan-400/40 via-white/10 to-transparent hidden md:block" />
-
-        {workExperience.map((job, index) => (
-          <Card job={job} key={`${job.companyName}-${index}`} />
-        ))}
+        {workExperiences.length === 0 ? (
+          <EmptyStateContent>No work experience</EmptyStateContent>
+        ) : (
+          <>
+            <div className="absolute left-6.75 top-0 bottom-0 w-px bg-linear-to-b from-cyan-400/40 via-white/10 to-transparent hidden md:block" />
+            {workExperiences.map((job, index) => (
+              <WorkExperienceItem
+                job={job}
+                key={`${job.companyName}-${index}`}
+              />
+            ))}
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-const Card = ({ job }: { job: WorkExperience }) => {
+const WorkExperienceItem = ({ job }: { job: WorkExperience }) => {
   const [imgErr, setImgErr] = useState(false);
   const isCurrent = !job.timeline.end;
 

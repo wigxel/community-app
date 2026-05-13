@@ -1,0 +1,4 @@
+# Naming Convention
+- use kebab-case for files names except for global file naming standards like README.md. eg.
+  DocumentGetting.tsx -> document-getting.tsx
+  useDocument -> use-document.ts

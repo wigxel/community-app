@@ -1,0 +1,7 @@
+# Package Manager
+
+- Always use `bun` for package management, running scripts, and installing dependencies.
+- Do not use `npm`, `yarn`, or `pnpm`.
+- Use `bun install` for adding packages.
+- Use `bun run <script>` for executing project scripts.
+- Use `bun x <command>` for running one-off commands (replacing `npx`).

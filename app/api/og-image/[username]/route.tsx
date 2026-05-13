@@ -1,11 +1,12 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
+import sharp from "sharp";
 import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery } from "~/lib/auth-server";
 
 import type { Profile } from "~/types/models";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 // Supported image formats by @vercel/og
 const SUPPORTED_IMAGE_TYPES = [
@@ -75,16 +76,38 @@ async function isImageLoadable(url: string): Promise<boolean> {
   }
 }
 
+async function pngToWebp(arrayBuffer: ArrayBuffer) {
+  const buffer = Buffer.from(arrayBuffer);
+
+  return await sharp(buffer).webp({ quality: 80 }).toBuffer();
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ username: string }> },
 ) {
   const { username } = await params;
 
+  const image = await generateImage({
+    username,
+  });
+
+  const optimized_image = await pngToWebp(await image.arrayBuffer());
+
+  return new Response(optimized_image, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/jpeg",
+      "Cache-Control": "public, immutable, no-transform, max-age=31536000",
+    },
+  });
+}
+
+async function generateImage({ username }: { username: string }) {
   try {
     const profile = await fetchAuthQuery(api.profiles.getProfileByUsername, {
       username,
-    });
+    }).catch(() => null);
 
     if (!profile) {
       return new ImageResponse(
@@ -106,6 +129,7 @@ export async function GET(
 
     // Check if the image is loadable by actually testing it
     let hasValidImage = false;
+
     if (profile.profileImage && profile.profileImage !== "/file.svg") {
       hasValidImage = await isImageLoadable(profile.profileImage);
     }
@@ -115,10 +139,6 @@ export async function GET(
       {
         width: 1200,
         height: 630,
-        headers: {
-          "Cache-Control":
-            "public, immutable, no-transform, s-maxage=86400, max-age=86400",
-        },
       },
     );
   } catch (error) {

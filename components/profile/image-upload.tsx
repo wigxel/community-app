@@ -1,6 +1,7 @@
 "use client";
 
 import { Maximize2, RotateCcw, RotateCw, Upload, X } from "lucide-react";
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
@@ -167,10 +168,12 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
       <div className="flex items-center gap-4">
         {currentImage && (
           <div className="relative">
-            <img
+            <Image
               src={currentImage}
               alt="Profile"
               className="h-24 w-24 rounded-full object-cover border-2 border-white/20"
+              width={240}
+              height={240}
             />
             <button
               type="button"

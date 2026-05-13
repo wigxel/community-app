@@ -42,6 +42,7 @@
         "react-dom": "~19.1.4",
         "react-hook-form": "^7.71.1",
         "react-image-crop": "^11.0.10",
+        "sharp": "^0.34.5",
         "tailwind-merge": "^3.4.0",
         "tailwindcss": "^4.1.18",
         "tailwindcss-animate": "^1.0.7",
