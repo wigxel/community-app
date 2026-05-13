@@ -38,4 +38,4 @@ jobs:
           APP_ENV: ${{ secrets.APP_ENV }}
           NEXT_PUBLIC_LOG_LEVEL: ${{ secrets.NEXT_PUBLIC_LOG_LEVEL }}
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
-        run: bun run build
+        run: bun run build:ci
