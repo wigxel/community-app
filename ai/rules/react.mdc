@@ -1,0 +1,28 @@
+## React Patterns
+- Prefer controlled components over uncontrolled ones
+- Implement proper error boundaries
+- Extract reusable hooks for shared logic
+- Prefer abortController.signal over removeEventListener
+- Must not use forwardRef from react 19 up. ref is now automatically injected into the props
+
+
+## React Components
+- Extract `.map()` rendering into a dedicated Item component **when the map closure exceeds 15 lines**. Simpler inline maps (e.g., basic list items, dropdown options) are acceptable.
+  ```tsx
+  // Acceptable: Simple inline map (under 15 lines)
+  {items.map(item => (
+    <SelectItem key={item.id} value={item.id}>
+      {item.label}
+    </SelectItem>
+  ))}
+  
+  // Refactor: Map closure exceeds 15 lines → extract to Item component
+  {records.map(record => (
+    <AttendanceRecord
+      key={record._id}
+      record={record}
+      onApprove={handleApprove}
+      onReject={handleReject}
+    />
+  ))}
+  ```
