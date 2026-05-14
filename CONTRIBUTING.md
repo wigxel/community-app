@@ -19,6 +19,8 @@ Thank you for your interest in contributing! This guide walks you through everyt
   - [Running the App](#running-the-app)
   - [Branch Naming](#branch-naming)
   - [Commit Style](#commit-style)
+    - [Making a Commit with Commitizen](#making-a-commit-with-commitizen)
+    - [Commit Types](#commit-types)
   - [Before Submitting a PR](#before-submitting-a-pr)
   - [Pull Request Guidelines](#pull-request-guidelines)
   - [Reward](#reward)
@@ -239,20 +241,63 @@ git checkout -b docs/add-contributing-guide
 
 ## Commit Style
 
-Follow conventional commit format:
+This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification and uses **Commitizen** to guide contributors through the correct commit format interactively.
+
+### Making a Commit with Commitizen
+
+Instead of running `git commit -m "..."` directly, use the Commitizen prompt:
+
+```bash
+bun run commit
+```
+
+This launches an interactive CLI that walks you through filling out your commit message step by step — no need to remember the format manually.
+
+**Example session:**
 
 ```
-type: short description
+? Select the type of change you're committing: (Use arrow keys)
+❯ feat:     A new feature
+  fix:      A bug fix
+  docs:     Documentation only changes
+  style:    Changes that do not affect the meaning of the code
+  refactor: A code change that neither fixes a bug nor adds a feature
+  test:     Adding missing tests or correcting existing tests
+  chore:    Changes to the build process or auxiliary tools
+
+? What is the scope of this change? (press enter to skip): profile
+
+? Write a short, imperative description of the change:
+  add avatar upload to user profile page
+
+? Provide a longer description (press enter to skip):
+
+? Are there any breaking changes? No
+
+? Does this change affect any open issues? Yes → closes #42
 ```
 
-Examples:
+Your final commit message will be generated as:
 
 ```
-feat: add user profile avatar upload
-fix: resolve clerk session expiry redirect
-docs: update environment setup instructions
-chore: upgrade vitest to v4
+feat(profile): add avatar upload to user profile page
+
+closes #42
 ```
+
+### Commit Types
+
+| Type       | When to use                                   |
+| ---------- | --------------------------------------------- |
+| `feat`     | A new feature                                 |
+| `fix`      | A bug fix                                     |
+| `docs`     | Documentation changes only                    |
+| `style`    | Formatting, whitespace — no logic changes     |
+| `refactor` | Code restructuring without behaviour change   |
+| `test`     | Adding or updating tests                      |
+| `chore`    | Dependency updates, config or tooling changes |
+
+> **Why Commitizen?** Consistent commit messages make the project history easier to read, help automate changelogs, and make it clear at a glance what every change does. `bun run commit` ensures every contributor follows the same format without having to memorise it.
 
 Husky is configured to run lint-staged checks on every commit. Your staged files will be automatically linted and formatted before the commit goes through.
 
