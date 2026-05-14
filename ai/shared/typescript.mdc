@@ -1,3 +1,4 @@
+
 # TypeScript
 - Always type React components with explicit interfaces
 - Never use 'any' unless absolutely necessary

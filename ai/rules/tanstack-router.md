@@ -1,5 +1,0 @@
-# Routing
-
-## Nested/Layout routes
-
-The root file of the a layout is should be `route.tsx` instead of `index.tsx`.

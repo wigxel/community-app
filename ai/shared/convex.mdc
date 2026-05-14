@@ -1,3 +1,4 @@
+
 ## Convex Best Practices
 - Group related mutations and queries in the same file
 - Add descriptive comments for complex database operations
