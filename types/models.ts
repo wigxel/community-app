@@ -1,3 +1,8 @@
+export interface ProfileLocation {
+  city: string;
+  country: string;
+}
+
 export interface Profile {
   firstName: string;
   lastName: string;
@@ -11,6 +16,7 @@ export interface Profile {
   projects?: Project[];
   workExperience?: ProfileWorkExperience[];
   interests?: string[];
+  location?: ProfileLocation;
 }
 
 export interface ProfileWorkExperience {

@@ -124,7 +124,13 @@ const formSchema = z.object({
   shortBio: z.string().optional(),
   profileImage: z.string().optional(),
   workExperience: z.array(workExperienceSchema).optional(),
-  interests: z.string().optional(), // comma-separated
+  interests: z.string().optional(),
+  location: z
+    .object({
+      city: z.string().min(1, "City is required"),
+      country: z.string().min(1, "Country is required"),
+    })
+    .optional(),
   links: z
     .array(linkSchema)
     .max(3, { message: "You can add at most 3 links." }),
@@ -161,6 +167,7 @@ export default function Profile() {
                 isCurrent: exp.endDate === null || exp.endDate === undefined,
               })) || [],
             interests: profile.interests?.join(", ") || "",
+            location: profile.location || { city: "", country: "Nigeria" },
             links: profile.links ?? [],
           }}
         />
@@ -191,6 +198,7 @@ export function ProfileForm({
     defaultValues: {
       ...initialData,
       workExperience: initialData.workExperience || [],
+      location: initialData.location || { city: "", country: "Nigeria" },
       links: initialData.links || [],
     },
   });
@@ -277,6 +285,7 @@ export function ProfileForm({
         profileImage: values.profileImage || null,
         workExperience,
         interests,
+        location: values.location || undefined,
         links: normalizedLinks,
       });
 
@@ -384,6 +393,35 @@ export function ProfileForm({
                   </FormItem>
                 )}
               />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="location.city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Port-Harcourt" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="location.country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}

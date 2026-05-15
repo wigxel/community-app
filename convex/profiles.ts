@@ -1,5 +1,5 @@
 import { queryGeneric as query } from "convex/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 
@@ -107,7 +107,7 @@ export const createProfile = mutation({
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
-    if (!authUser) throw new Error("Not authenticated");
+    if (!authUser) throw new ConvexError("Not authenticated");
 
     const existing = await ctx.db
       .query("profile")
@@ -130,6 +130,7 @@ export const createProfile = mutation({
       projects: [],
       workExperience: [],
       interests: [],
+      location: { city: "", country: "Nigeria" },
     });
   },
 });
@@ -163,17 +164,23 @@ export const updateProfile = mutation({
         }),
       ),
     ),
+    location: v.optional(
+      v.object({
+        city: v.string(),
+        country: v.string(),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
-    if (!authUser) throw new Error("Not authenticated");
+    if (!authUser) throw new ConvexError("Not authenticated");
 
     const profile = await ctx.db
       .query("profile")
       .withIndex("by_email", (q) => q.eq("email", authUser.email))
       .unique();
 
-    if (!profile) throw new Error("Profile not found");
+    if (!profile) throw new ConvexError("Profile not found");
 
     await ctx.db.patch(profile._id, {
       firstName: args.firstName,
@@ -188,6 +195,7 @@ export const updateProfile = mutation({
         workExperience: args.workExperience,
       }),
       ...(args.interests !== undefined && { interests: args.interests }),
+      ...(args.location !== undefined && { location: args.location }),
     });
 
     return profile._id;

@@ -27,6 +27,11 @@ const project_schema = v.array(
   }),
 );
 
+const profile_location_schema = v.object({
+  city: v.string(),
+  country: v.string(),
+});
+
 const profile_work_experience_schema = v.array(
   v.object({
     position: v.string(),
@@ -75,6 +80,7 @@ const schema = defineSchema({
     projects: v.optional(project_schema),
     workExperience: v.optional(profile_work_experience_schema),
     interests: v.optional(v.array(v.string())),
+    location: v.optional(profile_location_schema),
   })
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])
