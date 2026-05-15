@@ -7,6 +7,7 @@
     "dev:backend": "convex dev",
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:ci": "bunx convex deploy --preview-create $GITHUB_HEAD_REF --cmd \"bun run build\"",
     "start": "next start",
     "commit": "cz",
     "svg:convert": "npx @svgr/cli --icon --typescript --ignore-existing --memo --out-dir ./components/Icons -- public/assets/icons",
