@@ -2,10 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod/v4";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { LoadingSpinner } from "~/components/ui/loading-spinner";
 import { authClient } from "~/lib/auth-client";
 
 type SignInState = {
@@ -21,13 +23,15 @@ type SignUpState = {
 };
 
 const signInSchema = z.object({
-  email: z.email("Invalid email address"),
+  email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
 const signUpSchema = z
   .object({
-    email: z.email("Invalid email address"),
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    email: z.string().email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
   })
@@ -62,6 +66,8 @@ async function signUpAction(
   formData: FormData,
 ): Promise<SignUpState> {
   const raw = {
+    firstName: formData.get("firstName") as string,
+    lastName: formData.get("lastName") as string,
     email: formData.get("email") as string,
     password: formData.get("password") as string,
     confirmPassword: formData.get("confirmPassword") as string,
@@ -75,16 +81,13 @@ async function signUpAction(
   const { error } = await authClient.signUp.email({
     email: parsed.data.email,
     password: parsed.data.password,
-    name: parsed.data.email.split("@")[0], // Better auth requires a name by default
+    name: `${parsed.data.firstName} ${parsed.data.lastName}`,
   });
 
   if (error)
     return { timestamp: Date.now(), error: error.message ?? "Sign up failed" };
 
-  return {
-    timestamp: Date.now(),
-    success: true,
-  };
+  return { timestamp: Date.now(), success: true };
 }
 
 export default function AuthForm({
@@ -109,15 +112,26 @@ export default function AuthForm({
 
   useEffect(() => {
     if (signInState.success) {
+      toast.success("Welcome back!");
       router.push(redirectTo);
     }
   }, [signInState.success, redirectTo, router]);
 
   useEffect(() => {
     if (signUpState.success) {
+      toast.success("Account created! Redirecting to onboarding...");
       window.location.href = `/onboarding?redirect=${encodeURIComponent(redirectTo)}`;
     }
   }, [signUpState.success, redirectTo]);
+
+  useEffect(() => {
+    if (signUpState.error) {
+      toast.error(signUpState.error);
+    }
+    if (signInState.error) {
+      toast.error(signInState.error);
+    }
+  }, [signUpState.error, signInState.error]);
 
   const switchMode = (next: "sign-in" | "sign-up") => {
     setMode(next);
@@ -167,6 +181,7 @@ export default function AuthForm({
                   name="email"
                   type="email"
                   required
+                  disabled={signInPending}
                   autoComplete="email"
                   placeholder="you@example.com"
                 />
@@ -179,6 +194,7 @@ export default function AuthForm({
                   name="password"
                   type="password"
                   required
+                  disabled={signInPending}
                   autoComplete="current-password"
                   placeholder="••••••••"
                 />
@@ -189,7 +205,14 @@ export default function AuthForm({
                 disabled={signInPending}
                 className="mt-1 w-full"
               >
-                {signInPending ? "Signing in…" : "Sign In"}
+                {signInPending ? (
+                  <>
+                    <LoadingSpinner className="mr-2" />
+                    Signing in…
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </form>
           ) : (
@@ -200,6 +223,31 @@ export default function AuthForm({
                 </p>
               )}
 
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="first-name">First Name</Label>
+                  <Input
+                    id="first-name"
+                    name="firstName"
+                    type="text"
+                    required
+                    disabled={signUpPending}
+                    placeholder="John"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="last-name">Last Name</Label>
+                  <Input
+                    id="last-name"
+                    name="lastName"
+                    type="text"
+                    required
+                    disabled={signUpPending}
+                    placeholder="Doe"
+                  />
+                </div>
+              </div>
+
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="email-up">Email</Label>
                 <Input
@@ -207,6 +255,7 @@ export default function AuthForm({
                   name="email"
                   type="email"
                   required
+                  disabled={signUpPending}
                   autoComplete="email"
                   placeholder="you@example.com"
                 />
@@ -219,6 +268,7 @@ export default function AuthForm({
                   name="password"
                   type="password"
                   required
+                  disabled={signUpPending}
                   minLength={8}
                   autoComplete="new-password"
                   placeholder="min. 8 characters"
@@ -232,6 +282,7 @@ export default function AuthForm({
                   name="confirmPassword"
                   type="password"
                   required
+                  disabled={signUpPending}
                   minLength={8}
                   autoComplete="new-password"
                   placeholder="Confirm your password"
@@ -243,7 +294,14 @@ export default function AuthForm({
                 disabled={signUpPending}
                 className="mt-1 w-full"
               >
-                {signUpPending ? "Creating account…" : "Create Account"}
+                {signUpPending ? (
+                  <>
+                    <LoadingSpinner className="mr-2" />
+                    Creating account…
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </form>
           )}
