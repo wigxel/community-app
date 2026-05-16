@@ -3,6 +3,7 @@
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { ConvexReactClient } from "convex/react";
 import type { ReactNode } from "react";
+import { Toaster } from "sonner";
 import { env } from "~/env";
 import { authClient } from "~/lib/auth-client";
 
@@ -22,6 +23,7 @@ const Providers = ({
       initialToken={initialToken}
     >
       {children}
+      <Toaster position="bottom-right" richColors />
     </ConvexBetterAuthProvider>
   );
 };

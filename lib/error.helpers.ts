@@ -23,6 +23,10 @@ export function getErrorMessage(error: unknown): string {
 }
 
 export function anomaly(error: unknown, ...others: unknown[]) {
+  if (process.env.NODE_ENV === "development") {
+    console.warn("[Anomaly]", error);
+  }
+
   posthog.captureException(error, {
     arguments: safeArray(others),
   });

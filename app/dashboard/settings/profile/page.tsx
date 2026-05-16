@@ -1,9 +1,11 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
+import { isNullable } from "effect/Predicate";
 import { Globe, Link, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,6 +32,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { useTitles } from "~/hooks/useTitles";
+import { anomaly } from "~/lib/error.helpers";
 
 // ─── Link types ────────────────────────────────────────────────────────────────
 
@@ -231,7 +234,9 @@ export function ProfileForm({
   );
 
   function addLink(tag: LinkTag) {
-    const type = LINK_TYPES.find((t) => t.tag === tag)!;
+    const type = LINK_TYPES.find((t) => t.tag === tag);
+    if (isNullable(type)) return toast.error("No link type provided");
+
     appendLink({ tag, title: type.title, value: "" });
   }
 
@@ -241,7 +246,14 @@ export function ProfileForm({
 
     try {
       const normalizedLinks = values.links.map((link) => {
-        const type = LINK_TYPES.find((t) => t.tag === link.tag)!;
+        const type = LINK_TYPES.find((t) => t.tag === link.tag);
+
+        if (!type) {
+          const error = new Error("Link type should always be present");
+          anomaly("type should always be present");
+          throw error;
+        }
+
         return {
           ...link,
           value: type.prefix
@@ -538,7 +550,9 @@ export function ProfileForm({
 
               {linkFields.map((field, index) => {
                 const Icon = getLinkIcon(field.tag);
-                const typeConfig = LINK_TYPES.find((t) => t.tag === field.tag)!;
+                const typeConfig = LINK_TYPES.find((t) => t.tag === field.tag);
+
+                if (isNullable(typeConfig)) return null;
 
                 return (
                   <div key={field.id} className="flex items-start gap-3">
