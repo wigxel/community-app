@@ -8,6 +8,7 @@ import {
   ImageIcon,
   Link,
   Mail,
+  MapPin,
   Phone,
   Video,
 } from "lucide-react";
@@ -126,19 +127,17 @@ export default async function ProfileCard({
 
   return (
     <div className="container mx-auto px-5 py-8 md:px-8">
-      <div className="mb-5 flex justify-between items-center gap-5">
-        <h1 className="text-white-700 w-fit text-[clamp(14px,7vw,36px)] font-bold">
-          User Profile
-        </h1>
+      <div className="mb-8 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <ShareButton username={username} />
           <ReturnButton />
+          <ShareButton username={username} />
         </div>
       </div>
-      <div className="min-h-100 space-y-6 rounded-3xl bg-linear-to-br from-slate-50/10 to-slate-50/5 p-5 text-white shadow-2xl md:space-y-10 md:p-10 border border-white/10">
+
+      <section className="flex gap-4">
         {/* Profile Header */}
-        <div className="flex flex-col items-start gap-x-10 gap-y-5 md:flex-row md:items-center">
-          <div className="relative aspect-square h-35 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl md:h-50 ring-4 ring-white/10">
+        <div className="flex flex-col items-start gap-y-4">
+          <div className="relative aspect-square h-35 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl md:h-32 ring-4 ring-white/10">
             {profile.profileImage?.startsWith("data:") ? (
               <Image
                 src={profile.profileImage}
@@ -158,19 +157,29 @@ export default async function ProfileCard({
               />
             )}
           </div>
-          <div className="space-y-3">
+
+          <div className="space-y-2">
             <p className="w-fit text-center text-2xl leading-none font-bold tracking-tight">
               {profile.firstName} {profile.lastName}
             </p>
+
             <p className="w-fit text-center text-base font-medium text-blue-300/90">
               @{profile.username}
             </p>
+
             {profile.title && (
-              <div className="flex w-fit items-center gap-2 rounded-full border border-blue-400/40 bg-linear-to-r from-blue-500/20 to-blue-600/20 px-4 py-2.5 text-center text-sm font-semibold text-blue-100 shadow-lg">
+              <div className="flex w-fit items-center gap-2 rounded-full border border-blue-400/40 bg-linear-to-r from-blue-500/20 to-blue-600/20 px-4 py-2.5 text-center text-xs font-semibold text-blue-100 shadow-lg">
                 <Briefcase size={18} className="text-blue-300" />
                 {profile.title.name}
               </div>
             )}
+
+            <div className="flex w-fit items-center gap-2 rounded-full border border-purple-400/40 bg-linear-to-r from-purple-500/20 to-purple-600/20 px-4 py-2.5 text-center text-sm font-semibold text-purple-100 shadow-lg">
+              <MapPin size={18} className="text-purple-300" />
+              {profile.location?.city
+                ? `${profile.location.city}, ${profile.location.country}`
+                : "Nigeria"}
+            </div>
           </div>
 
           {/* Short Bio */}
@@ -196,7 +205,8 @@ export default async function ProfileCard({
                 Contact Information
               </h2>
             </div>
-            <div className="flex flex-col gap-5 *:w-full lg:flex-row">
+
+            <div className="flex flex-col gap-2">
               {/* Email */}
               <div className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:border-white/30 hover:shadow-xl hover:scale-[1.02] md:p-7">
                 <div className="flex items-start justify-between gap-4">
@@ -290,33 +300,35 @@ export default async function ProfileCard({
           )}
         </div>
 
-        {profile.interests && profile.interests.length > 0 && (
-          <div>
-            <div className="flex items-center gap-2 mb-6">
-              <div className="h-1 w-8 rounded-full bg-linear-to-r from-pink-400 to-rose-400"></div>
-              <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
-                Interests
-              </h2>
+        <div className="min-h-100 flex-1 space-y-6 rounded-3xl bg-linear-to-br from-slate-50/10 to-slate-50/5 p-5 text-white shadow-2xl md:space-y-10 md:p-10 border border-white/10">
+          {profile.interests && profile.interests.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="h-1 w-8 rounded-full bg-linear-to-r from-pink-400 to-rose-400"></div>
+                <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
+                  Interests
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {profile.interests.map((interest) => (
+                  <div
+                    key={interest}
+                    className="group rounded-2xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 px-5 py-3 transition-all hover:border-white/30 hover:shadow-lg hover:scale-105"
+                  >
+                    <span className="text-base font-semibold text-white/95 group-hover:text-pink-300 transition-colors">
+                      {interest}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {profile.interests.map((interest) => (
-                <div
-                  key={interest}
-                  className="group rounded-2xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 px-5 py-3 transition-all hover:border-white/30 hover:shadow-lg hover:scale-105"
-                >
-                  <span className="text-base font-semibold text-white/95 group-hover:text-pink-300 transition-colors">
-                    {interest}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          )}
 
-        <Projects projects={profile?.projects} />
+          <Projects projects={profile?.projects} />
 
-        <WorkExperienceSection userId={currentProfile.userId} />
-      </div>
+          <WorkExperienceSection userId={currentProfile.userId} />
+        </div>
+      </section>
     </div>
   );
 }
