@@ -154,6 +154,29 @@ export const updateProfile = mutation({
         }),
       ),
     ),
+    projects: v.optional(
+      v.array(
+        v.object({
+          title: v.string(),
+          description: v.string(),
+          timeline: v.object({
+            start: v.number(),
+            end: v.number(),
+          }),
+          media: v.array(
+            v.object({
+              type: v.union(
+                v.literal("photo"),
+                v.literal("pdf"),
+                v.literal("video"),
+              ),
+              metadata: v.any(),
+            }),
+          ),
+          link: v.optional(v.array(v.string())),
+        }),
+      ),
+    ),
     interests: v.optional(v.array(v.string())),
     links: v.optional(
       v.array(
@@ -194,8 +217,10 @@ export const updateProfile = mutation({
       ...(args.workExperience !== undefined && {
         workExperience: args.workExperience,
       }),
+      ...(args.projects !== undefined && { projects: args.projects }),
       ...(args.interests !== undefined && { interests: args.interests }),
       ...(args.location !== undefined && { location: args.location }),
+      ...(args.links !== undefined && { links: args.links }),
     });
 
     return profile._id;

@@ -326,6 +326,55 @@ export default async function ProfileCard({
 
           <Projects projects={profile?.projects} />
 
+          {/* Work Experience */}
+          {profile.workExperience && profile.workExperience.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="h-1 w-8 rounded-full bg-linear-to-r from-cyan-400 to-blue-400"></div>
+                <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
+                  Work Experience
+                </h2>
+              </div>
+              <div className="space-y-4">
+                {profile.workExperience.map((exp, _index) => {
+                  const startDate = new Date(exp.startDate);
+                  const endDate = exp.endDate ? new Date(exp.endDate) : null;
+                  const startYear = startDate.getFullYear();
+                  const endYear = endDate ? endDate.getFullYear() : "Present";
+
+                  return (
+                    <div
+                      key={`${exp.company}-${exp.position}-${exp.startDate}`}
+                      className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:border-white/30 hover:shadow-xl md:p-7"
+                    >
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-white tracking-tight">
+                            {exp.position}
+                          </h3>
+                          <p className="text-lg text-blue-300/90 font-medium mt-1">
+                            {exp.company}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 rounded-full border border-cyan-400/30 bg-linear-to-r from-cyan-500/15 to-blue-500/15 px-4 py-2 text-sm font-medium text-cyan-200/90 shadow-lg whitespace-nowrap">
+                          <Calendar size={16} className="text-cyan-300" />
+                          <span>
+                            {startYear} — {endYear}
+                          </span>
+                        </div>
+                      </div>
+                      {exp.description && (
+                        <p className="text-white/80 leading-relaxed">
+                          {exp.description}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <WorkExperienceSection userId={currentProfile.userId} />
         </div>
       </section>

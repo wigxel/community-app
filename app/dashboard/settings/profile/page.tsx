@@ -81,6 +81,14 @@ const workExperienceSchema = z.object({
   isCurrent: z.boolean(),
 });
 
+const projectSchema = z.object({
+  title: z.string().min(1, "Project title is required"),
+  description: z.string().min(1, "Project description is required"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().min(1, "End date is required"),
+  links: z.string().optional(), // comma-separated links
+});
+
 const linkSchema = z
   .object({
     tag: z.enum(["linkedin", "github", "portfolio"]),
@@ -127,6 +135,7 @@ const formSchema = z.object({
   shortBio: z.string().optional(),
   profileImage: z.string().optional(),
   workExperience: z.array(workExperienceSchema).optional(),
+  projects: z.array(projectSchema).optional(),
   interests: z.string().optional(),
   location: z
     .object({
@@ -169,6 +178,18 @@ export default function Profile() {
                 description: exp.description || "",
                 isCurrent: exp.endDate === null || exp.endDate === undefined,
               })) || [],
+            projects:
+              profile.projects?.map((proj) => ({
+                title: proj.title,
+                description: proj.description,
+                startDate: new Date(proj.timeline.start)
+                  .toISOString()
+                  .split("T")[0],
+                endDate: new Date(proj.timeline.end)
+                  .toISOString()
+                  .split("T")[0],
+                links: proj.link?.join(", ") || "",
+              })) || [],
             interests: profile.interests?.join(", ") || "",
             location: profile.location || { city: "", country: "Nigeria" },
             links: profile.links ?? [],
@@ -201,6 +222,7 @@ export function ProfileForm({
     defaultValues: {
       ...initialData,
       workExperience: initialData.workExperience || [],
+      projects: initialData.projects || [],
       location: initialData.location || { city: "", country: "Nigeria" },
       links: initialData.links || [],
     },
@@ -214,6 +236,16 @@ export function ProfileForm({
   } = useFieldArray({
     control: form.control,
     name: "workExperience",
+  });
+
+  // Projects field array
+  const {
+    fields: projectFields,
+    append: appendProject,
+    remove: removeProject,
+  } = useFieldArray({
+    control: form.control,
+    name: "projects",
   });
 
   // Links field array
@@ -281,6 +313,23 @@ export function ProfileForm({
           description: exp.description || "",
         })) || [];
 
+      const projects =
+        values.projects?.map((proj) => ({
+          title: proj.title,
+          description: proj.description,
+          timeline: {
+            start: new Date(proj.startDate).getTime(),
+            end: new Date(proj.endDate).getTime(),
+          },
+          media: [],
+          link: proj.links
+            ? proj.links
+                .split(",")
+                .map((l) => l.trim())
+                .filter(Boolean)
+            : [],
+        })) || [];
+
       const interests = values.interests
         ? values.interests
             .split(",")
@@ -296,6 +345,7 @@ export function ProfileForm({
         shortBio: values.shortBio || "",
         profileImage: values.profileImage || null,
         workExperience,
+        projects,
         interests,
         location: values.location || undefined,
         links: normalizedLinks,
@@ -809,6 +859,150 @@ export function ProfileForm({
                   </FormItem>
                 )}
               />
+            </CardContent>
+          </Card>
+
+          {/* ── Projects ──────────────────────────────────────────────────── */}
+          <Card className="bg-blue-500/10 border-white/10">
+            <CardHeader>
+              <CardTitle className="text-xl text-white flex items-center justify-between">
+                Projects
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    appendProject({
+                      title: "",
+                      description: "",
+                      startDate: "",
+                      endDate: "",
+                      links: "",
+                    })
+                  }
+                  className="group flex items-center bg-white border-gray-300"
+                >
+                  <Plus className="h-4 w-4 text-gray-900 group-hover:mr-2 transition-all flex-shrink-0" />
+                  <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap text-gray-900">
+                    Add Project
+                  </span>
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {projectFields.length === 0 ? (
+                <p className="text-white/60 text-sm text-center py-4">
+                  No projects added yet. Click "Add Project" to get started.
+                </p>
+              ) : (
+                projectFields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="p-4 rounded-lg bg-white/5 border border-white/10 space-y-4"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-white">
+                        Project {index + 1}
+                      </h4>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeProject(index)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name={`projects.${index}.title`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Project Title</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="My Awesome Project"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`projects.${index}.description`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Describe your project..."
+                              className="resize-none"
+                              rows={3}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name={`projects.${index}.startDate`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Start Date</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`projects.${index}.endDate`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>End Date</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name={`projects.${index}.links`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Project Links (Optional)</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="https://github.com/..., https://demo.com/..."
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Enter project links separated by commas.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 
