@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -7,7 +8,6 @@ import { z } from "zod/v4";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { LoadingSpinner } from "~/components/ui/loading-spinner";
 import { authClient } from "~/lib/auth-client";
 
 type SignInState = {
@@ -23,7 +23,7 @@ type SignUpState = {
 };
 
 const signInSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -31,7 +31,7 @@ const signUpSchema = z
   .object({
     firstName: z.string().min(2, "First name must be at least 2 characters"),
     lastName: z.string().min(2, "Last name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
+    email: z.email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
   })
@@ -139,9 +139,9 @@ export default function AuthForm({
     }
   }, [signUpState.error, signInState.error]);
 
-  useEffect(() => {
-    setFormValues({ firstName: "", lastName: "", email: "" });
-  }, []);
+  // useEffect(() => {
+  //   setFormValues({ firstName: "", lastName: "", email: "" });
+  // }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -150,6 +150,7 @@ export default function AuthForm({
 
   const switchMode = (next: "sign-in" | "sign-up") => {
     setMode(next);
+    setFormValues({ firstName: "", lastName: "", email: "" });
   };
 
   return (
@@ -222,7 +223,7 @@ export default function AuthForm({
               >
                 {signInPending ? (
                   <>
-                    <LoadingSpinner className="mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Signing in…
                   </>
                 ) : (
@@ -320,7 +321,7 @@ export default function AuthForm({
               >
                 {signUpPending ? (
                   <>
-                    <LoadingSpinner className="mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating account…
                   </>
                 ) : (
