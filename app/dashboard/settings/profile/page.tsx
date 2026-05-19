@@ -1,11 +1,15 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
-import { isNullable } from "effect/Predicate";
-import { Globe, Link, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { Globe, GripVertical, Link, Plus, Trash2 } from "lucide-react";
+import { Reorder, useDragControls } from "motion/react";
+import { useRef, useState } from "react";
+import {
+  type FieldArrayWithId,
+  type UseFormReturn,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,7 +36,6 @@ import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { useTitles } from "~/hooks/useTitles";
-import { anomaly } from "~/lib/error.helpers";
 
 // ─── Link types ────────────────────────────────────────────────────────────────
 
@@ -69,6 +72,133 @@ const getLinkIcon = (tag: string) => {
 };
 
 const usernameOnlyRegex = /^(?!.*(http|https|www\.|\/)).+$/i;
+
+const normalizeLinkForEdit = (link: {
+  tag: string;
+  title: string;
+  value: string;
+}) => {
+  const normalizedTag = link.tag === "website" ? "portfolio" : link.tag;
+
+  if (normalizedTag === "linkedin") {
+    const match = link.value.match(
+      /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([^/?#]+)/i,
+    );
+    return {
+      ...link,
+      tag: normalizedTag,
+      value: match ? match[1] : link.value,
+    };
+  }
+
+  if (normalizedTag === "github") {
+    const match = link.value.match(
+      /(?:https?:\/\/)?(?:www\.)?github\.com\/([^/?#]+)/i,
+    );
+    return {
+      ...link,
+      tag: normalizedTag,
+      value: match ? match[1] : link.value,
+    };
+  }
+
+  return {
+    ...link,
+    tag: normalizedTag,
+  };
+};
+
+type LinkField = FieldArrayWithId<z.infer<typeof formSchema>, "links", "id">;
+
+function DraggableLinkItem({
+  field,
+  index,
+  form,
+  removeLink,
+  constraintsRef,
+}: {
+  field: LinkField;
+  index: number;
+  form: UseFormReturn<z.infer<typeof formSchema>>;
+  removeLink: (index: number) => void;
+  constraintsRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const dragControls = useDragControls();
+  const Icon = getLinkIcon(field.tag);
+  const typeConfig =
+    LINK_TYPES.find((t) => t.tag === field.tag) ?? LINK_TYPES[0];
+
+  return (
+    <Reorder.Item
+      key={field.id}
+      value={field.id}
+      drag="y"
+      dragListener={false}
+      dragControls={dragControls}
+      dragConstraints={constraintsRef}
+      className="cursor-grab"
+    >
+      <div key={field.id} className="flex items-start gap-3">
+        <div
+          className="mt-6 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted"
+          title="Drag to reorder"
+          onPointerDown={(event) => dragControls.start(event)}
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </div>
+
+        <div className="mt-6.25 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+        </div>
+
+        <FormField
+          control={form.control}
+          name={`links.${index}.value`}
+          render={({ field: inputField }) => (
+            <FormItem className="flex-1">
+              <FormLabel className="select-none">{typeConfig.title}</FormLabel>
+              <FormControl>
+                {typeConfig.prefix ? (
+                  <div className="flex items-center rounded-md border overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+                    <span className="px-3 py-2 text-sm text-muted-foreground bg-muted border-r shrink-0 select-none">
+                      {typeConfig.prefix}
+                    </span>
+                    <Input
+                      className="border-0 rounded-none shadow-none focus-visible:ring-0"
+                      placeholder={typeConfig.placeholder}
+                      {...inputField}
+                      onChange={(e) => {
+                        inputField.onChange(e);
+                        form.clearErrors(`links.${index}.value`);
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <Input placeholder={typeConfig.placeholder} {...inputField} />
+                )}
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-destructive mt-6.25"
+          onClick={() => {
+            form.clearErrors(`links.${index}`);
+            removeLink(index);
+          }}
+          aria-label={`Remove ${typeConfig.title} link`}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </Reorder.Item>
+  );
+}
 
 // ─── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -191,8 +321,8 @@ export default function Profile() {
                 links: proj.link?.join(", ") || "",
               })) || [],
             interests: profile.interests?.join(", ") || "",
-            location: profile.location || { city: "", country: "Nigeria" },
-            links: profile.links ?? [],
+            links:
+              profile.links?.map((link) => normalizeLinkForEdit(link)) ?? [],
           }}
         />
       ) : (
@@ -253,12 +383,15 @@ export function ProfileForm({
     fields: linkFields,
     append: appendLink,
     remove: removeLink,
+    move: moveLink,
   } = useFieldArray({
     control: form.control,
     name: "links",
   });
 
+  const linkConstraintsRef = useRef<HTMLDivElement>(null);
   const watchedLinks = form.watch("links") ?? [];
+  const linkFieldIds = linkFields.map((field) => field.id);
 
   const usedTags = watchedLinks.map((f) => f.tag);
   const availableLinkTypes = LINK_TYPES.filter(
@@ -267,8 +400,7 @@ export function ProfileForm({
 
   function addLink(tag: LinkTag) {
     const type = LINK_TYPES.find((t) => t.tag === tag);
-    if (isNullable(type)) return toast.error("No link type provided");
-
+    if (!type) return;
     appendLink({ tag, title: type.title, value: "" });
   }
 
@@ -279,13 +411,9 @@ export function ProfileForm({
     try {
       const normalizedLinks = values.links.map((link) => {
         const type = LINK_TYPES.find((t) => t.tag === link.tag);
-
         if (!type) {
-          const error = new Error("Link type should always be present");
-          anomaly("type should always be present");
-          throw error;
+          return link;
         }
-
         return {
           ...link,
           value: type.prefix
@@ -598,69 +726,41 @@ export function ProfileForm({
                 </p>
               )}
 
-              {linkFields.map((field, index) => {
-                const Icon = getLinkIcon(field.tag);
-                const typeConfig = LINK_TYPES.find((t) => t.tag === field.tag);
+              <div className="space-y-4" ref={linkConstraintsRef}>
+                <Reorder.Group
+                  axis="y"
+                  values={linkFieldIds}
+                  onReorder={(newOrder) => {
+                    const movedId = newOrder.find(
+                      (id, index) => id !== linkFieldIds[index],
+                    );
+                    if (!movedId) return;
 
-                if (isNullable(typeConfig)) return null;
-
-                return (
-                  <div key={field.id} className="flex items-start gap-3">
-                    <div className="mt-6.25 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted">
-                      <Icon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name={`links.${index}.value`}
-                      render={({ field: inputField }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel>{typeConfig.title}</FormLabel>
-                          <FormControl>
-                            {typeConfig.prefix ? (
-                              <div className="flex items-center rounded-md border overflow-hidden focus-within:ring-1 focus-within:ring-ring">
-                                <span className="px-3 py-2 text-sm text-muted-foreground bg-muted border-r shrink-0">
-                                  {typeConfig.prefix}
-                                </span>
-                                <Input
-                                  className="border-0 rounded-none shadow-none focus-visible:ring-0"
-                                  placeholder={typeConfig.placeholder}
-                                  {...inputField}
-                                  onChange={(e) => {
-                                    inputField.onChange(e);
-
-                                    form.clearErrors(`links.${index}.value`);
-                                  }}
-                                />
-                              </div>
-                            ) : (
-                              <Input
-                                placeholder={typeConfig.placeholder}
-                                {...inputField}
-                              />
-                            )}
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                    const oldIndex = linkFieldIds.indexOf(movedId);
+                    const newIndex = newOrder.indexOf(movedId);
+                    if (
+                      oldIndex !== -1 &&
+                      newIndex !== -1 &&
+                      oldIndex !== newIndex
+                    ) {
+                      moveLink(oldIndex, newIndex);
+                    }
+                  }}
+                  className="space-y-4"
+                  style={{ position: "relative" }}
+                >
+                  {linkFields.map((field, index) => (
+                    <DraggableLinkItem
+                      key={field.id}
+                      field={field}
+                      index={index}
+                      form={form}
+                      removeLink={removeLink}
+                      constraintsRef={linkConstraintsRef}
                     />
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive mt-6.25"
-                      onClick={() => {
-                        form.clearErrors(`links.${index}`);
-                        removeLink(index);
-                      }}
-                      aria-label={`Remove ${typeConfig.title} link`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                );
-              })}
+                  ))}
+                </Reorder.Group>
+              </div>
             </CardContent>
           </Card>
 
@@ -702,7 +802,7 @@ export function ProfileForm({
                 workFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="p-4 rounded-lg bg-white/5 border border-white/10 space-y-4"
+                    className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-4"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-sm font-semibold text-white">

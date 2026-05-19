@@ -79,7 +79,7 @@ export const getProfile = query({
 
       const title = user.title ? await ctx.db.get(user.title) : null;
       return { ...user, title };
-    } catch (_error) {
+    } catch {
       // If authentication fails, return null instead of throwing
       return null;
     }
@@ -127,7 +127,6 @@ export const createProfile = mutation({
       title: null,
       shortBio: "",
       links: [],
-      projects: [],
       workExperience: [],
       interests: [],
       location: { city: "", country: "Nigeria" },

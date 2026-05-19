@@ -9,12 +9,7 @@ const link_schema = v.array(
   }),
 );
 
-const media_schema = v.object({
-  type: v.union(v.literal("photo"), v.literal("pdf"), v.literal("video")),
-  metadata: v.any(),
-});
-
-const project_schema = v.array(
+const deprecated_projects_schema = v.array(
   v.object({
     title: v.string(),
     timeline: v.object({
@@ -22,10 +17,63 @@ const project_schema = v.array(
       end: v.number(),
     }),
     description: v.string(),
-    media: v.array(media_schema),
-    link: v.optional(v.array(v.string())),
+    media: v.array(
+      v.object({
+        type: v.union(v.literal("photo"), v.literal("pdf"), v.literal("video")),
+        metadata: v.any(),
+      }),
+    ),
+    link: v.array(v.string()),
   }),
 );
+
+const project_media_schema = v.object({
+  type: v.union(v.literal("photo"), v.literal("pdf"), v.literal("video")),
+  metadata: v.object({
+    url: v.string(),
+    title: v.optional(v.string()),
+    filename: v.string(),
+    mimeType: v.string(),
+    size: v.number(),
+    duration: v.optional(v.number()),
+    width: v.optional(v.number()),
+    height: v.optional(v.number()),
+    storageId: v.optional(v.string()),
+  }),
+});
+
+const project_link_schema = v.object({
+  tag: v.union(
+    v.literal("github"),
+    v.literal("live"),
+    v.literal("figma"),
+    v.literal("behance"),
+    v.literal("docs"),
+    v.literal("other"),
+  ),
+  value: v.string(),
+});
+
+export const project_schema = {
+  userId: v.string(),
+  title: v.string(),
+  timeline: v.object({
+    start: v.union(
+      v.null(),
+      v.object({ year: v.string() }),
+      v.object({ month: v.string(), year: v.string() }),
+    ),
+    end: v.union(
+      v.null(),
+      v.object({ year: v.string() }),
+      v.object({ month: v.string(), year: v.string() }),
+    ),
+  }),
+  ongoing: v.boolean(),
+  description: v.string(),
+  media: v.array(project_media_schema),
+  link: v.array(project_link_schema),
+};
 
 const profile_location_schema = v.object({
   city: v.string(),
@@ -77,7 +125,7 @@ const schema = defineSchema({
     title: v.nullable(v.id("titles")),
     links: v.optional(link_schema),
     shortBio: v.optional(v.nullable(v.string())),
-    projects: v.optional(project_schema),
+    projects: v.optional(deprecated_projects_schema),
     workExperience: v.optional(profile_work_experience_schema),
     interests: v.optional(v.array(v.string())),
     location: v.optional(profile_location_schema),
@@ -85,6 +133,8 @@ const schema = defineSchema({
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])
     .index("by_email", ["email"]),
+
+  project: defineTable(project_schema).index("by_userId", ["userId"]),
 
   workExperience: defineTable(work_experience_schema).index("by_userId", [
     "userId",

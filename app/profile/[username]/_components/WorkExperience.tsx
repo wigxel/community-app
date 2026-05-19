@@ -69,11 +69,8 @@ export function WorkExperienceSection({ userId }: WorkExperienceSectionProps) {
         ) : (
           <>
             <div className="absolute left-6.75 top-0 bottom-0 w-px bg-linear-to-b from-cyan-400/40 via-white/10 to-transparent hidden md:block" />
-            {workExperiences.map((job, index) => (
-              <WorkExperienceItem
-                job={job}
-                key={`${job.companyName}-${index}`}
-              />
+            {workExperiences.map((job) => (
+              <WorkExperienceItem job={job} key={`${job._id}`} />
             ))}
           </>
         )}
