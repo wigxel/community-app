@@ -30,9 +30,5 @@ jobs:
       - name: Build application
         env:
           SKIP_ENV_VALIDATION: "true"
-          NEXT_PUBLIC_CONVEX_URL: "https://example.convex.cloud"
-          NEXT_PUBLIC_CONVEX_SITE_URL: "https://example.convex.site"
           CONVEX_SITE_URL: "https://example.convex.site"
-          NEXT_PUBLIC_SITE_URL: "https://example.com"
-          SITE_URL: "https://example.com"
         run: bun run build
