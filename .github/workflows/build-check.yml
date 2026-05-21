@@ -24,13 +24,10 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Convex typecheck
+        run: bun run convex:typecheck
+
       - name: Build application
         env:
-          NODE_ENV: ${{ secrets.NODE_ENV }}
-          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
-          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-          SITE_URL: ${{ secrets.SITE_URL }}
-          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
-          NEXT_PUBLIC_CONVEX_SITE_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_SITE_URL }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-        run: bun run build:ci
+          SKIP_ENV_VALIDATION: "true"
+        run: bun run build
