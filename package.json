@@ -7,7 +7,7 @@
     "dev:backend": "convex dev",
     "dev": "next dev --turbopack",
     "build": "next build",
-    "convex:typecheck": "bunx convex codegen --typecheck=enable",
+    "convex:typecheck": "tsc -p convex --noEmit",
     "start": "next start",
     "commit": "cz",
     "svg:convert": "npx @svgr/cli --icon --typescript --ignore-existing --memo --out-dir ./components/Icons -- public/assets/icons",
