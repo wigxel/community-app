@@ -1,7 +1,7 @@
 name: Build Check
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - synchronize
@@ -9,12 +9,32 @@ on:
       - approved
 
 jobs:
-  build:
+  require-approval:
+    if: github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            if (!reviews.some(r => r.state === 'APPROVED')) {
+              core.setFailed('This fork PR requires maintainer approval before building with secrets.');
+            }
+            core.notice('Fork PR approved — building with secrets');
 
+  build:
+    needs: [require-approval]
+    if: always() && (needs.require-approval.result == 'success' || needs.require-approval.result == 'skipped')
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Set up Node.js with Bun
         uses: oven-sh/setup-bun@v1
