@@ -216,7 +216,12 @@ export const updateProfile = mutation({
       ...(args.workExperience !== undefined && {
         workExperience: args.workExperience,
       }),
-      ...(args.projects !== undefined && { projects: args.projects }),
+      ...(args.projects !== undefined && {
+        projects: args.projects.map((project) => ({
+          ...project,
+          link: project.link ?? [],
+        })),
+      }),
       ...(args.interests !== undefined && { interests: args.interests }),
       ...(args.location !== undefined && { location: args.location }),
       ...(args.links !== undefined && { links: args.links }),
