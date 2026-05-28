@@ -18,7 +18,7 @@ const DashboardPage = () => {
   if (!profile) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-white/60">Loading.........</p>
+        <p className="text-white/60">Loading.............</p>
       </div>
     );
   }
