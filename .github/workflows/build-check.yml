@@ -59,6 +59,7 @@ jobs:
 
       - name: Build application
         env:
+          GITHUB_HEAD_REF: ${{ github.event.pull_request.head.ref }}
           NODE_ENV: ${{ secrets.NODE_ENV }}
           CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
