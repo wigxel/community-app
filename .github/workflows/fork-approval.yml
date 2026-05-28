@@ -1,0 +1,15 @@
+name: Fork PR Approval
+on:
+  pull_request_review:
+    types:
+      - submitted
+    branches:
+      - staging
+      - master
+
+jobs:
+  record-approval:
+    if: github.event.review.state == 'approved' && github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Fork PR approved — build will start via workflow_run"
