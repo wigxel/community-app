@@ -214,7 +214,7 @@ const workExperienceSchema = z.object({
   isCurrent: z.boolean(),
 });
 
-const projectSchema = z.object({
+const _projectSchema = z.object({
   title: z.string().min(1, "Project title is required"),
   description: z.string().min(1, "Project description is required"),
   startDate: z.string().min(1, "Start date is required"),
@@ -431,9 +431,7 @@ export function ProfileForm({
         : [];
 
       const existingIds = new Set(
-        (initialData.workExperience ?? [])
-          .map((e: any) => e._id)
-          .filter(Boolean),
+        (initialData.workExperience ?? []).map((e) => e._id).filter(Boolean),
       );
 
       for (const exp of values.workExperience ?? []) {
@@ -454,15 +452,19 @@ export function ProfileForm({
         };
 
         if (exp._id) {
-          await updateWorkExp({ id: exp._id as any, ...payload });
+          await updateWorkExp({
+            id: exp._id as Id<"workExperience">,
+            ...payload,
+          });
           existingIds.delete(exp._id);
         } else {
-          await createWorkExp({ userId: profile!.userId!, ...payload });
+          if (!profile?.userId) return;
+          await createWorkExp({ userId: profile.userId, ...payload });
         }
       }
 
       for (const removedId of existingIds) {
-        await removeWorkExp({ id: removedId as any });
+        await removeWorkExp({ id: removedId as Id<"workExperience"> });
       }
       const interests = values.interests
         ? values.interests

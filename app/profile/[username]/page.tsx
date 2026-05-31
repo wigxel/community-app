@@ -334,7 +334,7 @@ export default async function ProfileCard({
                 </h2>
               </div>
               <div className="space-y-6">
-                {profile.projects.map((project: any, index: number) => {
+                {profile.projects.map((project, index: number) => {
                   const key = `${project.title}-${index}`;
                   return (
                     <div
