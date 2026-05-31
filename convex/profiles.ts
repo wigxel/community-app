@@ -127,7 +127,6 @@ export const createProfile = mutation({
       title: null,
       shortBio: "",
       links: [],
-      workExperience: [],
       interests: [],
       location: { city: "", country: "Nigeria" },
     });
@@ -142,17 +141,6 @@ export const updateProfile = mutation({
     title: v.optional(v.union(v.id("titles"), v.null())),
     shortBio: v.optional(v.string()),
     profileImage: v.optional(v.union(v.string(), v.null())),
-    workExperience: v.optional(
-      v.array(
-        v.object({
-          position: v.string(),
-          company: v.string(),
-          startDate: v.number(),
-          endDate: v.optional(v.union(v.number(), v.null())),
-          description: v.optional(v.string()),
-        }),
-      ),
-    ),
     interests: v.optional(v.array(v.string())),
     links: v.optional(
       v.array(
@@ -189,9 +177,6 @@ export const updateProfile = mutation({
       ...(args.shortBio !== undefined && { shortBio: args.shortBio }),
       ...(args.profileImage !== undefined && {
         profileImage: args.profileImage,
-      }),
-      ...(args.workExperience !== undefined && {
-        workExperience: args.workExperience,
       }),
       ...(args.interests !== undefined && { interests: args.interests }),
       ...(args.location !== undefined && { location: args.location }),

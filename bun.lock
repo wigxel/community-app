@@ -26,7 +26,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "consola": "^3.4.2",
-        "convex": "^1.35.1",
+        "convex": "^1.39.1",
         "date-fns": "^4.1.0",
         "effect": "^3.21.2",
         "eslint-plugin-react": "^7.37.5",
