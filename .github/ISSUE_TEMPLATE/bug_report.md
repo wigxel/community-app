@@ -69,3 +69,9 @@ paste logs here
 ## Additional Context
 
 <!-- Anything else that might help us understand or reproduce the issue? -->
+
+## Reward
+
+Reward: 3k
+Estimated Task Duration: 4 days
+Deadline: 1 week

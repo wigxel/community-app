@@ -322,7 +322,8 @@ export default async function ProfileCard({
             </div>
           )}
 
-          <Projects userId={currentProfile.userId} />
+          {/* Projects from project table (new) */}
+          <Projects userId={currentProfile.userId ?? profile.userId} />
 
           <WorkExperienceSection userId={currentProfile.userId} />
         </div>

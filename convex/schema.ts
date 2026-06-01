@@ -23,7 +23,7 @@ const deprecated_projects_schema = v.array(
         metadata: v.any(),
       }),
     ),
-    link: v.array(v.string()),
+    link: v.optional(v.array(v.string())),
   }),
 );
 

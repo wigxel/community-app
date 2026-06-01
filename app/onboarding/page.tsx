@@ -21,11 +21,13 @@ export default async function OnboardingPage({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center px-4 py-8">
+      <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome!</h1>
-          <p className="text-white/60">
+          <h1 className="text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Welcome!
+          </h1>
+          <p className="text-white/60 text-lg">
             Let's set up your profile to get started.
           </p>
         </div>
