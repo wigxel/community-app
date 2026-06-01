@@ -211,6 +211,14 @@ const workExperienceSchema = z.object({
   isCurrent: z.boolean(),
 });
 
+const _projectSchema = z.object({
+  title: z.string().min(1, "Project title is required"),
+  description: z.string().min(1, "Project description is required"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().min(1, "End date is required"),
+  links: z.string().optional(), // comma-separated links
+});
+
 const linkSchema = z
   .object({
     tag: z.enum(["linkedin", "github", "portfolio"]),

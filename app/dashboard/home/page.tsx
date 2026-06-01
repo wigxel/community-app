@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { Briefcase, Folder, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { GettingStartedWidget } from "~/components/dashboard/getting-started-widget";
 import StatCard from "~/components/dashboard/home/StatCard";
 import WorkItem from "~/components/dashboard/home/WorkItem";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -47,6 +48,8 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
+      <GettingStartedWidget />
+
       <Card className="bg-blue-500/20 text-blue-300 border border-white/10">
         <CardContent className="flex items-center gap-4 pt-6">
           <Avatar className="h-14 w-14">

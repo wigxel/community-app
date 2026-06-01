@@ -1,124 +1,410 @@
 "use client";
 
+import { useMutation, useQuery } from "convex/react";
+import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect } from "react";
+import { useState } from "react";
 import { z } from "zod/v4";
+import { ImageUpload } from "~/components/profile/image-upload";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { createProfileAction } from "./actions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
 
-type OnboardingState = {
-  error?: string;
-  success?: boolean;
-  timestamp: number;
-};
-
-const onboardingSchema = z.object({
+const _onboardingSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   username: z
     .string()
     .min(3, "Username must be at least 3 characters")
     .regex(/^[a-z0-9_-]+$/, "Only lowercase letters, numbers, - and _ allowed"),
+  profileImage: z.string().optional(),
+  title: z.string().optional(),
+  interests: z.array(z.string()).min(1, "Select at least one interest"),
 });
 
-async function submitOnboarding(
-  _prev: OnboardingState,
-  formData: FormData,
-): Promise<OnboardingState> {
-  const raw = {
-    firstName: formData.get("firstName") as string,
-    lastName: formData.get("lastName") as string,
-    username: (formData.get("username") as string).toLowerCase(),
-  };
-
-  const parsed = onboardingSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { timestamp: Date.now(), error: parsed.error.issues[0].message };
-  }
-
-  try {
-    await createProfileAction({
-      firstName: parsed.data.firstName,
-      lastName: parsed.data.lastName,
-      username: parsed.data.username,
-    });
-  } catch (err: unknown) {
-    return {
-      timestamp: Date.now(),
-      error: err instanceof Error ? err.message : "Profile creation failed",
-    };
-  }
-
-  return {
-    timestamp: Date.now(),
-    success: true,
-  };
-}
+const COMMON_INTERESTS = [
+  "Web Development",
+  "Mobile Development",
+  "Machine Learning",
+  "Data Science",
+  "UI/UX Design",
+  "Cloud Computing",
+  "DevOps",
+  "Cybersecurity",
+  "Blockchain",
+  "Game Development",
+  "Photography",
+  "Writing",
+  "Music",
+  "Sports",
+  "Travel",
+  "Reading",
+];
 
 export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
+  const createProfile = useMutation(api.profiles.createProfile);
+  const updateProfile = useMutation(api.profiles.updateProfile);
+  const titles = useQuery(api.titles.listTitles) ?? [];
 
-  const [state, submitAction, isPending] = useActionState<
-    OnboardingState,
-    FormData
-  >(submitOnboarding, { timestamp: 0 });
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    profileImage: "",
+    title: "",
+    interests: [] as string[],
+  });
+  const [customInterest, setCustomInterest] = useState("");
+  const [error, setError] = useState("");
+  const [isPending, setIsPending] = useState(false);
 
-  useEffect(() => {
-    if (state.success) {
-      router.push(redirectTo);
+  const handleNext = () => {
+    setError("");
+
+    if (step === 1) {
+      if (!formData.firstName || formData.firstName.length < 2) {
+        setError("First name must be at least 2 characters");
+        return;
+      }
+      if (!formData.lastName || formData.lastName.length < 2) {
+        setError("Last name must be at least 2 characters");
+        return;
+      }
+      if (!formData.username || formData.username.length < 3) {
+        setError("Username must be at least 3 characters");
+        return;
+      }
+      if (!/^[a-z0-9_-]+$/.test(formData.username)) {
+        setError("Only lowercase letters, numbers, - and _ allowed");
+        return;
+      }
     }
-  }, [state.success, redirectTo, router]);
+
+    if (step === 4) {
+      if (formData.interests.length === 0) {
+        setError("Select at least one interest");
+        return;
+      }
+    }
+
+    setStep(step + 1);
+  };
+
+  const handleBack = () => {
+    setError("");
+    setStep(step - 1);
+  };
+
+  const toggleInterest = (interest: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      interests: prev.interests.includes(interest)
+        ? prev.interests.filter((i) => i !== interest)
+        : [...prev.interests, interest],
+    }));
+  };
+
+  const addCustomInterest = () => {
+    if (
+      customInterest.trim() &&
+      !formData.interests.includes(customInterest.trim())
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        interests: [...prev.interests, customInterest.trim()],
+      }));
+      setCustomInterest("");
+    }
+  };
+
+  const removeInterest = (interest: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      interests: prev.interests.filter((i) => i !== interest),
+    }));
+  };
+
+  const handleSubmit = async () => {
+    setError("");
+    setIsPending(true);
+
+    try {
+      // Create basic profile first
+      await createProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username.toLowerCase(),
+      });
+
+      // Update with additional details
+      await updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumbers: [],
+        title: formData.title ? (formData.title as Id<"titles">) : null,
+        profileImage: formData.profileImage || null,
+        interests: formData.interests,
+      });
+
+      router.push(redirectTo);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Profile creation failed");
+      setIsPending(false);
+    }
+  };
+
+  const progress = (step / 4) * 100;
 
   return (
-    <form action={submitAction} className="flex flex-col gap-5 mt-6">
-      {state.error && (
+    <div className="space-y-6">
+      {/* Progress Bar */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm text-white/60">
+          <span>Step {step} of 4</span>
+          <span>{Math.round(progress)}%</span>
+        </div>
+        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      {error && (
         <p className="text-sm text-red-400 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
-          {state.error}
+          {error}
         </p>
       )}
 
-      <div className="flex gap-4">
-        <div className="flex flex-col gap-2 flex-1">
-          <Label htmlFor="firstName">First name</Label>
-          <Input
-            id="firstName"
-            name="firstName"
-            required
-            autoComplete="given-name"
-            placeholder="Jane"
+      {/* Step 1: Basic Info */}
+      {step === 1 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-xl font-semibold mb-1">Basic Information</h2>
+            <p className="text-sm text-white/60">Tell us about yourself</p>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex flex-col gap-2 flex-1">
+              <Label htmlFor="firstName">First name</Label>
+              <Input
+                id="firstName"
+                value={formData.firstName}
+                onChange={(e) =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
+                placeholder="Jane"
+              />
+            </div>
+            <div className="flex flex-col gap-2 flex-1">
+              <Label htmlFor="lastName">Last name</Label>
+              <Input
+                id="lastName"
+                value={formData.lastName}
+                onChange={(e) =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
+                placeholder="Doe"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              value={formData.username}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  username: e.target.value.toLowerCase(),
+                })
+              }
+              placeholder="janedoe"
+            />
+            <p className="text-xs text-white/50">
+              This will be your unique identifier.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Step 2: Avatar Upload */}
+      {step === 2 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-xl font-semibold mb-1">Profile Picture</h2>
+            <p className="text-sm text-white/60">
+              Upload your avatar (optional)
+            </p>
+          </div>
+
+          <ImageUpload
+            currentImage={formData.profileImage || null}
+            onImageChange={(image) =>
+              setFormData({ ...formData, profileImage: image })
+            }
           />
         </div>
-        <div className="flex flex-col gap-2 flex-1">
-          <Label htmlFor="lastName">Last name</Label>
-          <Input
-            id="lastName"
-            name="lastName"
-            required
-            autoComplete="family-name"
-            placeholder="Doe"
-          />
+      )}
+
+      {/* Step 3: Role Selection */}
+      {step === 3 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-xl font-semibold mb-1">Your Role</h2>
+            <p className="text-sm text-white/60">
+              What best describes you? (optional)
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="title">Select Role</Label>
+            <Select
+              value={formData.title}
+              onValueChange={(value) =>
+                setFormData({ ...formData, title: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a role" />
+              </SelectTrigger>
+              <SelectContent>
+                {titles.map((title) => (
+                  <SelectItem key={title._id} value={title._id}>
+                    {title.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="username">Username</Label>
-        <Input
-          id="username"
-          name="username"
-          required
-          autoComplete="username"
-          placeholder="janedoe"
-        />
-        <p className="text-xs text-white/50">
-          This will be your unique identifier.
-        </p>
-      </div>
+      {/* Step 4: Interests */}
+      {step === 4 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-xl font-semibold mb-1">Your Interests</h2>
+            <p className="text-sm text-white/60">
+              Select at least one interest
+            </p>
+          </div>
 
-      <Button type="submit" disabled={isPending} className="mt-4 w-full">
-        {isPending ? "Setting up profile…" : "Complete Onboarding"}
-      </Button>
-    </form>
+          <div className="flex flex-wrap gap-2">
+            {COMMON_INTERESTS.map((interest) => (
+              <button
+                key={interest}
+                type="button"
+                onClick={() => toggleInterest(interest)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  formData.interests.includes(interest)
+                    ? "bg-blue-500 text-white"
+                    : "bg-white/10 text-white/70 hover:bg-white/20"
+                }`}
+              >
+                {interest}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="customInterest">Add Custom Interest</Label>
+            <div className="flex gap-2">
+              <Input
+                id="customInterest"
+                value={customInterest}
+                onChange={(e) => setCustomInterest(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addCustomInterest();
+                  }
+                }}
+                placeholder="e.g., Cooking, Gardening"
+              />
+              <Button
+                type="button"
+                onClick={addCustomInterest}
+                variant="outline"
+                className="!text-white bg-white/10 border-white/30 hover:bg-white/20"
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+
+          {formData.interests.length > 0 && (
+            <div>
+              <Label className="mb-2 block">
+                Selected Interests ({formData.interests.length})
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {formData.interests.map((interest) => (
+                  <div
+                    key={interest}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-sm border border-blue-400/30"
+                  >
+                    <span>{interest}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeInterest(interest)}
+                      className="hover:text-blue-100"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Navigation Buttons */}
+      <div className="flex gap-3 pt-4">
+        {step > 1 && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleBack}
+            disabled={isPending}
+            className="flex-1 !text-white bg-white/10 border-white/30 hover:bg-white/20"
+          >
+            Back
+          </Button>
+        )}
+        {step < 4 ? (
+          <Button
+            type="button"
+            onClick={handleNext}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 !text-white"
+          >
+            Next
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isPending}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 !text-white"
+          >
+            {isPending ? "Creating Profile..." : "Complete Setup"}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }

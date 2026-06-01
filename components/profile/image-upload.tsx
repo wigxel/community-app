@@ -195,8 +195,13 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
             id="image-upload"
           />
           <label htmlFor="image-upload">
-            <Button type="button" variant="outline" asChild>
-              <span className="cursor-pointer">
+            <Button
+              type="button"
+              variant="outline"
+              className="!text-white bg-white/10 border-white/30 hover:bg-white/20"
+              asChild
+            >
+              <span className="cursor-pointer flex items-center">
                 <Upload className="mr-2 h-4 w-4" />
                 {currentImage ? "Change Image" : "Upload Image"}
               </span>
