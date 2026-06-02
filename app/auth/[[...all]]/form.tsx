@@ -125,23 +125,9 @@ export default function AuthForm({
 
   useEffect(() => {
     if (signUpState.success) {
-      toast.success("Account created! Redirecting to onboarding...");
       window.location.href = `/onboarding?redirect=${encodeURIComponent(redirectTo)}`;
     }
   }, [signUpState.success, redirectTo]);
-
-  useEffect(() => {
-    if (signUpState.error) {
-      toast.error(signUpState.error);
-    }
-    if (signInState.error) {
-      toast.error(signInState.error);
-    }
-  }, [signUpState.error, signInState.error]);
-
-  // useEffect(() => {
-  //   setFormValues({ firstName: "", lastName: "", email: "" });
-  // }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
