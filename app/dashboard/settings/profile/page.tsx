@@ -207,7 +207,10 @@ const workExperienceSchema = z.object({
   company: z.string().min(1, "Company is required"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().optional(),
-  description: z.string().optional(),
+  description: z.string().min(1, "Description is required"),
+  _id: z.string().optional(),
+  location: z.enum(["remote", "hybrid", "onsite"]),
+  type: z.enum(["contract", "full-time"]),
   isCurrent: z.boolean(),
 });
 
@@ -281,12 +284,39 @@ const formSchema = z.object({
 
 export default function Profile() {
   const profile = useQuery(api.profiles.getProfile);
+  const existingWorkExp = useQuery(
+    api.workExperience.getByUserId,
+    profile?.userId ? { userId: profile.userId } : "skip",
+  );
+
+  const mappedWorkExperience: z.infer<typeof workExperienceSchema>[] =
+    existingWorkExp?.map((exp) => ({
+      _id: exp._id,
+      position: exp.position,
+      company: exp.companyName,
+      startDate: new Date(exp.timeline.start).toISOString().split("T")[0],
+      endDate: exp.timeline.end
+        ? new Date(exp.timeline.end).toISOString().split("T")[0]
+        : "",
+      description: exp.description || "",
+      isCurrent: !exp.timeline.end,
+      location:
+        exp.location === "remote" ||
+        exp.location === "hybrid" ||
+        exp.location === "onsite"
+          ? exp.location
+          : "onsite",
+      type:
+        exp.type === "contract" || exp.type === "full-time"
+          ? exp.type
+          : "full-time",
+    })) || [];
 
   return (
     <div className="px-2 md:px-4">
       <h1 className="text-4xl font-semibold mb-8">Edit Profile</h1>
 
-      {profile ? (
+      {profile && existingWorkExp !== undefined ? (
         <ProfileForm
           initialData={{
             firstname: profile.firstName,
@@ -296,18 +326,8 @@ export default function Profile() {
             title: profile?.title?._id,
             shortBio: profile.shortBio || "",
             profileImage: profile.profileImage || "",
-            workExperience:
-              profile.workExperience?.map((exp) => ({
-                position: exp.position,
-                company: exp.company,
-                startDate: new Date(exp.startDate).toISOString().split("T")[0],
-                endDate: exp.endDate
-                  ? new Date(exp.endDate).toISOString().split("T")[0]
-                  : "",
-                description: exp.description || "",
-                isCurrent: exp.endDate === null || exp.endDate === undefined,
-              })) || [],
             interests: profile.interests?.join(", ") || "",
+            workExperience: mappedWorkExperience,
             links:
               profile.links?.map((link) => normalizeLinkForEdit(link)) ?? [],
           }}
@@ -333,6 +353,11 @@ export function ProfileForm({
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  const createWorkExp = useMutation(api.workExperience.create);
+  const updateWorkExp = useMutation(api.workExperience.update);
+  const removeWorkExp = useMutation(api.workExperience.remove);
+  const profile = useQuery(api.profiles.getProfile);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -405,18 +430,42 @@ export function ProfileForm({
             .filter(Boolean)
         : [];
 
-      const workExperience =
-        values.workExperience?.map((exp) => ({
-          position: exp.position,
-          company: exp.company,
-          startDate: new Date(exp.startDate).getTime(),
-          endDate:
-            exp.isCurrent || !exp.endDate
-              ? null
-              : new Date(exp.endDate).getTime(),
-          description: exp.description || "",
-        })) || [];
+      const existingIds = new Set(
+        (initialData.workExperience ?? []).map((e) => e._id).filter(Boolean),
+      );
 
+      for (const exp of values.workExperience ?? []) {
+        const timeline = {
+          start: new Date(exp.startDate).getTime(),
+          end:
+            exp.isCurrent || !exp.endDate
+              ? undefined
+              : new Date(exp.endDate).getTime(),
+        };
+        const payload = {
+          companyName: exp.company,
+          position: exp.position,
+          description: exp.description || "",
+          location: exp.location,
+          type: exp.type,
+          timeline,
+        };
+
+        if (exp._id) {
+          await updateWorkExp({
+            id: exp._id as Id<"workExperience">,
+            ...payload,
+          });
+          existingIds.delete(exp._id);
+        } else {
+          if (!profile?.userId) return;
+          await createWorkExp({ userId: profile.userId, ...payload });
+        }
+      }
+
+      for (const removedId of existingIds) {
+        await removeWorkExp({ id: removedId as Id<"workExperience"> });
+      }
       const interests = values.interests
         ? values.interests
             .split(",")
@@ -431,7 +480,6 @@ export function ProfileForm({
         title: values.title ? (values.title as Id<"titles">) : null,
         shortBio: values.shortBio || "",
         profileImage: values.profileImage || null,
-        workExperience,
         interests,
         location: values.location || undefined,
         links: normalizedLinks,
@@ -738,6 +786,8 @@ export function ProfileForm({
                       startDate: "",
                       endDate: "",
                       description: "",
+                      location: "onsite",
+                      type: "full-time",
                       isCurrent: false,
                     })
                   }
@@ -804,6 +854,62 @@ export function ProfileForm({
                             <FormControl>
                               <Input placeholder="Acme Inc." {...field} />
                             </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name={`workExperience.${index}.location`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Location Type</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select location" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="onsite">Onsite</SelectItem>
+                                <SelectItem value="hybrid">Hybrid</SelectItem>
+                                <SelectItem value="remote">Remote</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`workExperience.${index}.type`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Employment Type</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="full-time">
+                                  Full-time
+                                </SelectItem>
+                                <SelectItem value="contract">
+                                  Contract
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
