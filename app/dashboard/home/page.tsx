@@ -59,11 +59,7 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      <GettingStartedWidget
-        hasShortBio={hasShortBio}
-        hasProjects={hasProjects}
-        hasWorkExperience={hasWorkExperience}
-      />
+      <GettingStartedWidget />
 
       <Card className="bg-blue-500/20 text-blue-300 border border-white/10">
         <CardContent className="flex items-center gap-4 pt-6">
