@@ -62,8 +62,8 @@ export const getProfileByUsername = query({
     const title = user.title ? await ctx.db.get(user.title) : null;
     const skills = user.skills
       ? await Promise.all(
-        user.skills.map((skillId: Id<"skills">) => ctx.db.get(skillId)),
-      )
+          user.skills.map((skillId: Id<"skills">) => ctx.db.get(skillId)),
+        )
       : [];
     return { ...user, title, skills };
   },
