@@ -1,0 +1,4 @@
+
+[submodule "ai/generic"]
+	path = ai/generic
+	url = https://github.com/wigxel/ai-rules
