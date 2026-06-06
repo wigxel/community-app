@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { GitHub, LinkedIn } from "~/components/icons";
 import { ImageUpload } from "~/components/profile/image-upload";
+import { SkillsSelect } from "~/components/profile/skills-select";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -36,6 +37,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { useTitles } from "~/hooks/useTitles";
+import { safeArray } from "~/lib/data.helpers";
 
 // ─── Link types ────────────────────────────────────────────────────────────────
 
@@ -275,6 +277,7 @@ const formSchema = z.object({
   links: z
     .array(linkSchema)
     .max(3, { message: "You can add at most 3 links." }),
+  skills: z.array(z.string()).optional(), // array of skill IDs
 });
 
 // ─── Page component ────────────────────────────────────────────────────────────
@@ -310,6 +313,7 @@ export default function Profile() {
             interests: profile.interests?.join(", ") || "",
             links:
               profile.links?.map((link) => normalizeLinkForEdit(link)) ?? [],
+            skills: profile.skills || [],
           }}
         />
       ) : (
@@ -327,6 +331,7 @@ export function ProfileForm({
   initialData: Partial<z.infer<typeof formSchema>>;
 }) {
   const { titles } = useTitles();
+  const skills = useQuery(api.skills.listSkills);
   const updateProfile = useMutation(api.profiles.updateProfile);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{
@@ -341,6 +346,7 @@ export function ProfileForm({
       workExperience: initialData.workExperience || [],
       location: initialData.location || { city: "", country: "Nigeria" },
       links: initialData.links || [],
+      skills: initialData.skills || [],
     },
   });
 
@@ -435,6 +441,7 @@ export function ProfileForm({
         interests,
         location: values.location || undefined,
         links: normalizedLinks,
+        skills: (values.skills || []) as Id<"skills">[],
       });
 
       setMessage({ type: "success", text: "Profile updated successfully!" });
@@ -887,6 +894,35 @@ export function ProfileForm({
                   </div>
                 ))
               )}
+            </CardContent>
+          </Card>
+
+          {/*── Skills ─────────────────────────────────────────────────── */}
+          <Card className="bg-blue-500/10 border-white/10">
+            <CardHeader>
+              <CardTitle className="text-xl text-white">Skills</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="skills"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Your Skills</FormLabel>
+                    <FormControl>
+                      <SkillsSelect
+                        skills={safeArray(skills)}
+                        value={field.value || []}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Select the skills that represent your expertise.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </CardContent>
           </Card>
 

@@ -322,6 +322,29 @@ export default async function ProfileCard({
             </div>
           )}
 
+          {profile.skills && profile.skills.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="h-8 w-1 rounded-full bg-linear-to-r from-pink-400 to-purple-400"></div>
+                <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
+                  Skills
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {profile.skills.map((skill) => (
+                  <div
+                    key={skill.name}
+                    className="group rounded-xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 px-4 py-1 transition-all hover:border-white/30 hover:shadow-lg"
+                  >
+                    <span className="text-sm font-semibold text-white/95 group-hover:text-cyan-300 transition-colors">
+                      {skill.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Projects from project table (new) */}
           <Projects userId={currentProfile.userId ?? profile.userId} />
 

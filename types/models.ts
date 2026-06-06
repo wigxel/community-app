@@ -20,6 +20,7 @@ export interface Profile {
   workExperience?: ProfileWorkExperience[];
   interests?: string[];
   location?: ProfileLocation;
+  skills?: Skill[];
 }
 
 export interface ProfileWorkExperience {
@@ -34,6 +35,11 @@ export interface Title {
   name: string;
   description: string | null;
   color?: string;
+}
+
+export interface Skill {
+  name: string;
+  description: string | null;
 }
 
 export interface Link {

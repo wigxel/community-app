@@ -1,5 +1,6 @@
 import { queryGeneric as query } from "convex/server";
 import { ConvexError, v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 
@@ -59,7 +60,12 @@ export const getProfileByUsername = query({
     if (!user) return null;
 
     const title = user.title ? await ctx.db.get(user.title) : null;
-    return { ...user, title };
+    const skills = user.skills
+      ? await Promise.all(
+        user.skills.map((skillId: Id<"skills">) => ctx.db.get(skillId)),
+      )
+      : [];
+    return { ...user, title, skills };
   },
 });
 
@@ -130,6 +136,7 @@ export const createProfile = mutation({
       workExperience: [],
       interests: [],
       location: { city: "", country: "Nigeria" },
+      skills: [],
     });
   },
 });
@@ -169,6 +176,7 @@ export const updateProfile = mutation({
         country: v.string(),
       }),
     ),
+    skills: v.optional(v.array(v.id("skills"))),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
@@ -196,6 +204,7 @@ export const updateProfile = mutation({
       ...(args.interests !== undefined && { interests: args.interests }),
       ...(args.location !== undefined && { location: args.location }),
       ...(args.links !== undefined && { links: args.links }),
+      ...(args.skills !== undefined && { skills: args.skills }),
     });
 
     return profile._id;
