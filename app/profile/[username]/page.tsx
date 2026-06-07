@@ -1,8 +1,6 @@
 import {
   BookText,
   Briefcase,
-  Calendar,
-  ExternalLink,
   Globe,
   Link,
   Mail,
@@ -324,148 +322,8 @@ export default async function ProfileCard({
             </div>
           )}
 
-          {/* Projects from profile.projects (embedded - deprecated schema) */}
-          {profile.projects && profile.projects.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-6">
-                <div className="h-1 w-8 rounded-full bg-linear-to-r from-amber-400 to-orange-400"></div>
-                <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
-                  Projects
-                </h2>
-              </div>
-              <div className="space-y-6">
-                {profile.projects.map((project: any, index: number) => {
-                  const key = `${project.title}-${index}`;
-                  return (
-                    <div
-                      key={key}
-                      className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:border-white/30 hover:shadow-2xl md:p-8"
-                    >
-                      {/* Project Header */}
-                      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                        <h3 className="text-2xl font-bold text-white tracking-tight">
-                          {project.title}
-                        </h3>
-                        {project.timeline && (
-                          <div className="flex items-center gap-2.5 rounded-full border border-amber-400/30 bg-linear-to-r from-amber-500/15 to-orange-500/15 px-4 py-2 text-sm font-medium text-amber-200/90 shadow-lg">
-                            <Calendar size={16} className="text-amber-300" />
-                            <span>
-                              {new Date(
-                                project.timeline.start,
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                year: "numeric",
-                              })}
-                              {" - "}
-                              {new Date(
-                                project.timeline.end,
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                year: "numeric",
-                              })}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Project Description */}
-                      {project.description && (
-                        <p className="mb-7 text-lg leading-relaxed text-white/90 font-light">
-                          {project.description}
-                        </p>
-                      )}
-
-                      {/* Project Links */}
-                      {project.link &&
-                        Array.isArray(project.link) &&
-                        project.link.length > 0 && (
-                          <div>
-                            <h4 className="mb-4 flex items-center gap-2 text-xs font-bold tracking-widest text-white/60 uppercase">
-                              <div className="h-0.5 w-6 rounded-full bg-white/40"></div>
-                              Project Links
-                            </h4>
-                            <div className="flex flex-wrap gap-3">
-                              {project.link.map((url: string, idx: number) => {
-                                const linkKey = `${key}-link-${idx}`;
-                                return (
-                                  <a
-                                    key={linkKey}
-                                    href={url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="group/link flex items-center gap-2.5 rounded-xl border border-white/20 bg-linear-to-r from-white/15 to-white/10 px-5 py-2.5 text-sm font-semibold text-white/90 transition-all hover:border-white/40 hover:from-white/20 hover:to-white/15 hover:shadow-lg hover:scale-105"
-                                  >
-                                    <ExternalLink
-                                      size={14}
-                                      className="text-white/60 transition-colors group-hover/link:text-white"
-                                    />
-                                    <span className="truncate max-w-50">
-                                      {url.replace(/^https?:\/\/(www\.)?/, "")}
-                                    </span>
-                                  </a>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
           {/* Projects from project table (new) */}
           <Projects userId={currentProfile.userId ?? profile.userId} />
-
-          {/* Work Experience */}
-          {profile.workExperience && profile.workExperience.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-6">
-                <div className="h-1 w-8 rounded-full bg-linear-to-r from-cyan-400 to-blue-400"></div>
-                <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
-                  Work Experience
-                </h2>
-              </div>
-              <div className="space-y-4">
-                {profile.workExperience.map((exp, _index) => {
-                  const startDate = new Date(exp.startDate);
-                  const endDate = exp.endDate ? new Date(exp.endDate) : null;
-                  const startYear = startDate.getFullYear();
-                  const endYear = endDate ? endDate.getFullYear() : "Present";
-
-                  return (
-                    <div
-                      key={`${exp.company}-${exp.position}-${exp.startDate}`}
-                      className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:border-white/30 hover:shadow-xl md:p-7"
-                    >
-                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-white tracking-tight">
-                            {exp.position}
-                          </h3>
-                          <p className="text-lg text-blue-300/90 font-medium mt-1">
-                            {exp.company}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 rounded-full border border-cyan-400/30 bg-linear-to-r from-cyan-500/15 to-blue-500/15 px-4 py-2 text-sm font-medium text-cyan-200/90 shadow-lg whitespace-nowrap">
-                          <Calendar size={16} className="text-cyan-300" />
-                          <span>
-                            {startYear} — {endYear}
-                          </span>
-                        </div>
-                      </div>
-                      {exp.description && (
-                        <p className="text-white/80 leading-relaxed">
-                          {exp.description}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           <WorkExperienceSection userId={currentProfile.userId} />
         </div>

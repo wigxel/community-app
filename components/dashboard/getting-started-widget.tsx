@@ -1,22 +1,23 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import { CheckCircle2, Circle } from "lucide-react";
 import Link from "next/link";
-import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Progress } from "~/components/ui/progress";
+import { api } from "~/convex/_generated/api";
+import { safeArray, safeStr } from "~/lib/data.helpers";
+import { Badge } from "../ui/badge";
+import { SegmentProgressBar } from "../ui/segmented-gradient-progress";
 
-interface GettingStartedWidgetProps {
-  hasShortBio: boolean;
-  hasProjects: boolean;
-  hasWorkExperience: boolean;
-}
+export function GettingStartedWidget() {
+  const profile = useQuery(api.profiles.getProfile);
+  const modify = useQuery(api.project.listProject);
 
-export function GettingStartedWidget({
-  hasShortBio,
-  hasProjects,
-  hasWorkExperience,
-}: GettingStartedWidgetProps) {
+  // Check for Getting Started widget
+  const hasShortBio = safeStr(profile.shortBio).length > 0;
+  const hasProjects = safeArray(modify).length > 0;
+  const hasWorkExperience = safeArray(profile.workExperience).length > 0;
+
   const steps = [
     {
       id: "bio",
@@ -28,7 +29,7 @@ export function GettingStartedWidget({
       id: "projects",
       label: "Add a Project",
       completed: hasProjects,
-      href: "/dashboard/settings/profile",
+      href: "/dashboard/projects",
     },
     {
       id: "experience",
@@ -49,38 +50,28 @@ export function GettingStartedWidget({
   }
 
   return (
-    <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-white/10">
+    <Card className="lg:fixed bottom-0 right-0 lg:max-w-md bg-gray-800 border-white/10">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-xl text-white flex items-center gap-2">
+            <CardTitle className="text-xl text-white flex justify-between items-center gap-2">
               Almost There!
-              <span className="text-sm font-semibold px-2.5 py-1 rounded-full bg-blue-300 text-black">
+              <Badge variant={"secondary"} className="tabular-nums">
                 {Math.round(progress)}%
-              </span>
+              </Badge>
             </CardTitle>
-            <p className="text-sm text-white/60 mt-1">
+            <p className="text-sm text-white/60 text-balance mt-1">
               Complete the remaining steps in the checklist before going live.
             </p>
           </div>
         </div>
       </CardHeader>
+
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Progress value={progress} className="h-2" />
-          <div className="flex gap-1">
-            {steps.map((step, i) => (
-              <div
-                key={step.id}
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  i < completedCount
-                    ? "bg-gradient-to-r from-blue-200 to-blue-400"
-                    : "bg-white/20"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
+        <SegmentProgressBar
+          gradient={{ startColor: "#1f4fee", endColor: "#32aaf9" }}
+          progressValue={progress}
+        />
 
         <div className="space-y-2">
           {steps.map((step) => (
@@ -90,9 +81,9 @@ export function GettingStartedWidget({
               className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
             >
               {step.completed ? (
-                <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />
+                <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
               ) : (
-                <Circle className="h-5 w-5 text-white/40 flex-shrink-0 group-hover:text-white/60" />
+                <Circle className="h-5 w-5 text-white/40 shrink-0 group-hover:text-white/60" />
               )}
               <span
                 className={`flex-1 text-sm ${
@@ -106,12 +97,6 @@ export function GettingStartedWidget({
             </Link>
           ))}
         </div>
-
-        <Link href="/dashboard/settings/profile">
-          <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20">
-            Go to checklist
-          </Button>
-        </Link>
       </CardContent>
     </Card>
   );
