@@ -323,7 +323,7 @@ export default async function ProfileCard({
               </div>
             </div>
           )}
-          
+
           {/* Project skills */}
           {profile.skills && profile.skills.length > 0 && (
             <div>
