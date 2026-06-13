@@ -114,6 +114,10 @@ const schema = defineSchema({
     description: v.nullable(v.string()),
     color: v.optional(v.string()),
   }),
+  skills: defineTable({
+    name: v.string(),
+    description: v.nullable(v.string()),
+  }),
   profile: defineTable({
     userId: v.optional(v.string()),
     firstName: v.string(),
@@ -129,6 +133,7 @@ const schema = defineSchema({
     workExperience: v.optional(profile_work_experience_schema),
     interests: v.optional(v.array(v.string())),
     location: v.optional(profile_location_schema),
+    skills: v.optional(v.array(v.id("skills"))),
   })
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])
