@@ -1,14 +1,10 @@
 "use client";
 
+import { Calendar, ExternalLink, Figma, FileText, Github } from "lucide-react";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
-import { ExternalLink, Github, Figma, Calendar, FileText } from "lucide-react";
-import { Doc } from "~/convex/_generated/dataModel";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { useEffect, useRef, useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
+import type { Doc } from "~/convex/_generated/dataModel";
 
 type Project = Doc<"project">;
 type MediaItem = Project["media"][number];
@@ -104,7 +100,9 @@ function MediaThumb({
 
   if (!url) {
     return (
-      <div className={`flex items-center justify-center bg-neutral-800 ${className}`}>
+      <div
+        className={`flex items-center justify-center bg-neutral-800 ${className}`}
+      >
         <span className="text-xs uppercase tracking-widest text-neutral-500">
           No Preview
         </span>
@@ -114,9 +112,13 @@ function MediaThumb({
 
   if (isPdf) {
     return (
-      <div className={`flex flex-col items-center justify-center gap-2 bg-neutral-800 ${className}`}>
+      <div
+        className={`flex flex-col items-center justify-center gap-2 bg-neutral-800 ${className}`}
+      >
         <FileText size={28} className="text-neutral-400" />
-        <span className="text-xs text-neutral-500 uppercase tracking-widest">PDF</span>
+        <span className="text-xs text-neutral-500 uppercase tracking-widest">
+          PDF
+        </span>
       </div>
     );
   }
@@ -171,23 +173,18 @@ function ProjectModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const [activeIndex, setActiveIndex] =
-    useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const timelineLabel =
-    getTimelineLabel(project);
+  const timelineLabel = getTimelineLabel(project);
 
   const media = project.media ?? [];
   const links = project.link ?? [];
 
-  const active =
-    media[activeIndex] ?? null;
+  const active = media[activeIndex] ?? null;
 
-  const isVideo =
-    active?.metadata?.mimeType?.startsWith("video/");
+  const isVideo = active?.metadata?.mimeType?.startsWith("video/");
 
-  const isPdf =
-    active?.metadata?.mimeType === "application/pdf";
+  const isPdf = active?.metadata?.mimeType === "application/pdf";
 
   const activeUrl = active?.metadata?.url ?? null;
 
@@ -203,25 +200,14 @@ function ProjectModal({
       videoRef.current?.play().catch(() => {});
     }, 50);
     return () => clearTimeout(id);
-  }, [activeIndex, isVideo, open]);
+  }, [isVideo]);
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(o) =>
-        !o && onClose()
-      }
-    >
-      <DialogContent
-        className="max-w-2xl w-full p-0 gap-0 bg-neutral-900 border-neutral-800 text-white rounded-2xl max-h-[90vh] flex flex-col overflow-hidden"
-      >
-        <DialogTitle className="sr-only">
-          {project.title}
-        </DialogTitle>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl w-full p-0 gap-0 bg-neutral-900 border-neutral-800 text-white rounded-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        <DialogTitle className="sr-only">{project.title}</DialogTitle>
 
-        <div
-          className="relative w-full bg-neutral-950 shrink-0 max-h-[40vh] min-h-55 overflow-hidden flex items-center justify-center"
-        >
+        <div className="relative w-full bg-neutral-950 shrink-0 max-h-[40vh] min-h-55 overflow-hidden flex items-center justify-center">
           <MediaThumb
             item={active}
             alt={project.title}
@@ -230,9 +216,7 @@ function ProjectModal({
           />
 
           {isVideo && (
-            <div
-              className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white text-xs"
-            >
+            <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white text-xs">
               <VideoBadgeSvg size={11} />
               Video
             </div>
@@ -252,23 +236,17 @@ function ProjectModal({
         </div>
 
         {media.length > 1 && (
-          <div
-            className="flex gap-2 px-6 pt-4 overflow-x-auto scrollbar-none shrink-0"
-          >
+          <div className="flex gap-2 px-6 pt-4 overflow-x-auto scrollbar-none shrink-0">
             {media.map((item, i) => (
               <button
                 key={item.metadata?.storageId}
                 type="button"
-                onClick={() =>
-                  setActiveIndex(i)
-                }
-                className={`shrink-0 w-16 h-10 rounded-lg overflow-hidden border-2 transition-all duration-200 ${ i === activeIndex ? "border-white/80 opacity-100" : "border-transparent opacity-40 hover:opacity-70" }`}
+                onClick={() => setActiveIndex(i)}
+                className={`shrink-0 w-16 h-10 rounded-lg overflow-hidden border-2 transition-all duration-200 ${i === activeIndex ? "border-white/80 opacity-100" : "border-transparent opacity-40 hover:opacity-70"}`}
               >
                 <MediaThumb
                   item={item}
-                  alt={`${project.title} media ${
-                    i + 1
-                  }`}
+                  alt={`${project.title} media ${i + 1}`}
                   className="w-full h-full object-cover"
                 />
               </button>
@@ -277,64 +255,47 @@ function ProjectModal({
         )}
 
         {/* ── Scrollable Body ── */}
-        <div
-          className="px-6 py-5 space-y-5 overflow-y-auto flex-1"
-        >
-          <div
-            className="flex items-start justify-between gap-4 flex-wrap"
-          >
+        <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               {timelineLabel && (
-                <div
-                  className="flex items-center gap-1.5 text-yellow-300 text-xs uppercase tracking-widest mb-1.5"
-                >
+                <div className="flex items-center gap-1.5 text-yellow-300 text-xs uppercase tracking-widest mb-1.5">
                   <Calendar size={11} />
 
                   {timelineLabel}
                 </div>
               )}
 
-              <h2
-                className="text-lg font-semibold leading-snug tracking-tight text-white"
-              >
+              <h2 className="text-lg font-semibold leading-snug tracking-tight text-white">
                 {project.title}
               </h2>
             </div>
 
             {links.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {links.map(
-                  (link, i) => {
-                    const {
-                      label,
-                      Icon,
-                    } = getLinkMeta(
-                      link.tag
-                    );
+                {links.map((link) => {
+                  const { label, Icon } = getLinkMeta(link.tag);
 
-                    return (
-                      <a
-                        key={`${link.tag}-${link.value}`}
-                        href={link.value}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/8 hover:bg-white/14 border border-white/10 text-xs text-white/80 hover:text-white transition-colors duration-150"
-                      >
-                        <Icon size={12} />
+                  return (
+                    <a
+                      key={`${link.tag}-${link.value}`}
+                      href={link.value}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/8 hover:bg-white/14 border border-white/10 text-xs text-white/80 hover:text-white transition-colors duration-150"
+                    >
+                      <Icon size={12} />
 
-                        {label}
-                      </a>
-                    );
-                  }
-                )}
+                      {label}
+                    </a>
+                  );
+                })}
               </div>
             )}
           </div>
 
           {project.description && (
-            <p
-              className="text-sm text-neutral-400 leading-relaxed whitespace-pre-line"
-            >
+            <p className="text-sm text-neutral-400 leading-relaxed whitespace-pre-line">
               {project.description}
             </p>
           )}
@@ -346,36 +307,22 @@ function ProjectModal({
 
 // ─── Card ────────────────────────────────────────────────────────────────────
 
-const LandingProjectCard = ({
-  project,
-}: {
-  project: Project;
-}) => {
-  const [modalOpen, setModalOpen] =
-    useState(false);
+const LandingProjectCard = ({ project }: { project: Project }) => {
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const videoRef =
-    useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const firstMedia =
-    project.media?.[0] ?? null;
+  const firstMedia = project.media?.[0] ?? null;
 
-  const mimeType =
-    firstMedia?.metadata?.mimeType ?? "";
+  const mimeType = firstMedia?.metadata?.mimeType ?? "";
 
-  const isVideo =
-    mimeType.startsWith("video/");
+  const isVideo = mimeType.startsWith("video/");
 
-  const isPdf =
-    mimeType === "application/pdf";
+  const isPdf = mimeType === "application/pdf";
 
-  const timelineLabel =
-    getTimelineLabel(project);
+  const timelineLabel = getTimelineLabel(project);
 
-  const liveLink =
-    project.link?.find(
-      (l) => l.tag === "live"
-    )?.value ?? null;
+  const liveLink = project.link?.find((l) => l.tag === "live")?.value ?? null;
 
   return (
     <>
@@ -383,27 +330,16 @@ const LandingProjectCard = ({
         type="button"
         tabIndex={0}
         aria-label={`View ${project.title}`}
-        onClick={() =>
-          setModalOpen(true)
-        }
+        onClick={() => setModalOpen(true)}
         onKeyDown={(e) => {
-          if (
-            e.key === "Enter" ||
-            e.key === " "
-          ) {
+          if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
 
             setModalOpen(true);
           }
         }}
-        onMouseEnter={() =>
-          videoRef.current
-            ?.play()
-            .catch(() => {})
-        }
-        onMouseLeave={() =>
-          videoRef.current?.pause()
-        }
+        onMouseEnter={() => videoRef.current?.play().catch(() => {})}
+        onMouseLeave={() => videoRef.current?.pause()}
         className="group relative overflow-hidden rounded-xl bg-neutral-900 aspect-16/10 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/50"
       >
         <div className="absolute inset-0">
@@ -416,55 +352,39 @@ const LandingProjectCard = ({
         </div>
 
         {isVideo && (
-          <div
-            className="absolute top-3 right-3 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-white"
-          >
+          <div className="absolute top-3 right-3 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-white">
             <VideoBadgeSvg size={13} />
           </div>
         )}
 
         {isPdf && (
-          <div
-            className="absolute top-3 right-3 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-white"
-          >
+          <div className="absolute top-3 right-3 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-white">
             <FileText size={13} />
           </div>
         )}
 
         {liveLink && (
-          <div
-            className="absolute top-3 left-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white/70 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          >
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white/70 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <ExternalLink size={10} />
             Live
           </div>
         )}
 
-        <div
-          className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent group-hover:from-black/90 transition-all duration-300"
-        />
+        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent group-hover:from-black/90 transition-all duration-300" />
 
-        <div
-          className="absolute bottom-0 left-0 right-0 z-10 p-4 translate-y-1.5 group-hover:translate-y-0 transition-transform duration-300"
-        >
+        <div className="absolute bottom-0 left-0 right-0 z-10 p-4 translate-y-1.5 group-hover:translate-y-0 transition-transform duration-300">
           {timelineLabel && (
-            <span
-              className="block text-[11px] uppercase tracking-widest text-yellow-300 mb-1"
-            >
+            <span className="block text-[11px] uppercase tracking-widest text-yellow-300 mb-1">
               {timelineLabel}
             </span>
           )}
 
-          <h3
-            className="font-semibold text-sm text-white line-clamp-1"
-          >
+          <h3 className="font-semibold text-sm text-white line-clamp-1">
             {project.title}
           </h3>
 
           {project.description && (
-            <p
-              className="mt-1 text-xs text-white/50 line-clamp-2 max-h-0 opacity-0 group-hover:max-h-10 group-hover:opacity-100 transition-all duration-300 overflow-hidden"
-            >
+            <p className="mt-1 text-xs text-white/50 line-clamp-2 max-h-0 opacity-0 group-hover:max-h-10 group-hover:opacity-100 transition-all duration-300 overflow-hidden">
               {project.description}
             </p>
           )}
@@ -474,9 +394,7 @@ const LandingProjectCard = ({
       <ProjectModal
         project={project}
         open={modalOpen}
-        onClose={() =>
-          setModalOpen(false)
-        }
+        onClose={() => setModalOpen(false)}
       />
     </>
   );
