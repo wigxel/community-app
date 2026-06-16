@@ -85,9 +85,6 @@ export const deleteProject = mutation({
 export const listAll = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, { paginationOpts }) => {
-    return await ctx.db
-      .query("project")
-      .order("desc")
-      .paginate(paginationOpts);
+    return await ctx.db.query("project").order("desc").paginate(paginationOpts);
   },
 });

@@ -2,10 +2,9 @@
 
 import { usePaginatedQuery } from "convex/react";
 import { useEffect, useRef } from "react";
-import { api } from "~/convex/_generated/api";
-
-import LandingProjectCard from "./LandingProjectCard";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
+import { api } from "~/convex/_generated/api";
+import LandingProjectCard from "./LandingProjectCard";
 
 const PAGE_SIZE = 12;
 const SKELETON_KEYS = Array.from({ length: PAGE_SIZE }, (_, i) => `sk-${i}`);
@@ -66,21 +65,23 @@ export default function ProjectFeed() {
         {/* Loading more skeletons */}
         {status === "LoadingMore" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-            {SKELETON_MORE_KEYS.map((k) => <ProjectCardSkeleton key={k} />)}
+            {SKELETON_MORE_KEYS.map((k) => (
+              <ProjectCardSkeleton key={k} />
+            ))}
           </div>
         )}
 
         {/* Empty state */}
         {!isLoading && results.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-neutral-500 gap-2">
-            <p className="text-sm">No projects yet — be the first to add one.</p>
+            <p className="text-sm">
+              No projects yet — be the first to add one.
+            </p>
           </div>
         )}
 
         {/* Scroll trigger */}
-        {canLoadMore && (
-          <ScrollTrigger onVisible={() => loadMore(PAGE_SIZE)} />
-        )}
+        {canLoadMore && <ScrollTrigger onVisible={() => loadMore(PAGE_SIZE)} />}
       </div>
     </section>
   );
