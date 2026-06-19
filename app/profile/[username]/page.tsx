@@ -1,8 +1,6 @@
 import {
   BookText,
   Briefcase,
-  Calendar,
-  ExternalLink,
   Globe,
   Link,
   Mail,

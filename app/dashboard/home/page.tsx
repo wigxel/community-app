@@ -50,13 +50,6 @@ const DashboardPage = () => {
 
   const projectCount = profile?.projects?.length || 0;
 
-  // Check for Getting Started widget
-  const hasShortBio = Boolean(profile.shortBio && profile.shortBio.length > 0);
-  const hasProjects = Boolean(profile.projects && profile.projects.length > 0);
-  const hasWorkExperience = Boolean(
-    workExperience && workExperience.length > 0,
-  );
-
   return (
     <div className="space-y-6">
       <GettingStartedWidget />

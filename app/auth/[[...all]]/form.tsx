@@ -216,6 +216,14 @@ export default function AuthForm({
                   "Sign In"
                 )}
               </Button>
+              <div className="text-center">
+                <a
+                  href="/auth/forgot-password"
+                  className="text-sm text-white/50 hover:text-white transition-colors"
+                >
+                  Forgot password?
+                </a>
+              </div>
             </form>
           ) : (
             <form action={signUpAction_} className="flex flex-col gap-4">
