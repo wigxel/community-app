@@ -1,5 +1,6 @@
 import { queryGeneric as query } from "convex/server";
 import { ConvexError, v } from "convex/values";
+import { validateUsernameFormat } from "../lib/username";
 import type { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
@@ -69,6 +70,29 @@ export const getProfileByUsername = query({
   },
 });
 
+export const checkUsernameAvailability = query({
+  args: { username: v.string() },
+  async handler(ctx, args) {
+    const username = args.username.trim().toLowerCase();
+
+    const formatError = validateUsernameFormat(username);
+    if (formatError) {
+      return { available: false, reason: formatError };
+    }
+
+    const existing = await ctx.db
+      .query("profile")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .unique();
+
+    if (existing) {
+      return { available: false, reason: "Username is already taken" };
+    }
+
+    return { available: true, reason: null };
+  },
+});
+
 export const getProfile = query({
   args: {},
   async handler(ctx) {
@@ -122,12 +146,24 @@ export const createProfile = mutation({
 
     if (existing) return existing._id;
 
+    const username = args.username.trim().toLowerCase();
+
+    const formatError = validateUsernameFormat(username);
+    if (formatError) throw new ConvexError(formatError);
+
+    const usernameTaken = await ctx.db
+      .query("profile")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .unique();
+
+    if (usernameTaken) throw new ConvexError("Username is already taken");
+
     return await ctx.db.insert("profile", {
       userId: authUser._id,
       email: authUser.email,
       firstName: args.firstName,
       lastName: args.lastName,
-      username: args.username.toLowerCase(),
+      username,
       phoneNumbers: [],
       profileImage: null,
       title: null,
