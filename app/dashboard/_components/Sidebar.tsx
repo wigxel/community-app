@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import {
   FolderOpenDot,
+  Heart,
   Home,
   LogOut,
   Menu,
@@ -24,6 +25,7 @@ const navigation = [
   { name: "Home", href: "/dashboard/home", icon: Home },
   { name: "Profile", href: "/dashboard/profile", icon: User },
   { name: "Projects", href: "/dashboard/projects", icon: FolderOpenDot },
+  { name: "Favourites", href: "/dashboard/favourites", icon: Heart },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 

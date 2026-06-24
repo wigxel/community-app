@@ -144,6 +144,14 @@ const schema = defineSchema({
   workExperience: defineTable(work_experience_schema).index("by_userId", [
     "userId",
   ]),
+
+  projectFavourites: defineTable({
+    userId: v.string(),
+    projectId: v.id("project"),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_projectId", ["projectId"])
+    .index("by_userId_projectId", ["userId", "projectId"]),
 });
 
 export default schema;

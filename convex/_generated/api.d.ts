@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as email from "../email.js";
+import type * as favourites from "../favourites.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as profiles from "../profiles.js";
@@ -27,6 +28,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   email: typeof email;
+  favourites: typeof favourites;
   files: typeof files;
   http: typeof http;
   profiles: typeof profiles;
