@@ -1,10 +1,14 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
-import { Check, Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { z } from "zod/v4";
+import {
+  CheckUsername,
+  type UsernameStatus,
+} from "~/components/onboarding/check-username";
 import { ImageUpload } from "~/components/profile/image-upload";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -19,7 +23,6 @@ import {
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { getErrorMessage } from "~/lib/error.helpers";
-import { validateUsernameFormat } from "~/lib/username";
 
 const _onboardingSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -70,34 +73,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
   const [customInterest, setCustomInterest] = useState("");
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
-
-  const trimmedUsername = formData.username.trim().toLowerCase();
-  const usernameFormatError = trimmedUsername
-    ? validateUsernameFormat(trimmedUsername)
-    : null;
-
-  const [debouncedUsername, setDebouncedUsername] = useState("");
-  useEffect(() => {
-    const id = setTimeout(() => setDebouncedUsername(trimmedUsername), 400);
-    return () => clearTimeout(id);
-  }, [trimmedUsername]);
-
-  const shouldCheckUsername =
-    debouncedUsername.length > 0 && !validateUsernameFormat(debouncedUsername);
-  const usernameCheck = useQuery(
-    api.profiles.checkUsernameAvailability,
-    shouldCheckUsername ? { username: debouncedUsername } : "skip",
-  );
-
-  const isCheckingUsername =
-    !usernameFormatError &&
-    trimmedUsername.length > 0 &&
-    (debouncedUsername !== trimmedUsername || usernameCheck === undefined);
-  const isUsernameAvailable =
-    debouncedUsername === trimmedUsername && usernameCheck?.available === true;
-  const usernameError =
-    usernameFormatError ??
-    (usernameCheck && !usernameCheck.available ? usernameCheck.reason : null);
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
 
   const handleNext = () => {
     setError("");
@@ -111,16 +87,12 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
         setError("Last name must be at least 2 characters");
         return;
       }
-      if (usernameFormatError) {
-        setError(usernameFormatError);
-        return;
-      }
-      if (isCheckingUsername) {
+      if (usernameStatus === "checking") {
         setError("Please wait while we check username availability");
         return;
       }
-      if (!isUsernameAvailable) {
-        setError(usernameError ?? "Username is already taken");
+      if (usernameStatus !== "available") {
+        setError("Please choose a valid and available username");
         return;
       }
     }
@@ -255,52 +227,11 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="username">Username</Label>
-            <div className="relative">
-              <Input
-                id="username"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    username: e.target.value.toLowerCase(),
-                  })
-                }
-                placeholder="janedoe"
-                aria-invalid={Boolean(usernameError)}
-                className={
-                  usernameError
-                    ? "border-red-500/50 pr-9"
-                    : isUsernameAvailable
-                      ? "border-green-500/50 pr-9"
-                      : "pr-9"
-                }
-              />
-              {trimmedUsername.length > 0 && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {isCheckingUsername ? (
-                    <Loader2 size={16} className="animate-spin text-white/50" />
-                  ) : isUsernameAvailable ? (
-                    <Check size={16} className="text-green-400" />
-                  ) : usernameError ? (
-                    <X size={16} className="text-red-400" />
-                  ) : null}
-                </span>
-              )}
-            </div>
-            {isCheckingUsername ? (
-              <p className="text-xs text-white/50">Checking availability…</p>
-            ) : usernameError ? (
-              <p className="text-xs text-red-400">{usernameError}</p>
-            ) : isUsernameAvailable ? (
-              <p className="text-xs text-green-400">Username is available</p>
-            ) : (
-              <p className="text-xs text-white/50">
-                This will be your unique identifier.
-              </p>
-            )}
-          </div>
+          <CheckUsername
+            value={formData.username}
+            onChange={(username) => setFormData({ ...formData, username })}
+            onStatusChange={setUsernameStatus}
+          />
         </div>
       )}
 
@@ -453,9 +384,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
           <Button
             type="button"
             onClick={handleNext}
-            disabled={
-              step === 1 && (isCheckingUsername || !isUsernameAvailable)
-            }
+            disabled={step === 1 && usernameStatus !== "available"}
             className="flex-1 bg-blue-600 hover:bg-blue-700 !text-white"
           >
             Next
