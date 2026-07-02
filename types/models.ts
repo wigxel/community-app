@@ -10,6 +10,7 @@ export interface Profile {
   firstName: string;
   lastName: string;
   profileImage: string | null;
+  coverImage?: string | null;
   email: string;
   phoneNumbers: string[];
   username: string;

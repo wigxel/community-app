@@ -166,6 +166,7 @@ export const createProfile = mutation({
       username,
       phoneNumbers: [],
       profileImage: null,
+      coverImage: null,
       title: null,
       shortBio: "",
       links: [],
@@ -184,6 +185,7 @@ export const updateProfile = mutation({
     title: v.optional(v.union(v.id("titles"), v.null())),
     shortBio: v.optional(v.string()),
     profileImage: v.optional(v.union(v.string(), v.null())),
+    coverImage: v.optional(v.union(v.string(), v.null())),
     interests: v.optional(v.array(v.string())),
     links: v.optional(
       v.array(
@@ -221,6 +223,9 @@ export const updateProfile = mutation({
       ...(args.shortBio !== undefined && { shortBio: args.shortBio }),
       ...(args.profileImage !== undefined && {
         profileImage: args.profileImage,
+      }),
+      ...(args.coverImage !== undefined && {
+        coverImage: args.coverImage,
       }),
       ...(args.interests !== undefined && { interests: args.interests }),
       ...(args.location !== undefined && { location: args.location }),

@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { GitHub, LinkedIn } from "~/components/icons";
+import { CoverImageUpload } from "~/components/profile/cover-image-upload";
 import { ImageUpload } from "~/components/profile/image-upload";
 import { SkillsSelect } from "~/components/profile/skills-select";
 import { Button } from "~/components/ui/button";
@@ -269,6 +270,7 @@ const formSchema = z.object({
   title: z.string().optional(),
   shortBio: z.string().optional(),
   profileImage: z.string().optional(),
+  coverImage: z.string().optional(),
   workExperience: z.array(workExperienceSchema).optional(),
   interests: z.string().optional(),
   location: z
@@ -329,6 +331,7 @@ export default function Profile() {
             title: profile?.title?._id,
             shortBio: profile.shortBio || "",
             profileImage: profile.profileImage || "",
+            coverImage: profile.coverImage || "",
             interests: profile.interests?.join(", ") || "",
             workExperience: mappedWorkExperience,
             links:
@@ -486,6 +489,7 @@ export function ProfileForm({
         title: values.title ? (values.title as Id<"titles">) : null,
         shortBio: values.shortBio || "",
         profileImage: values.profileImage || null,
+        coverImage: values.coverImage || null,
         interests,
         location: values.location || undefined,
         links: normalizedLinks,
@@ -694,6 +698,26 @@ export function ProfileForm({
                     <FormDescription>
                       Upload a profile picture (max 5MB). You can crop and
                       resize it.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="coverImage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cover Image</FormLabel>
+                    <FormControl>
+                      <CoverImageUpload
+                        currentImage={field.value || null}
+                        onImageChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Upload a cover/banner image for your profile.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
