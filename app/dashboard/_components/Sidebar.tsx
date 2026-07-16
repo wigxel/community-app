@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   Settings,
+  Trophy,
   User,
   X,
 } from "lucide-react";
@@ -25,6 +26,7 @@ const navigation = [
   { name: "Home", href: "/dashboard/home", icon: Home },
   { name: "Profile", href: "/dashboard/profile", icon: User },
   { name: "Projects", href: "/dashboard/projects", icon: FolderOpenDot },
+  { name: "Leaderboard", href: "/dashboard/leaderboard", icon: Trophy },
   { name: "Favourites", href: "/dashboard/favourites", icon: Heart },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
