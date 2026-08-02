@@ -1,8 +1,9 @@
 import { queryGeneric as query } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { validateUsernameFormat } from "../lib/username";
+import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { mutation } from "./_generated/server";
+import { action, mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 
 export const listProfile = query({
@@ -36,11 +37,7 @@ export const listProfile = query({
     const enrichedUsers = await Promise.all(
       filteredUsers.map(async (user) => {
         const title = user.title ? await ctx.db.get(user.title) : null;
-
-        return {
-          ...user,
-          title,
-        };
+        return { ...user, title };
       }),
     );
 
@@ -110,7 +107,6 @@ export const getProfile = query({
       const title = user.title ? await ctx.db.get(user.title) : null;
       return { ...user, title };
     } catch {
-      // If authentication fails, return null instead of throwing
       return null;
     }
   },
@@ -221,12 +217,8 @@ export const updateProfile = mutation({
       phoneNumbers: args.phoneNumbers,
       ...(args.title !== undefined && { title: args.title }),
       ...(args.shortBio !== undefined && { shortBio: args.shortBio }),
-      ...(args.profileImage !== undefined && {
-        profileImage: args.profileImage,
-      }),
-      ...(args.coverImage !== undefined && {
-        coverImage: args.coverImage,
-      }),
+      ...(args.profileImage !== undefined && { profileImage: args.profileImage }),
+      ...(args.coverImage !== undefined && { coverImage: args.coverImage }),
       ...(args.interests !== undefined && { interests: args.interests }),
       ...(args.location !== undefined && { location: args.location }),
       ...(args.links !== undefined && { links: args.links }),
@@ -234,5 +226,73 @@ export const updateProfile = mutation({
     });
 
     return profile._id;
+  },
+});
+
+export const resolveAndLinkBlueskyHandle = action({
+  args: {
+    handle: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const handle = args.handle.replace(/^@/, "").trim();
+
+    const res = await fetch(
+      `https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle=${handle}`,
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        "Could not verify Bluesky handle. Please check it and try again.",
+      );
+    }
+
+    const { did } = await res.json();
+
+    await ctx.runMutation(api.profiles.saveBlueskyHandle, { handle, did });
+
+    return { handle, did };
+  },
+});
+
+export const saveBlueskyHandle = mutation({
+  args: {
+    handle: v.string(),
+    did: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) throw new ConvexError("Not authenticated");
+
+    const profile = await ctx.db
+      .query("profile")
+      .withIndex("by_email", (q) => q.eq("email", authUser.email))
+      .unique();
+
+    if (!profile) throw new ConvexError("Profile not found");
+
+    await ctx.db.patch(profile._id, {
+      blueskyHandle: args.handle,
+      atprotoDid: args.did,
+    });
+  },
+});
+
+export const unlinkBlueskyHandle = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) throw new ConvexError("Not authenticated");
+
+    const profile = await ctx.db
+      .query("profile")
+      .withIndex("by_email", (q) => q.eq("email", authUser.email))
+      .unique();
+
+    if (!profile) throw new ConvexError("Profile not found");
+
+    await ctx.db.patch(profile._id, {
+      blueskyHandle: undefined,
+      atprotoDid: undefined,
+    });
   },
 });

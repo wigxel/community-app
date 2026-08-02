@@ -135,6 +135,8 @@ const schema = defineSchema({
     interests: v.optional(v.array(v.string())),
     location: v.optional(profile_location_schema),
     skills: v.optional(v.array(v.id("skills"))),
+    blueskyHandle: v.optional(v.string()),
+    atprotoDid: v.optional(v.string()),
   })
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])

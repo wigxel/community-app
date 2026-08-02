@@ -3,6 +3,7 @@ import Link from "next/link";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 import { getToken } from "~/lib/auth-server";
 import NavAuth from "./_components/NavAuth";
 import Providers from "./providers";
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }) {
             {children}
           </body>
         </html>
+        <Toaster position="top-right" />
       </Providers>
     </NuqsAdapter>
   );

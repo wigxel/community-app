@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import { Behance, Figma, GitHub, LinkedIn } from "~/components/icons";
 import ReturnButton from "~/components/profile/return-button";
 import { ShareButton } from "~/components/profile/share-button";
+import { BlueskyLink } from "~/components/profile/bluesky-link";
 import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeArray, safeObj } from "~/lib/data.helpers";
@@ -20,7 +21,6 @@ import type { Profile } from "~/types/models";
 import Projects from "./_components/project";
 import { WorkExperienceSection } from "./_components/WorkExperience";
 
-// Helper function to get the appropriate icon for each link type
 const getLinkIcon = (tag: string) => {
   const iconMap = {
     linkedin: LinkedIn,
@@ -41,9 +41,7 @@ export async function generateMetadata({
   const { username } = await params;
   const currentProfile = await fetchAuthQuery(
     api.profiles.getProfileByUsername,
-    {
-      username,
-    },
+    { username },
   );
   const profile: Profile = safeObj(currentProfile);
 
@@ -109,9 +107,7 @@ export default async function ProfileCard({
   const { username } = await params;
   const currentProfile = await fetchAuthQuery(
     api.profiles.getProfileByUsername,
-    {
-      username,
-    },
+    { username },
   );
 
   if (currentProfile === null) {
@@ -130,7 +126,7 @@ export default async function ProfileCard({
         </div>
       </div>
 
-      {/* COVER IMAGE  */}
+      {/* COVER IMAGE */}
       <div className="relative mb-8 h-40 w-full overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 shadow-2xl lg:h-50">
         {profile.coverImage ? (
           <Image
@@ -229,7 +225,7 @@ export default async function ProfileCard({
                       <div className="mb-2 text-xs tracking-wider text-white/60 uppercase font-semibold">
                         Email Address
                       </div>
-                      <a
+                      
                         href={`mailto:${profile.email}`}
                         className="text-lg font-medium break-all text-white/95 transition-colors hover:text-emerald-300"
                       >
@@ -254,7 +250,7 @@ export default async function ProfileCard({
                       <div className="space-y-2">
                         {profile.phoneNumbers.map((phone) => (
                           <p key={phone} className="w-fit">
-                            <a
+                            
                               href={`tel:${phone}`}
                               className="block text-lg font-medium text-white/95 transition-colors hover:text-blue-300"
                             >
@@ -271,7 +267,7 @@ export default async function ProfileCard({
           </div>
 
           {/* Social Links */}
-          {profile_links.length > 0 && (
+          {(profile_links.length > 0 || profile.blueskyHandle) && (
             <div>
               <div className="flex items-center gap-2 mb-6">
                 <div className="h-1 w-8 rounded-full bg-linear-to-r from-violet-400 to-fuchsia-400"></div>
@@ -283,7 +279,6 @@ export default async function ProfileCard({
               <div className="grid grid-cols-1">
                 {profile_links.map((link) => {
                   const Icon = getLinkIcon(link.tag);
-
                   return (
                     <a
                       key={link.tag}
@@ -308,6 +303,11 @@ export default async function ProfileCard({
                     </a>
                   );
                 })}
+
+                {/* Bluesky link — shown if handle is linked */}
+                {profile.blueskyHandle && (
+                  <BlueskyLink handle={profile.blueskyHandle} />
+                )}
               </div>
             </div>
           )}

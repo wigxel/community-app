@@ -191,7 +191,6 @@ export default function Projects({ userId }: { userId?: string }) {
                     <div className="flex flex-wrap gap-3">
                       {project.link.map(({ value: url }, idx) => {
                         const key = `${project._id}-link-${idx}`;
-
                         return (
                           <a
                             key={key}

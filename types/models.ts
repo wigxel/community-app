@@ -22,6 +22,9 @@ export interface Profile {
   interests?: string[];
   location?: ProfileLocation;
   skills?: Skill[];
+  // ATProto / Bluesky integration (Phase 1)
+  blueskyHandle?: string;
+  atprotoDid?: string;
 }
 
 export interface ProfileWorkExperience {

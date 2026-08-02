@@ -1,6 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { Globe, GripVertical, Link, Plus, Trash2 } from "lucide-react";
 import { Reorder, useDragControls } from "motion/react";
 import { useRef, useState } from "react";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { GitHub, LinkedIn } from "~/components/icons";
 import { CoverImageUpload } from "~/components/profile/cover-image-upload";
+import { BlueskyHandleCard } from "~/components/profile/BlueskyHandleCard";
 import { ImageUpload } from "~/components/profile/image-upload";
 import { SkillsSelect } from "~/components/profile/skills-select";
 import { Button } from "~/components/ui/button";
@@ -222,15 +223,13 @@ const _projectSchema = z.object({
   description: z.string().min(1, "Project description is required"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
-  links: z.string().optional(), // comma-separated links
+  links: z.string().optional(),
 });
 
 const linkSchema = z
   .object({
     tag: z.enum(["linkedin", "github", "portfolio"]),
-
     title: z.string().min(1),
-
     value: z.string().min(1, {
       message: "This field is required.",
     }),
@@ -282,7 +281,7 @@ const formSchema = z.object({
   links: z
     .array(linkSchema)
     .max(3, { message: "You can add at most 3 links." }),
-  skills: z.array(z.string()).optional(), // array of skill IDs
+  skills: z.array(z.string()).optional(),
 });
 
 // ─── Page component ────────────────────────────────────────────────────────────
@@ -378,7 +377,6 @@ export function ProfileForm({
     },
   });
 
-  // Work experience field array
   const {
     fields: workFields,
     append: appendWork,
@@ -388,7 +386,6 @@ export function ProfileForm({
     name: "workExperience",
   });
 
-  // Links field array
   const {
     fields: linkFields,
     append: appendLink,
@@ -421,9 +418,7 @@ export function ProfileForm({
     try {
       const normalizedLinks = values.links.map((link) => {
         const type = LINK_TYPES.find((t) => t.tag === link.tag);
-        if (!type) {
-          return link;
-        }
+        if (!type) return link;
         return {
           ...link,
           value: type.prefix
@@ -475,6 +470,7 @@ export function ProfileForm({
       for (const removedId of existingIds) {
         await removeWorkExp({ id: removedId as Id<"workExperience"> });
       }
+
       const interests = values.interests
         ? values.interests
             .split(",")
@@ -800,6 +796,9 @@ export function ProfileForm({
               </div>
             </CardContent>
           </Card>
+          
+          {/* ── Bluesky ────────────────────────────────────────────── */}
+          <BlueskyHandleCard />
 
           {/* ── Work Experience ───────────────────────────────────────────── */}
           <Card className="bg-blue-500/10 border-white/10">
@@ -1027,7 +1026,7 @@ export function ProfileForm({
             </CardContent>
           </Card>
 
-          {/*── Skills ─────────────────────────────────────────────────── */}
+          {/* ── Skills ───────────────────────────────────────────────────── */}
           <Card className="bg-blue-500/10 border-white/10">
             <CardHeader>
               <CardTitle className="text-xl text-white">Skills</CardTitle>

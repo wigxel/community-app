@@ -146,14 +146,12 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
     setIsPending(true);
 
     try {
-      // Create basic profile first
       await createProfile({
         firstName: formData.firstName,
         lastName: formData.lastName,
         username: formData.username.toLowerCase(),
       });
 
-      // Update with additional details
       await updateProfile({
         firstName: formData.firstName,
         lastName: formData.lastName,
