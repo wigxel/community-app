@@ -10,10 +10,12 @@
 
 import type * as auth from "../auth.js";
 import type * as email from "../email.js";
+import type * as favourites from "../favourites.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as profiles from "../profiles.js";
 import type * as project from "../project.js";
+import type * as skills from "../skills.js";
 import type * as titles from "../titles.js";
 import type * as workExperience from "../workExperience.js";
 
@@ -26,10 +28,12 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   email: typeof email;
+  favourites: typeof favourites;
   files: typeof files;
   http: typeof http;
   profiles: typeof profiles;
   project: typeof project;
+  skills: typeof skills;
   titles: typeof titles;
   workExperience: typeof workExperience;
 }>;

@@ -5,6 +5,10 @@ import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod/v4";
+import {
+  CheckUsername,
+  type UsernameStatus,
+} from "~/components/onboarding/check-username";
 import { ImageUpload } from "~/components/profile/image-upload";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -18,6 +22,7 @@ import {
 } from "~/components/ui/select";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
+import { getErrorMessage } from "~/lib/error.helpers";
 
 const _onboardingSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -68,6 +73,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
   const [customInterest, setCustomInterest] = useState("");
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
 
   const handleNext = () => {
     setError("");
@@ -81,12 +87,12 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
         setError("Last name must be at least 2 characters");
         return;
       }
-      if (!formData.username || formData.username.length < 3) {
-        setError("Username must be at least 3 characters");
+      if (usernameStatus === "checking") {
+        setError("Please wait while we check username availability");
         return;
       }
-      if (!/^[a-z0-9_-]+$/.test(formData.username)) {
-        setError("Only lowercase letters, numbers, - and _ allowed");
+      if (usernameStatus !== "available") {
+        setError("Please choose a valid and available username");
         return;
       }
     }
@@ -159,7 +165,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
 
       router.push(redirectTo);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Profile creation failed");
+      setError(getErrorMessage(err) || "Profile creation failed");
       setIsPending(false);
     }
   };
@@ -221,23 +227,11 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              value={formData.username}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  username: e.target.value.toLowerCase(),
-                })
-              }
-              placeholder="janedoe"
-            />
-            <p className="text-xs text-white/50">
-              This will be your unique identifier.
-            </p>
-          </div>
+          <CheckUsername
+            value={formData.username}
+            onChange={(username) => setFormData({ ...formData, username })}
+            onStatusChange={setUsernameStatus}
+          />
         </div>
       )}
 
@@ -390,6 +384,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
           <Button
             type="button"
             onClick={handleNext}
+            disabled={step === 1 && usernameStatus !== "available"}
             className="flex-1 bg-blue-600 hover:bg-blue-700 !text-white"
           >
             Next

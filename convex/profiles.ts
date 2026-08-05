@@ -1,5 +1,7 @@
 import { queryGeneric as query } from "convex/server";
 import { ConvexError, v } from "convex/values";
+import { validateUsernameFormat } from "../lib/username";
+import type { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 
@@ -59,7 +61,35 @@ export const getProfileByUsername = query({
     if (!user) return null;
 
     const title = user.title ? await ctx.db.get(user.title) : null;
-    return { ...user, title };
+    const skills = user.skills
+      ? await Promise.all(
+          user.skills.map((skillId: Id<"skills">) => ctx.db.get(skillId)),
+        )
+      : [];
+    return { ...user, title, skills };
+  },
+});
+
+export const checkUsernameAvailability = query({
+  args: { username: v.string() },
+  async handler(ctx, args) {
+    const username = args.username.trim().toLowerCase();
+
+    const formatError = validateUsernameFormat(username);
+    if (formatError) {
+      return { available: false, reason: formatError };
+    }
+
+    const existing = await ctx.db
+      .query("profile")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .unique();
+
+    if (existing) {
+      return { available: false, reason: "Username is already taken" };
+    }
+
+    return { available: true, reason: null };
   },
 });
 
@@ -116,20 +146,33 @@ export const createProfile = mutation({
 
     if (existing) return existing._id;
 
+    const username = args.username.trim().toLowerCase();
+
+    const formatError = validateUsernameFormat(username);
+    if (formatError) throw new ConvexError(formatError);
+
+    const usernameTaken = await ctx.db
+      .query("profile")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .unique();
+
+    if (usernameTaken) throw new ConvexError("Username is already taken");
+
     return await ctx.db.insert("profile", {
       userId: authUser._id,
       email: authUser.email,
       firstName: args.firstName,
       lastName: args.lastName,
-      username: args.username.toLowerCase(),
+      username,
       phoneNumbers: [],
       profileImage: null,
+      coverImage: null,
       title: null,
       shortBio: "",
       links: [],
-      workExperience: [],
       interests: [],
       location: { city: "", country: "Nigeria" },
+      skills: [],
     });
   },
 });
@@ -142,17 +185,7 @@ export const updateProfile = mutation({
     title: v.optional(v.union(v.id("titles"), v.null())),
     shortBio: v.optional(v.string()),
     profileImage: v.optional(v.union(v.string(), v.null())),
-    workExperience: v.optional(
-      v.array(
-        v.object({
-          position: v.string(),
-          company: v.string(),
-          startDate: v.number(),
-          endDate: v.optional(v.union(v.number(), v.null())),
-          description: v.optional(v.string()),
-        }),
-      ),
-    ),
+    coverImage: v.optional(v.union(v.string(), v.null())),
     interests: v.optional(v.array(v.string())),
     links: v.optional(
       v.array(
@@ -169,6 +202,7 @@ export const updateProfile = mutation({
         country: v.string(),
       }),
     ),
+    skills: v.optional(v.array(v.id("skills"))),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
@@ -190,12 +224,13 @@ export const updateProfile = mutation({
       ...(args.profileImage !== undefined && {
         profileImage: args.profileImage,
       }),
-      ...(args.workExperience !== undefined && {
-        workExperience: args.workExperience,
+      ...(args.coverImage !== undefined && {
+        coverImage: args.coverImage,
       }),
       ...(args.interests !== undefined && { interests: args.interests }),
       ...(args.location !== undefined && { location: args.location }),
       ...(args.links !== undefined && { links: args.links }),
+      ...(args.skills !== undefined && { skills: args.skills }),
     });
 
     return profile._id;

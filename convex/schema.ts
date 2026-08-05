@@ -114,12 +114,17 @@ const schema = defineSchema({
     description: v.nullable(v.string()),
     color: v.optional(v.string()),
   }),
+  skills: defineTable({
+    name: v.string(),
+    description: v.nullable(v.string()),
+  }),
   profile: defineTable({
     userId: v.optional(v.string()),
     firstName: v.string(),
     lastName: v.string(),
     email: v.string(),
     profileImage: v.nullable(v.string()),
+    coverImage: v.optional(v.nullable(v.string())),
     phoneNumbers: v.array(v.string()),
     username: v.string(),
     title: v.nullable(v.id("titles")),
@@ -129,6 +134,7 @@ const schema = defineSchema({
     workExperience: v.optional(profile_work_experience_schema),
     interests: v.optional(v.array(v.string())),
     location: v.optional(profile_location_schema),
+    skills: v.optional(v.array(v.id("skills"))),
   })
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])
@@ -139,6 +145,14 @@ const schema = defineSchema({
   workExperience: defineTable(work_experience_schema).index("by_userId", [
     "userId",
   ]),
+
+  projectFavourites: defineTable({
+    userId: v.string(),
+    projectId: v.id("project"),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_projectId", ["projectId"])
+    .index("by_userId_projectId", ["userId", "projectId"]),
 });
 
 export default schema;

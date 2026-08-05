@@ -1,0 +1,101 @@
+
+## Convex Best Practices
+- Group related mutations and queries in the same file
+- Add descriptive comments for complex database operations
+- Validate all inputs with proper validators
+- use ConvexError for exceptions instead of generic JS Error exception
+- Handle errors gracefully with appropriate messages
+- query(), mutation() and actions() output must not be directly referenced.
+- Create utility files (e.g., `convex/utils.ts`) for reusable backend logic, such as fetching current user information, to avoid code duplication and improve maintainability.
+
+# Coding Rules
+- When defining array arguments in Convex `v.array(v.id("..."))` should be used instead of `v.optional(v.array(v.id("...")))`. An empty array `[]` should be passed if no values are present, rather than `undefined`.
+
+it's not possible to do a fullTextSearch with Convex true the query operations api. for example:
+```ts
+ // This is invalid
+ ctx.db.query('task').filter(q => q.fullTextSearch(q.field('name'), 'value')).
+ // Use a simple equality operator instead
+ ctx.db.query('task').filter(q => q.eq(q.field('name'), 'value')).
+```
+
+## Querying in components
+Convex.useQuery isn't like Tanstack.useQuery hook. It doesn't have a loading state.
+
+```ts
+// ❌ Wrong - Convex useQuery doesn't return an object with isLoading
+const { data: roles, isLoading } = useQuery()
+
+// ✅ Correct - Convex useQuery returns the data directly (or undefined while loading)
+const roles = useQuery()
+```
+
+
+Mutation are triggered from queries, action and other mutations using the `ctx.runMutatation(internal.createNotification)`. for example.
+```ts
+import { action } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { v } from "convex/values";
+
+export const upgrade = action({
+  args: {
+    planId: v.id("plans"),
+  },
+  handler: async (ctx, args) => {
+    // Call out to payment provider (e.g. Stripe) to charge customer
+    const response = await fetch("https://...");
+    if (response.ok) {
+      // Mark the plan as "professional" in the Convex DB
+      await ctx.runMutation(internal.plans.markPlanAsProfessional, {
+        planId: args.planId,
+      });
+    }
+  },
+});
+
+// Learn more here: https://docs.convex.dev/functions/internal-functions
+````
+Ignore ActionCtx interface. it's not necessary so do not import
+
+## Convex Backend Function Calling Conventions
+This document clarifies how Convex functions (mutations, queries, actions) are called from within the Convex backend.
+
+### Calling Top-Level API Functions
+When calling functions exported directly from `convex/api.ts` (or other files that are intended to be part of the main API surface), you use the `ctx.runMutation()`, `ctx.runQuery()`, or `ctx.runAction()` methods. The first argument to these methods is a **string literal** representing the function's name.
+
+**Example:**
+
+```typescript
+// In another mutation or action:
+await ctx.runMutation("createCase", { /* arguments */ });
+```
+
+### Calling Internal Functions (Modularized Logic)
+
+For functions that are part of internal modules (e.g., defined in `convex/internal.ts` and intended for use by other backend functions), Convex provides a typed `internal` object through the generated API. You should import this `internal` object and use it to reference the function.
+
+**Example:**
+
+Assuming you have an internal mutation defined in `convex/internal.ts`:
+```typescript
+// convex/internal.ts
+export const createNotification = mutation({ ... });
+```
+
+To call this from another backend function, you would first import `internal` and then use the imported function reference directly with `ctx.runMutation`:
+
+```typescript
+// In another mutation or action:
+import { internal } from './_generated/api';
+// ... other imports ...
+
+// Call the internal mutation using the imported reference
+await ctx.runMutation(internal.createNotification, { /* arguments */ });
+```
+
+This approach leverages Convex's generated API for type safety and allows for a structured way to organize and call internal backend logic.
+
+# Convex Dependency Rule
+1. *query()* only have access to ctx.auth, ctx.db and ctx.runQuery
+2. *actions()* dont have access to ctx.db. it has access to ctx.runQuery, ctx.runMutation, ctx.storage, ctx.runAction, ctx.auth, ctx.scheduler.
+3. *mutations()* dont have access to ctx.db. it has access to ctx.runQuery, ctx.runMutation, ctx.storage, ctx.runAction, ctx.auth, ctx.scheduler.

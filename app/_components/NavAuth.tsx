@@ -1,11 +1,14 @@
+"use client";
+
 import Link from "next/link";
-import { fetchAuthQuery, isAuthenticated } from "@/lib/auth-server";
-import { api } from "~/convex/_generated/api";
+import { authClient } from "~/lib/auth-client";
 
-export default async function NavAuth() {
-  const authenticated = await isAuthenticated();
+export default function NavAuth() {
+  const { data: session, isPending } = authClient.useSession();
 
-  if (!authenticated) {
+  if (isPending) return null;
+
+  if (!session) {
     return (
       <>
         <Link
@@ -24,8 +27,7 @@ export default async function NavAuth() {
     );
   }
 
-  const user = await fetchAuthQuery(api.auth.getCurrentUser).catch(() => null);
-  const initial = user?.name?.charAt(0)?.toUpperCase() ?? "U";
+  const initial = session.user.name?.charAt(0)?.toUpperCase() ?? "U";
 
   return (
     <Link

@@ -130,10 +130,25 @@ export default async function ProfileCard({
         </div>
       </div>
 
-      <section className="flex gap-4">
+      {/* COVER IMAGE  */}
+      <div className="relative mb-8 h-40 w-full overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 shadow-2xl lg:h-50">
+        {profile.coverImage ? (
+          <Image
+            src={profile.coverImage}
+            alt="Cover image"
+            fill
+            className="object-cover"
+            unoptimized={profile.coverImage.startsWith("data:")}
+          />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700"></div>
+        )}
+      </div>
+
+      <section className="flex flex-col gap-4 md:flex-row relative z-10">
         {/* Profile Header */}
-        <div className="flex flex-col items-start gap-y-4">
-          <div className="relative aspect-square h-35 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl md:h-32 ring-4 ring-white/10">
+        <div className="-mt-30 flex flex-col items-start gap-y-4">
+          <div className="md:ml-7 ml-5 relative aspect-square h-30 overflow-hidden rounded-full border-4 border-white shadow-2xl md:h-40 bg-slate-900">
             {profile.profileImage?.startsWith("data:") ? (
               <Image
                 src={profile.profileImage}
@@ -298,7 +313,7 @@ export default async function ProfileCard({
           )}
         </div>
 
-        <div className="min-h-100 flex-1 space-y-6 rounded-3xl bg-linear-to-br from-slate-50/10 to-slate-50/5 p-5 text-white shadow-2xl md:space-y-10 md:p-10 border border-white/10">
+        <div className="min-h-100 flex-1 space-y-6 rounded-3xl bg-linear-to-br from-slate-50/10 to-slate-50/5 p-5 text-white shadow-2xl md:space-y-10 md:p-10 border border-white/10 md:-mt-5">
           {profile.interests && profile.interests.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-6">
@@ -322,9 +337,34 @@ export default async function ProfileCard({
             </div>
           )}
 
+          {/* Project skills */}
+          {profile.skills && profile.skills.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="h-8 w-1 rounded-full bg-linear-to-r from-pink-400 to-purple-400"></div>
+                <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
+                  Skills
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {profile.skills.map((skill) => (
+                  <div
+                    key={skill.name}
+                    className="group rounded-xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 px-4 py-1 transition-all hover:border-white/30 hover:shadow-lg"
+                  >
+                    <span className="text-sm font-semibold text-white/95 group-hover:text-cyan-300 transition-colors">
+                      {skill.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Projects from project table (new) */}
           <Projects userId={currentProfile.userId ?? profile.userId} />
 
+          {/* Work Experience */}
           <WorkExperienceSection userId={currentProfile.userId} />
         </div>
       </section>

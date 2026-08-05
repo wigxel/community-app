@@ -1,4 +1,4 @@
-import { queryGeneric as query } from "convex/server";
+import { paginationOptsValidator, queryGeneric as query } from "convex/server";
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
@@ -79,5 +79,12 @@ export const deleteProject = mutation({
       throw new Error("Unauthorized action");
 
     await ctx.db.delete(existingProject._id);
+  },
+});
+
+export const listAll = query({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { paginationOpts }) => {
+    return await ctx.db.query("project").order("desc").paginate(paginationOpts);
   },
 });

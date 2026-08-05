@@ -2,6 +2,7 @@
 import { useQuery } from "convex/react";
 import { Calendar, ExternalLink, FileText, Video } from "lucide-react";
 import Image from "next/image";
+import { FavouriteButton } from "~/app/_components/FavouriteButton";
 import { api } from "~/convex/_generated/api";
 import { safeArray } from "~/lib/data.helpers";
 import type { Project, TimelineDate } from "~/types/models";
@@ -59,13 +60,23 @@ export default function Projects({ userId }: { userId?: string }) {
                     {project.title}
                   </h3>
 
-                  {/* Project timeline */}
-                  {project_timeline && (
-                    <div className="flex items-center gap-2.5 rounded-full border border-amber-400/30 bg-linear-to-r from-amber-500/15 to-orange-500/15 px-4 py-2 text-sm font-medium text-amber-200/90 shadow-lg">
-                      <Calendar size={16} className="text-amber-300" />
-                      <span>{project_timeline}</span>
-                    </div>
-                  )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Project timeline */}
+                    {project_timeline && (
+                      <div className="flex items-center gap-2.5 rounded-full border border-amber-400/30 bg-linear-to-r from-amber-500/15 to-orange-500/15 px-4 py-2 text-sm font-medium text-amber-200/90 shadow-lg">
+                        <Calendar size={16} className="text-amber-300" />
+                        <span>{project_timeline}</span>
+                      </div>
+                    )}
+
+                    {/* Favourite button */}
+                    {project._id && (
+                      <FavouriteButton
+                        projectId={project._id}
+                        variant="inline"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {/* Project Description */}

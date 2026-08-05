@@ -14,6 +14,10 @@ import { api } from "~/convex/_generated/api";
 
 const DashboardPage = () => {
   const profile = useQuery(api.profiles.getProfile);
+  const workExperience = useQuery(
+    api.workExperience.getByUserId,
+    profile?.userId ? { userId: profile.userId } : "skip",
+  );
 
   if (!profile) {
     return (
@@ -89,7 +93,7 @@ const DashboardPage = () => {
         <StatCard
           icon={<Briefcase className="h-5 w-5 text-blue-300" />}
           label="Work Experience"
-          value={(profile.workExperience?.length || 0).toString()}
+          value={(workExperience?.length || 0).toString()}
         />
         <StatCard
           icon={<Folder className="h-5 w-5 text-blue-300" />}
@@ -122,21 +126,21 @@ const DashboardPage = () => {
               </div>
             )}
 
-            {profile.workExperience && profile.workExperience.length > 0 ? (
+            {workExperience && workExperience.length > 0 ? (
               <div>
                 <p className="text-sm text-white/60 mb-2">
                   Recent Work Experience
                 </p>
-                {profile.workExperience.slice(0, 3).map((exp) => {
-                  const startYear = new Date(exp.startDate).getFullYear();
-                  const endYear = exp.endDate
-                    ? new Date(exp.endDate).getFullYear()
+                {workExperience.slice(0, 3).map((exp) => {
+                  const startYear = new Date(exp.timeline.start).getFullYear();
+                  const endYear = exp.timeline.end
+                    ? new Date(exp.timeline.end).getFullYear()
                     : "Present";
                   return (
                     <WorkItem
-                      key={`${exp.company}-${exp.position}-${exp.startDate}`}
+                      key={exp._id}
                       position={exp.position}
-                      company={exp.company}
+                      company={exp.companyName}
                       timeline={`${startYear} — ${endYear}`}
                     />
                   );
