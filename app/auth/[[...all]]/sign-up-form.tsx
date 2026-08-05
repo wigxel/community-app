@@ -59,7 +59,9 @@ async function signUpAction(
 export default function SignUpForm({ redirectTo }: { redirectTo: string }) {
   const [state, action, pending] = useActionState<SignUpState, FormData>(
     signUpAction,
-    { timestamp: 0 },
+    {
+      timestamp: 0,
+    },
   );
 
   useEffect(() => {

@@ -47,7 +47,9 @@ export default function SignInForm({ redirectTo }: { redirectTo: string }) {
 
   const [state, action, pending] = useActionState<SignInState, FormData>(
     signInAction,
-    { timestamp: 0 },
+    {
+      timestamp: 0,
+    },
   );
 
   useEffect(() => {
