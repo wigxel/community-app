@@ -75,7 +75,7 @@ function LeaderboardList({ titleName }: { titleName: string }) {
 
   return (
     <div className="space-y-4">
-      {leaderboard.map((profile, index) => (
+      {leaderboard.map((profile) => (
         <Card
           key={profile._id}
           className="bg-white/5 border-white/10 overflow-hidden transition-all hover:bg-white/10"
@@ -83,7 +83,7 @@ function LeaderboardList({ titleName }: { titleName: string }) {
           <CardContent className="p-6 flex items-start gap-4">
             <div className="flex-shrink-0 mt-1">
               <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center font-bold text-blue-400">
-                #{index + 1}
+                #{profile.ranking}
               </div>
             </div>
 
