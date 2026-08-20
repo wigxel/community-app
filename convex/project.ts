@@ -1,5 +1,11 @@
-import { paginationOptsValidator, queryGeneric as query } from "convex/server";
+import {
+  type PaginationResult,
+  paginationOptsValidator,
+  queryGeneric as query,
+} from "convex/server";
 import { v } from "convex/values";
+import type { BasicProject } from "../types/models";
+import type { Doc } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 import { project_schema } from "./schema";
@@ -23,6 +29,16 @@ export const listProjectByUserId = query({
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .collect();
+  },
+});
+
+export const getProject = query({
+  args: { id: v.nullable(v.string()) },
+  handler: async (ctx, args) => {
+    return ctx.db
+      .query("project")
+      .filter((q) => q.eq(q.field("_id"), args.id))
+      .first();
   },
 });
 
@@ -84,7 +100,32 @@ export const deleteProject = mutation({
 
 export const listAll = query({
   args: { paginationOpts: paginationOptsValidator },
-  handler: async (ctx, { paginationOpts }) => {
-    return await ctx.db.query("project").order("desc").paginate(paginationOpts);
+  handler: async (
+    ctx,
+    { paginationOpts },
+  ): Promise<PaginationResult<BasicProject>> => {
+    const records = await ctx.db
+      .query("project")
+      .order("desc")
+      .paginate({
+        ...paginationOpts,
+        numItems: Math.min(50, paginationOpts.numItems),
+      });
+
+    return {
+      ...records,
+      page: await Promise.all(
+        records.page.map(async (project) => {
+          const profile: Doc<"profile"> = await ctx.db.get(project.userId);
+
+          return {
+            ...project,
+            username: profile?.username ?? "@anonymous",
+            ownerName:
+              `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
+          };
+        }),
+      ),
+    };
   },
 });

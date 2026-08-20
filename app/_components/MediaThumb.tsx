@@ -34,7 +34,7 @@ export function MediaThumb({
   if (!url) {
     return (
       <div
-        className={`flex items-center aspect-[29.6/22.2] w-full justify-center bg-background ${className}`}
+        className={`flex items-center aspect-post w-full justify-center bg-background ${className}`}
       >
         <span className="text-xs uppercase tracking-widest text-neutral-500">
           No Preview
@@ -46,7 +46,7 @@ export function MediaThumb({
   if (isPdf) {
     return (
       <div
-        className={`flex flex-col items-center aspect-[29.6/22.2] w-full justify-center gap-2 bg-background ${className}`}
+        className={`flex flex-col items-center aspect-post w-full justify-center gap-2 bg-background ${className}`}
       >
         <FileText size={28} className="text-neutral-400" />
         <span className="text-xs text-neutral-500 uppercase tracking-widest">
@@ -61,7 +61,7 @@ export function MediaThumb({
       <video
         ref={videoRef}
         src={url}
-        className={cn("aspect-[29.6/22.2]", className)}
+        className={cn("aspect-post", className)}
         muted
         playsInline
         loop
@@ -76,7 +76,7 @@ export function MediaThumb({
         src={url}
         alt={alt}
         fill
-        className={cn(className, "aspect-[29.6/22.2]")}
+        className={cn(className, "aspect-post")}
         loading="lazy"
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
       />
@@ -89,7 +89,7 @@ export function MediaThumb({
       alt={alt}
       width={item?.metadata?.width ?? 800}
       height={item?.metadata?.height ?? 450}
-      className={cn(className, "aspect-[29.6/22.2]")}
+      className={cn(className, "aspect-post")}
       loading="lazy"
     />
   );

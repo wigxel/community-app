@@ -1,4 +1,4 @@
-import type { Id } from "~/convex/_generated/dataModel";
+import type { Id } from "../convex/_generated/dataModel";
 
 export interface ProfileLocation {
   city: string;
@@ -83,6 +83,11 @@ export type TimelineDate =
   | null
   | { year: string }
   | { month: string; year: string };
+
+export type BasicProject = Project & {
+  ownerName: string;
+  username: string;
+};
 
 export interface Project {
   _id?: Id<"project">;

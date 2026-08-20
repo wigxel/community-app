@@ -45,6 +45,8 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  --aspect-post: 29.6/22.2;
 }
 
 body {
@@ -86,6 +88,9 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  --project-card-media-radius: 1.8em;
+  --project-card-media-padding: 0.6em;
 }
 
 .dark {
@@ -120,6 +125,9 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  --project-card-media-radius: 1.8em;
+  --project-card-media-padding: 0.6em;
 }
 
 @layer base {

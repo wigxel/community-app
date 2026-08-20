@@ -3,4 +3,9 @@ import Figma from "./figma";
 import GitHub from "./github";
 import LinkedIn from "./linkedin";
 
+export {
+  Heart as HeartIcon,
+  SearchNormal1 as SearchIcon,
+} from "iconsax-reactjs";
+
 export { Behance, Figma, GitHub, LinkedIn };

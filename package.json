@@ -58,6 +58,7 @@
     "effect": "3.21.2",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "5.2.0",
+    "iconsax-reactjs": "^0.0.8",
     "lodash-es": "4.17.21",
     "lucide-react": "0.562.0",
     "motion": "12.9.2",

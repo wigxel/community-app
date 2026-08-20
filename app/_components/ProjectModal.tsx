@@ -1,23 +1,15 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import { Calendar, ExternalLink, Figma, FileText, Github } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 import { FavouriteButton } from "~/app/_components/FavouriteButton";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
-import type { Doc } from "~/convex/_generated/dataModel";
+import { api } from "~/convex/_generated/api";
+import { safeObj } from "~/lib/data.helpers";
+import { ProjectImpl } from "~/lib/factories/project";
 import { MediaThumb } from "./MediaThumb";
-
-type Project = Doc<"project">;
-
-function getTimelineLabel(project: Project): string | null {
-  const start = project.timeline?.start?.year;
-  const end = project.timeline?.end?.year;
-
-  if (!start) return null;
-  if (project.ongoing) return `${start} – Present`;
-  if (end && end !== start) return `${start} – ${end}`;
-  return start;
-}
 
 const LINK_META: Record<string, { label: string; Icon: React.ElementType }> = {
   live: { label: "Live Site", Icon: ExternalLink },
@@ -55,24 +47,20 @@ function VideoBadgeSvg({ size }: { size: number }) {
   );
 }
 
-/**
- * Shared project detail modal — used by both the landing-page community
- * feed card and the dashboard Favourites page card.
- */
-export function ProjectModal({
-  project,
-  open,
-  onClose,
-}: {
-  project: Project;
-  open: boolean;
-  onClose: () => void;
-}) {
-  const [activeIndex, setActiveIndex] = useState(0);
+export function ProjectModal() {
+  const searchParams = useSearchParams();
 
-  const timelineLabel = getTimelineLabel(project);
-  const media = project.media ?? [];
-  const links = project.link ?? [];
+  const [open, setOpen] = useState(false);
+  const [projectId] = React.useState<string | null>(null);
+  console.log("Changed", searchParams);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  let project = useQuery(api.project.getProject, { id: projectId });
+  project = safeObj(project);
+
+  const timelineLabel = ProjectImpl.timeline(project);
+  const links = ProjectImpl.links(project);
+  const media = ProjectImpl.listMedia(project);
   const active = media[activeIndex] ?? null;
 
   const isVideo = active?.metadata?.mimeType?.startsWith("video/");
@@ -83,14 +71,21 @@ export function ProjectModal({
 
   useEffect(() => {
     if (!isVideo) return;
+
     const id = setTimeout(() => {
       videoRef.current?.play().catch(() => {});
     }, 50);
+
     return () => clearTimeout(id);
   }, [isVideo]);
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpenState) => {
+        setOpen(isOpenState);
+      }}
+    >
       <DialogContent className="max-w-2xl w-full p-0 gap-0 bg-neutral-900 border-neutral-800 text-white rounded-2xl max-h-[90vh] flex flex-col overflow-hidden">
         <DialogTitle className="sr-only">{project.title}</DialogTitle>
 
@@ -161,11 +156,13 @@ export function ProjectModal({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <FavouriteButton
-                projectId={project._id}
-                variant="card"
-                className="border-white/20 bg-white/8 hover:bg-rose-500/20"
-              />
+              {project._id ? (
+                <FavouriteButton
+                  projectId={project._id}
+                  variant="card"
+                  className="border-white/20 bg-white/8 hover:bg-rose-500/20"
+                />
+              ) : null}
 
               {links.map((link) => {
                 const { label, Icon } = getLinkMeta(link.tag);
