@@ -5,6 +5,7 @@ import { Loader } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
 import { SearchIcon } from "~/components/icons";
+import { Container } from "~/components/layouts/container";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { StandardGrid } from "~/components/layouts/grids";
 import { Button } from "~/components/ui/button";
@@ -127,7 +128,7 @@ export default function PublicProjectsCatalog() {
   const isLoading = status === "LoadingFirstPage";
 
   return (
-    <section className="py-6 px-6 flex flex-col gap-[3.2rem]">
+    <Container level="max" className="flex flex-col gap-[3.2rem]">
       <SearchBox />
 
       {/* Grid */}
@@ -142,6 +143,6 @@ export default function PublicProjectsCatalog() {
 
       {/* Empty state */}
       {!isLoading && results.length === 0 && <CatalogEmptyStateContent />}
-    </section>
+    </Container>
   );
 }
