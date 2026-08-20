@@ -1,23 +1,12 @@
 "use client";
 
-import { Eye, FileText } from "lucide-react";
+import { FileText, HeartIcon } from "lucide-react";
 import { useRef, useState } from "react";
-import { FavouriteButton } from "~/app/_components/FavouriteButton";
 import { MediaThumb } from "~/app/_components/MediaThumb";
 import { ProjectModal } from "~/app/_components/ProjectModal";
-import type { Doc } from "~/convex/_generated/dataModel";
-
-type Project = Doc<"project">;
-
-function getTimelineLabel(project: Project): string | null {
-  const start = project.timeline?.start?.year;
-  const end = project.timeline?.end?.year;
-
-  if (!start) return null;
-  if (project.ongoing) return `${start} – Present`;
-  if (end && end !== start) return `${start} – ${end}`;
-  return start;
-}
+import { ProfileAvatar } from "~/components/profile/avatar";
+import { cn } from "~/lib/utils";
+import type { Project } from "~/types/models";
 
 function VideoBadgeSvg({ size }: { size: number }) {
   return (
@@ -47,87 +36,43 @@ function VideoBadgeSvg({ size }: { size: number }) {
 
 const LandingProjectCard = ({ project }: { project: Project }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
-  const videoRef = useRef<HTMLVideoElement>(null);
   const firstMedia = project.media?.[0] ?? null;
   const mimeType = firstMedia?.metadata?.mimeType ?? "";
   const isVideo = mimeType.startsWith("video/");
-  const isPdf = mimeType === "application/pdf";
-  const timelineLabel = getTimelineLabel(project);
+  const likes_count = "3.3k";
 
   return (
     <>
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: Container needs hover state for video playback */}
       <section
-        className="group relative overflow-hidden rounded-xl bg-neutral-900 aspect-video w-full"
-        onMouseEnter={() => {
-          setIsHovered(true);
-          videoRef.current?.play().catch(() => {});
-        }}
-        onMouseLeave={() => {
-          setIsHovered(false);
-          videoRef.current?.pause();
+        className="group flex flex-col relative [font-size:12px] rounded-(--media-radius) bg-muted p-(--media-padding) w-full"
+        style={{
+          "--media-radius": "1.8em",
+          "--media-padding": "0.6em",
         }}
       >
-        <div className="absolute inset-0">
-          <MediaThumb
-            item={firstMedia}
-            alt={project.title}
-            fill
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-            videoRef={videoRef}
+        <div className="overflow-hidden rounded-[calc(var(--media-radius)-calc(var(--media-padding)*0.5))]">
+          <MediaThumbnail
+            variant={isVideo ? "video" : "image"}
+            media={firstMedia}
           />
         </div>
 
-        {/* ── Static type badge — only shown when NOT hovered ── */}
-        {(isVideo || isPdf) && (
-          <div
-            className={`absolute top-3 right-3 z-10 flex items-center justify-center w-7 h-7 rounded-full
-                        bg-white/10 backdrop-blur-sm border border-white/15 text-white
-                        transition-opacity duration-200
-                        ${isHovered ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-          >
-            {isVideo ? <VideoBadgeSvg size={13} /> : <FileText size={13} />}
+        <div className="flex items-center pt-2 px-[0.8em] justify-between z-20 relative">
+          <div className="inline-flex items-center gap-[0.6em]">
+            <ProfileAvatar
+              className="size-[2.4em] bg-blue-400! rounded-full"
+              name="John Doe"
+            />
+            <h3 className="font-semibold text-sm text-foreground line-clamp-1">
+              {project.username ?? "--"}
+            </h3>
           </div>
-        )}
 
-        {/* ── Hover overlay ── */}
-        <div
-          className={`absolute inset-0 z-20 flex items-center justify-center gap-3 bg-black/55 backdrop-blur-[2px] transition-opacity duration-250 ${isHovered ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        >
-          <button
-            type="button"
-            aria-label={`View ${project.title}`}
-            onClick={() => setModalOpen(true)}
-            className="flex items-center justify-center w-11 h-11 rounded-full  bg-white/15 hover:bg-white/25  backdrop-blur-sm border border-white/25 hover:border-white/50  text-white  transition-all duration-200 hover:scale-110 active:scale-95  cursor-pointer"
-          >
-            <Eye size={20} />
-          </button>
-
-          <FavouriteButton projectId={project._id} variant="overlay" />
-        </div>
-
-        <div className="absolute inset-0 z-10 bg-linear-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-
-        <div
-          className="absolute bottom-0 left-0 right-0 z-10 p-4
-                     translate-y-1 group-hover:translate-y-0
-                     transition-transform duration-300 pointer-events-none"
-        >
-          {timelineLabel && (
-            <span className="block text-[11px] uppercase tracking-widest text-yellow-300 mb-1">
-              {timelineLabel}
-            </span>
-          )}
-          <h3 className="font-semibold text-sm text-white line-clamp-1">
-            {project.title}
-          </h3>
-          {project.description && (
-            <p className="mt-1 text-xs text-white/50 line-clamp-2 max-h-0 opacity-0 group-hover:max-h-10 group-hover:opacity-100 transition-all duration-300 overflow-hidden">
-              {project.description}
-            </p>
-          )}
+          <div className="inline-flex gap-0.5 text-sm items-center text-muted-foreground">
+            <HeartIcon size="1em" />
+            <span>{likes_count}</span>
+          </div>
         </div>
       </section>
 
@@ -139,5 +84,45 @@ const LandingProjectCard = ({ project }: { project: Project }) => {
     </>
   );
 };
+
+type MediaProps = {
+  variant: "video" | "image";
+  media: Project["media"] | null;
+  alt: string | undefined;
+};
+
+function MediaThumbnail({ variant, media, alt }: MediaProps) {
+  const isVideo = variant === "video";
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const thumbnail = (
+    <MediaThumb
+      item={media}
+      alt={alt}
+      fill
+      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+      videoRef={videoRef}
+    />
+  );
+
+  if (isVideo) {
+    return (
+      // biome-ignore lint/a11y/noStaticElementInteractions: Not necessary
+      <div
+        className="video-container"
+        onMouseEnter={() => {
+          videoRef.current?.play().catch(() => {});
+        }}
+        onMouseLeave={() => {
+          videoRef.current?.pause();
+        }}
+      >
+        {thumbnail}
+      </div>
+    );
+  }
+
+  return thumbnail;
+}
 
 export default LandingProjectCard;

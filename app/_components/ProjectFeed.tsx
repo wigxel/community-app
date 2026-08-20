@@ -1,14 +1,15 @@
 "use client";
 
 import { usePaginatedQuery } from "convex/react";
-import { useEffect, useRef } from "react";
+import { Loader } from "lucide-react";
+import React, { useEffect, useRef } from "react";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
+import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
 import LandingProjectCard from "./LandingProjectCard";
 
 const PAGE_SIZE = 12;
 const SKELETON_KEYS = Array.from({ length: PAGE_SIZE }, (_, i) => `sk-${i}`);
-const SKELETON_MORE_KEYS = ["sk-more-0", "sk-more-1", "sk-more-2"];
 
 function ScrollTrigger({ onVisible }: { onVisible: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -32,57 +33,86 @@ function ScrollTrigger({ onVisible }: { onVisible: () => void }) {
 }
 
 export default function ProjectFeed() {
-  const { results, status, loadMore } = usePaginatedQuery(
+  const { results, status } = usePaginatedQuery(
     api.project.listAll,
     {},
     { initialNumItems: PAGE_SIZE },
   );
 
   const isLoading = status === "LoadingFirstPage";
-  const canLoadMore = status === "CanLoadMore";
 
   return (
     <section className="py-6 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-baseline justify-between flex-wrap gap-3 mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            Community Projects
-          </h2>
-          <p className="text-sm text-neutral-500">
-            Work shipped by members of the community
-          </p>
-        </div>
+      <SearchBox />
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {isLoading
-            ? SKELETON_KEYS.map((k) => <ProjectCardSkeleton key={k} />)
-            : results.map((project) => (
-                <LandingProjectCard key={project._id} project={project} />
-              ))}
-        </div>
+      {/* Grid */}
+      {isLoading ? <GridLoader /> : <CatalogGrid />}
 
-        {/* Loading more skeletons */}
-        {status === "LoadingMore" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-            {SKELETON_MORE_KEYS.map((k) => (
-              <ProjectCardSkeleton key={k} />
-            ))}
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!isLoading && results.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-neutral-500 gap-2">
-            <p className="text-sm">
-              No projects yet — be the first to add one.
-            </p>
-          </div>
-        )}
-
-        {/* Scroll trigger */}
-        {canLoadMore && <ScrollTrigger onVisible={() => loadMore(PAGE_SIZE)} />}
-      </div>
+      {/* Empty state */}
+      {!isLoading && results.length === 0 && <CatalogEmptyStateContent />}
     </section>
+  );
+}
+
+function GridLoader() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {SKELETON_KEYS.map((k) => (
+        <ProjectCardSkeleton key={k} />
+      ))}
+    </div>
+  );
+}
+
+function CatalogGrid() {
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.project.listAll,
+    {},
+    { initialNumItems: PAGE_SIZE },
+  );
+
+  const canLoadMore = status === "CanLoadMore";
+
+  return (
+    <>
+      <div className="grid grid-cols-4 gap-[3.2rem] mb-12">
+        {results.map((project) => (
+          <LandingProjectCard key={project._id} project={project} />
+        ))}
+      </div>
+
+      {status === "LoadingMore" ? (
+        <span className="animate-spin">
+          <Loader />
+        </span>
+      ) : null}
+
+      {/* Scroll trigger */}
+      {canLoadMore && <ScrollTrigger onVisible={() => loadMore(PAGE_SIZE)} />}
+    </>
+  );
+}
+
+function SearchBox() {
+  const [searchTerm, setSearchTerm] = React.useState("");
+
+  return (
+    <div className="flex">
+      <input
+        type="text"
+        placeholder="Search..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      <Button>Search</Button>
+    </div>
+  );
+}
+
+function CatalogEmptyStateContent() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-neutral-500 gap-2">
+      <p className="text-sm">No projects yet — be the first to add one.</p>
+    </div>
   );
 }

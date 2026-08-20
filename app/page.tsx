@@ -10,6 +10,7 @@ import ProjectFeed from "./_components/ProjectFeed";
 export default function Home() {
   return (
     <div className="container mx-auto">
+      {/* Hero section */}
       <Container
         level="max"
         className="min-h-[40svh] flex items-start gap-8 py-32"
@@ -45,6 +46,7 @@ export default function Home() {
         <div className="aspect-[16/9] rounded-lg bg-gray-800 flex-1"></div>
       </Container>
 
+      {/* Hero section */}
       <ProjectFeed />
     </div>
   );
