@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 import { z } from "zod/v4";
@@ -15,7 +16,7 @@ type ForgotPasswordState = {
 };
 
 const schema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
 });
 
 async function forgotPasswordAction(
@@ -117,12 +118,12 @@ export default function ForgotPasswordForm() {
               </Button>
 
               <div className="text-center">
-                <a
-                  href="/auth"
+                <Link
+                  href="/auth/sign-in"
                   className="text-sm text-white/50 hover:text-white transition-colors"
                 >
                   Back to sign in
-                </a>
+                </Link>
               </div>
             </form>
           )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
@@ -68,7 +69,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   useEffect(() => {
     if (state.success) {
       toast.success("Password reset! Please sign in.");
-      router.push("/auth");
+      router.push("/auth/sign-in");
     }
   }, [state.success, router]);
 
@@ -130,12 +131,12 @@ export default function ResetPasswordForm({ token }: { token: string }) {
             </Button>
 
             <div className="text-center">
-              <a
-                href="/auth"
+              <Link
+                href="/auth/sign-in"
                 className="text-sm text-white/50 hover:text-white transition-colors"
               >
                 Back to sign in
-              </a>
+              </Link>
             </div>
           </form>
         </div>

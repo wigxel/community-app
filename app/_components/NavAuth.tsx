@@ -14,10 +14,10 @@ export default function NavAuth() {
   if (!session) {
     return (
       <>
-        <Link href="/auth?mode=sign-up">
+        <Link href="/auth/sign-up">
           <Button variant="secondary">Sign up</Button>
         </Link>
-        <Link href="/auth">
+        <Link href="/auth/sign-in">
           <Button variant="default">Sign in</Button>
         </Link>
       </>

@@ -21,7 +21,7 @@ import {
 } from "react-hook-form";
 import type { z } from "zod";
 
-import type { formSchema } from "~/app/dashboard/projects/edit/page";
+import type { formSchema } from "~/app/(dashboard)/dashboard/projects/edit/page";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {

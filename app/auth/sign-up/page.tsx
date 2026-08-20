@@ -1,14 +1,14 @@
 import { Suspense } from "react";
-import AuthHandler from "./handler";
+import SignUpHandler from "./handler";
 
-export default function AuthPage({
+export default function SignUpPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string; mode?: string }>;
+  searchParams: Promise<{ redirect?: string }>;
 }) {
   return (
     <Suspense fallback={<AuthFallback />}>
-      <AuthHandler searchParamsPromise={searchParams} />
+      <SignUpHandler searchParamsPromise={searchParams} />
     </Suspense>
   );
 }

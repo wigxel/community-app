@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import type { z } from "zod";
-import type { timelineDate } from "~/app/dashboard/projects/edit/page";
+import type { timelineDate } from "~/app/(dashboard)/dashboard/projects/edit/page";
 import { Label } from "~/components/ui/label";
 
 const MONTHS = [

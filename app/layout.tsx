@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { bodyFont } from "~/styles/font";
 import { getToken } from "~/lib/auth-server";
+import { bodyFont } from "~/styles/font";
 import "./globals.css";
 import Providers from "./providers";
 
@@ -20,7 +20,9 @@ export default async function RootLayout({ children }) {
     <NuqsAdapter>
       <Providers initialToken={token}>
         <html lang="en" className="dark">
-          <body className={`${bodyFont.variable} font-sans antialiased flex flex-col min-h-screen`}>
+          <body
+            className={`${bodyFont.variable} font-sans antialiased flex flex-col min-h-screen`}
+          >
             {children}
           </body>
         </html>
