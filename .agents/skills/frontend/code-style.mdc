@@ -1,0 +1,29 @@
+# Code Style
+
+## General
+- Use // for single-line comments
+- Keep functions under 50 lines where possible
+- Limit nesting to 3 levels
+- Use meaningful variable names
+- Add JSDoc comments for complex functions
+- Prefer const over let
+- I prefer const over let
+- Avoid unnecessary re-assignment. Use `const` for most cases
+- Prefer Immutability and Functional style of coding.
+- Put wrap complex related business logic into a functions
+- don't use .forEach loop
+
+## Date Manipulation
+- Always use date-fns utilities
+
+## Imports
+### Import Paths
+- use typescript path aliases for paths that are over 2 levels up in the tree from the module directory. eg "../../../"
+
+### Import Order
+1. React and Next.js imports
+2. External libraries and dependencies
+3. Convex-specific imports
+4. Internal components and utilities
+5. Type imports
+6. CSS/style imports
