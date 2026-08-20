@@ -1,10 +1,9 @@
-import { Inter } from "next/font/google";
-import Link from "next/link";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-import "./globals.css";
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Header } from "~/components/layouts/header";
 import { getToken } from "~/lib/auth-server";
-import NavAuth from "./_components/NavAuth";
+import "./globals.css";
 import Providers from "./providers";
 
 const baseFont = Inter({
@@ -23,13 +22,9 @@ export default async function RootLayout({ children }) {
   return (
     <NuqsAdapter>
       <Providers initialToken={token}>
-        <html lang="en">
+        <html lang="en" className="dark">
           <body className={`${baseFont.variable} antialiased`}>
-            <nav className="flex gap-2 justify-end items-center h-18 px-5">
-              <Link href="/">Home</Link>
-              <Link href="/catalog">Catalog</Link>
-              <NavAuth />
-            </nav>
+            <Header />
             {children}
           </body>
         </html>

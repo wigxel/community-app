@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Button } from "~/components/ui/button";
 import { authClient } from "~/lib/auth-client";
 
 export default function NavAuth() {
@@ -11,17 +12,11 @@ export default function NavAuth() {
   if (!session) {
     return (
       <>
-        <Link
-          href="/auth"
-          className="text-sm text-white/70 hover:text-white transition-colors"
-        >
-          Sign In
+        <Link href="/auth">
+          <Button variant="ghost">Sign In</Button>
         </Link>
-        <Link
-          href="/auth?mode=sign-up"
-          className="bg-blue-500 hover:bg-blue-600 text-white rounded-full font-medium text-sm h-10 px-5 inline-flex items-center transition-colors"
-        >
-          Sign Up
+        <Link href="/auth?mode=sign-up">
+          <Button>Sign Up</Button>
         </Link>
       </>
     );
