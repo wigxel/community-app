@@ -1,11 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod/v4";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "~/components/ui/input";
+import { PasswordInput } from "~/components/fields/password";
+import { LoadingButton } from "~/components/forms/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
@@ -14,9 +15,8 @@ import {
   FormItem,
   FormLabel,
 } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import { SegmentProgressBar } from "~/components/ui/segmented-gradient-progress";
-import { PasswordInput } from "~/components/fields/password";
-import { LoadingButton } from "~/components/forms/button";
 import { authClient } from "~/lib/auth-client";
 
 const signUpSchema = z

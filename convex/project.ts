@@ -3,8 +3,8 @@ import {
   paginationOptsValidator,
   queryGeneric as query,
 } from "convex/server";
-import { ConvexError, v } from "convex/values";
-import { Result, type ResultShape } from "../lib/result";
+import { v } from "convex/values";
+import { Result } from "../lib/result";
 import type { BasicProject } from "../types/models";
 import type { Doc } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";

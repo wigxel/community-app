@@ -20,8 +20,12 @@ export const Result = {
       error: (error: TError) => TErrorResult;
     },
   ) => {
-    if (result == undefined) {
+    if (result === undefined) {
       return matchers.loading?.();
+    }
+
+    if (result === null) {
+      return matchers.error(result as TError);
     }
 
     return pipe(

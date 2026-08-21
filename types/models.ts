@@ -1,4 +1,4 @@
-import type { Doc, Id } from "../convex/_generated/dataModel";
+import type { Doc } from "../convex/_generated/dataModel";
 
 export interface ProfileLocation {
   city: string;

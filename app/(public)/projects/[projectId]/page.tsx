@@ -4,7 +4,7 @@ import { ProjectDetails } from "~/app/_components/project-details";
 import { Container } from "~/components/layouts/container";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
-import { Project } from "~/types/models";
+import type { Project } from "~/types/models";
 
 export default async function ProjectsPage({
   params,
