@@ -136,3 +136,19 @@ body {
 body::selection {
   background-color: hsl(from var(--accent-foreground) h s l / 0.3);
 }
+
+.slice-backdrop-effect {
+  --dossier-stripe-angle: 60deg;
+  --dossier-stripe-stroke: 1px;
+  --dossier-stripe-period: 16px;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  background-image: repeating-linear-gradient(
+    var(--dossier-stripe-angle),
+    color-mix(in oklch, var(--background) 40%, transparent) 0,
+    color-mix(in oklch, var(--background) 40%, transparent)
+      var(--dossier-stripe-stroke),
+    var(--background) var(--dossier-stripe-stroke),
+    var(--background) var(--dossier-stripe-period)
+  );
+}

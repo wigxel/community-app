@@ -5,7 +5,7 @@ import { Container } from "./container";
 
 export function Header() {
   return (
-    <header className="h-18 py-4 z-40 sticky top-0 bg-background">
+    <header className="h-18 slice-backdrop-effect py-4 z-40 sticky top-0">
       <Container
         level="max"
         className="flex gap-2 justify-between items-center"
