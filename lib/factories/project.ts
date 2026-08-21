@@ -1,5 +1,5 @@
 import { ExternalLink, Figma, Github } from "~/components/icons";
-import type { Project } from "~/types/models";
+import type { Media, Project } from "~/types/models";
 import { safeArray } from "../data.helpers";
 
 const LINK_META: Record<string, { label: string; Icon: React.ElementType }> = {
@@ -13,6 +13,26 @@ function getLinkMeta(tag: string) {
 }
 
 type MaybeProject = Project | null | undefined;
+
+export const MediaImpl = {
+  match: <TPhoto, TVideo, TPdf>(
+    media: Media,
+    matchers: {
+      photo: (media: Extract<Media, { type: "photo" }>) => TPhoto;
+      video: (media: Extract<Media, { type: "video" }>) => TVideo;
+      pdf: (media: Extract<Media, { type: "pdf" }>) => TPdf;
+    },
+  ) => {
+    switch (media.type) {
+      case "photo":
+        return matchers.photo(media);
+      case "video":
+        return matchers.video(media);
+      case "pdf":
+        return matchers.pdf(media);
+    }
+  },
+};
 
 export const ProjectImpl = {
   listMedia: (project: MaybeProject) => safeArray(project?.media),
