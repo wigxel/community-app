@@ -1,5 +1,5 @@
 import { Either, pipe } from "effect";
-import { safeObj } from "./data.helpers";
+import { isRecord } from "effect/Predicate";
 
 export type ResultShape<TData, TError = never> = Either.Either<TData, TError>;
 
@@ -39,11 +39,15 @@ export const Result = {
   parse<TRight, TLeft>(
     record: ResultShape<TRight, TLeft>,
   ): ResultShape<TRight, TLeft> {
-    const safe_record = safeObj(record);
+    if (!isRecord(record)) {
+      return Either.left({} as TLeft);
+    }
 
-    return "left" in safe_record
-      ? Either.left(safe_record.left)
-      : Either.right(safe_record.right);
+    const r = record as Record<string, unknown>;
+
+    return "left" in r
+      ? Either.left(r.left as TLeft)
+      : Either.right(r.right as TRight);
   },
 
   toTuple: <TData, TError = unknown>(result: ResultShape<TData, TError>) => {
