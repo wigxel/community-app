@@ -151,7 +151,7 @@ export function FavouriteButton({
     );
   }
 
-  // ── Inline variant — wide pill with label; used in profile project cards ──
+  // ── Inline variant — heart + count ───────────────────────────────────────
   return (
     <button
       type="button"
@@ -161,26 +161,32 @@ export function FavouriteButton({
       onClick={handleClick}
       title={title}
       className={cn(
-        "flex items-center gap-1.5 rounded-full px-3 py-1.5",
-        "border text-sm font-medium transition-all duration-200 select-none cursor-pointer",
+        "flex items-center gap-1",
+        "text-[8px] transition-all duration-200",
+        "select-none cursor-pointer",
+        "hover:scale-105",
         optimisticFavourited
-          ? "bg-rose-500/15 border-rose-400/40 text-rose-300"
-          : "bg-white/5 border-white/15 text-white/50 hover:text-rose-300 hover:border-rose-400/30 hover:bg-rose-500/10",
-        isUnauthenticated && "opacity-50 cursor-default",
+          ? "text-rose-400"
+          : "text-white/45 hover:text-rose-300",
+        isUnauthenticated && "cursor-default opacity-50 hover:scale-100",
+        isPending && "opacity-60",
         className,
       )}
     >
       <Heart
-        size={15}
+        size={13}
+        strokeWidth={1.8}
         className={cn(
           "transition-all duration-200",
-          optimisticFavourited ? "fill-rose-400 text-rose-400" : "",
+          optimisticFavourited
+            ? "fill-rose-400 text-rose-400"
+            : "fill-transparent",
         )}
       />
-      <span className="tabular-nums">
-        {optimisticFavourited ? "Favourited" : "Favourite"}
-        {optimisticCount > 0 && ` · ${optimisticCount}`}
-      </span>
+
+      {optimisticCount > 0 && (
+        <span className="tabular-nums leading-none">{optimisticCount}</span>
+      )}
     </button>
   );
 }
