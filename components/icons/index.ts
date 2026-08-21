@@ -1,6 +1,6 @@
 import Behance from "./behance";
 import Figma from "./figma";
-import GitHub from "./github";
+import Github from "./github";
 import LinkedIn from "./linkedin";
 
 export {
@@ -8,4 +8,6 @@ export {
   SearchNormal1 as SearchIcon,
 } from "iconsax-reactjs";
 
-export { Behance, Figma, GitHub, LinkedIn };
+export { ExternalLink } from "lucide-react";
+
+export { Behance, Figma, Github, LinkedIn };

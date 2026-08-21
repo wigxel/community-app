@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GitHub, LinkedIn } from "~/components/icons";
+import { Github, LinkedIn } from "~/components/icons";
 import { CoverImageUpload } from "~/components/profile/cover-image-upload";
 import { ImageUpload } from "~/components/profile/image-upload";
 import { SkillsSelect } from "~/components/profile/skills-select";
@@ -68,7 +68,7 @@ type LinkTag = (typeof LINK_TYPES)[number]["tag"];
 const getLinkIcon = (tag: string) => {
   const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     linkedin: LinkedIn,
-    github: GitHub,
+    github: Github,
     portfolio: Globe,
   };
   return iconMap[tag.toLowerCase()] ?? Link;

@@ -10,7 +10,7 @@ import {
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Behance, Figma, GitHub, LinkedIn } from "~/components/icons";
+import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
 import ReturnButton from "~/components/profile/return-button";
 import { ShareButton } from "~/components/profile/share-button";
 import { api } from "~/convex/_generated/api";
@@ -24,7 +24,7 @@ import { WorkExperienceSection } from "./_components/WorkExperience";
 const getLinkIcon = (tag: string) => {
   const iconMap = {
     linkedin: LinkedIn,
-    github: GitHub,
+    github: Github,
     portfolio: Globe,
     docs: BookText,
     figma: Figma,

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMediaQuery } from "hooks-ts";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
@@ -14,21 +15,30 @@ const LandingProjectCard = ({ project }: { project: BasicProject }) => {
   const isVideo = mimeType.startsWith("video/");
   const likes_count = "3.3k";
   const pathname = usePathname();
+  const isMobile = useMediaQuery(
+    "(max-width: 600px) or (orientation: portrait)",
+  );
 
   const handleNavigation = (
     event:
       | React.KeyboardEvent<HTMLAnchorElement>
       | React.MouseEvent<HTMLAnchorElement>,
   ) => {
+    if (isMobile) return;
+
     event.preventDefault();
     event.stopPropagation();
 
-    window.history.pushState(null, "", `#preview:${project._id}`);
+    window.location.hash = `#preview:${project._id}`;
   };
 
   return (
     <Link
-      href={{ pathname, hash: `#preview:${project._id}` }}
+      href={
+        isMobile
+          ? `/projects/${project._id}`
+          : { pathname, hash: `#preview:${project._id}` }
+      }
       scroll={false}
       onClick={handleNavigation}
       onKeyDown={handleNavigation}
@@ -47,7 +57,7 @@ const LandingProjectCard = ({ project }: { project: BasicProject }) => {
               className="size-[2.4em] bg-blue-400! rounded-full"
               name={project.ownerName}
             />
-            <h3 className="font-semibold truncate max-w-[15ch] border text-sm text-foreground line-clamp-1">
+            <h3 className="font-semibold truncate max-w-[15ch] text-sm text-foreground line-clamp-1">
               {project.username ?? "--"}
             </h3>
           </div>

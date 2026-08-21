@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const token = await getToken();
+  const token = await getToken().catch(() => null);
 
   return (
     <NuqsAdapter>

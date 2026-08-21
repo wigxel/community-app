@@ -18,16 +18,16 @@ export default function Home() {
         <div className="flex-1 lg:pl-12">
           <div className="flex flex-col flex-1 py-12 gap-4">
             <h1 className="text-6xl text-balance font-bold tracking-tighter">
-              {/*<Balancer>*/}
-              Show your best works <br /> in a{" "}
-              <span className="text-accent-foreground">
-                <Type
-                  values={["professional", "best", "creative"]}
-                  speed={100}
-                />
-              </span>{" "}
-              way
-              {/*</Balancer>*/}
+              <Balancer>
+                Show your best works <br /> in a{" "}
+                <span className="text-accent-foreground">
+                  <Type
+                    values={["professional", "best", "creative"]}
+                    speed={100}
+                  />
+                </span>{" "}
+                way
+              </Balancer>
             </h1>
 
             <p className="text-balance text-base text-muted-foreground max-w-md">

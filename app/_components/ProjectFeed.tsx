@@ -132,7 +132,7 @@ export default function PublicProjectsCatalog() {
       <SearchBox />
 
       {/* Grid */}
-      {!isLoading ? (
+      {isLoading ? (
         <StandardGridSkeleton
           size={PAGE_SIZE}
           Component={ProjectCardSkeleton}

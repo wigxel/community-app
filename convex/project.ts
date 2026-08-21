@@ -3,7 +3,8 @@ import {
   paginationOptsValidator,
   queryGeneric as query,
 } from "convex/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
+import { Result, type ResultShape } from "../lib/result";
 import type { BasicProject } from "../types/models";
 import type { Doc } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
@@ -35,10 +36,16 @@ export const listProjectByUserId = query({
 export const getProject = query({
   args: { id: v.nullable(v.string()) },
   handler: async (ctx, args) => {
-    return ctx.db
+    const project: Doc<"project"> | null = await ctx.db
       .query("project")
       .filter((q) => q.eq(q.field("_id"), args.id))
       .first();
+
+    if (project === null) {
+      return Result.error("Not found");
+    }
+
+    return Result.ok(project);
   },
 });
 

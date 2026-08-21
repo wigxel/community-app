@@ -1,4 +1,4 @@
-import type { Id } from "../convex/_generated/dataModel";
+import type { Doc, Id } from "../convex/_generated/dataModel";
 
 export interface ProfileLocation {
   city: string;
@@ -67,6 +67,7 @@ type PhotoMedia = {
   type: "photo";
   metadata: BaseMediaMetadata & { width: number; height: number };
 };
+
 type VideoMedia = {
   type: "video";
   metadata: BaseMediaMetadata & {
@@ -89,10 +90,7 @@ export type BasicProject = Project & {
   username: string;
 };
 
-export interface Project {
-  _id?: Id<"project">;
-  userId: string;
-  title: string;
+export interface Project extends Doc<"project"> {
   timeline: {
     start: TimelineDate;
     end: TimelineDate;

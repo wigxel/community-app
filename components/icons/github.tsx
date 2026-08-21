@@ -4,7 +4,7 @@ interface GitHubProps extends SVGProps<SVGSVGElement> {
   size?: number;
 }
 
-export default function GitHub({
+export default function Github({
   size = 24,
   className = "",
   ...props

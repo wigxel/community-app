@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Behance, Figma, GitHub, LinkedIn } from "~/components/icons";
+import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
 import {
   Card,
   CardContent,
@@ -23,7 +23,7 @@ import type { Project, TimelineDate } from "~/types/models";
 const getLinkIcon = (tag: string) => {
   const iconMap = {
     linkedin: LinkedIn,
-    github: GitHub,
+    github: Github,
     portfolio: Globe,
     docs: BookText,
     figma: Figma,
