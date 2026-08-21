@@ -152,3 +152,7 @@ body::selection {
     var(--background) var(--dossier-stripe-period)
   );
 }
+
+.corner-sharp {
+  corner-shape: bevel;
+}

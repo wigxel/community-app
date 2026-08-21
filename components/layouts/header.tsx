@@ -10,14 +10,7 @@ export function Header() {
         level="max"
         className="flex gap-2 justify-between items-center"
       >
-        <Link href="/" className="flex-1">
-          <Image
-            src="/brand-logo-light.svg"
-            alt={"Community app Logo"}
-            width={69}
-            height={12}
-          />
-        </Link>
+        <BrandLogo />
 
         <nav className="inline-flex gap-4 flex-1 justify-center">
           <Link href="/catalog">Projects</Link>
@@ -30,5 +23,19 @@ export function Header() {
         </div>
       </Container>
     </header>
+  );
+}
+
+export function BrandLogo() {
+  return (
+    <Link href="/" className="flex-1">
+      <Image
+        src="/brand-logo-light.svg"
+        alt={"Rever"}
+        width={69}
+        height={12}
+        className="transform translate-y-[25%]"
+      />
+    </Link>
   );
 }

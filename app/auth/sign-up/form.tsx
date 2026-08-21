@@ -1,23 +1,22 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "~/components/ui/form";
-import { Progress } from "~/components/ui/progress";
+import { SegmentProgressBar } from "~/components/ui/segmented-gradient-progress";
+import { PasswordInput } from "~/components/fields/password";
+import { LoadingButton } from "~/components/forms/button";
 import { authClient } from "~/lib/auth-client";
 
 const signUpSchema = z
@@ -50,7 +49,7 @@ const defaultValues: Partial<SignUpValues> = {
 function getPasswordStrength(password: string): {
   score: number;
   label: string;
-  color: string;
+  gradient: { startColor: string; endColor: string };
 } {
   let score = 0;
   if (password.length >= 8) score++;
@@ -60,14 +59,26 @@ function getPasswordStrength(password: string): {
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
 
-  if (score <= 2) return { score, label: "Weak", color: "bg-red-500" };
-  if (score <= 4) return { score, label: "Fair", color: "bg-yellow-500" };
-  return { score, label: "Strong", color: "bg-green-500" };
+  if (score <= 2)
+    return {
+      score,
+      label: "Weak",
+      gradient: { startColor: "#ef4444", endColor: "#f97316" },
+    };
+  if (score <= 4)
+    return {
+      score,
+      label: "Fair",
+      gradient: { startColor: "#f97316", endColor: "#eab308" },
+    };
+  return {
+    score,
+    label: "Strong",
+    gradient: { startColor: "#22c55e", endColor: "#10b981" },
+  };
 }
 
 export default function SignUpForm({ redirectTo }: { redirectTo: string }) {
-  const [showPassword, setShowPassword] = useState(false);
-
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues,
@@ -95,262 +106,245 @@ export default function SignUpForm({ redirectTo }: { redirectTo: string }) {
     window.location.href = `/onboarding?redirect=${encodeURIComponent(redirectTo)}`;
   }
 
+  function onError() {
+    const errors = form.formState.errors;
+    const firstError = Object.values(errors)[0];
+    if (firstError?.message) {
+      toast.error("Validation error", { description: firstError.message });
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-white">Create account</h1>
-          <p className="mt-2 text-sm text-white/50">
+        <div className="mb-8 text-start">
+          <h1 className="text-3xl font-semibold text-foreground">
+            Create account
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Get started with your free account
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-lg backdrop-blur-sm">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-col gap-4"
-            >
-              <div className="grid grid-cols-2 gap-3">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white/70">
-                        First Name
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="John"
-                          disabled={form.formState.isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white/70">Last Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Doe"
-                          disabled={form.formState.isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit, onError)}
+            className="flex flex-col gap-4"
+          >
+            <div className="grid grid-cols-2 gap-3">
               <FormField
                 control={form.control}
-                name="email"
+                name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white/70">Email</FormLabel>
+                    <FormLabel>First Name</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        type="email"
-                        placeholder="you@example.com"
-                        autoComplete="email"
+                        placeholder="John"
                         disabled={form.formState.isSubmitting}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
-                name="password"
+                name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white/70">Password</FormLabel>
+                    <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
-                          {...field}
-                          type={showPassword ? "text" : "password"}
-                          placeholder="min. 8 characters"
-                          autoComplete="new-password"
-                          disabled={form.formState.isSubmitting}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/50 hover:text-white transition-colors"
+                      <Input
+                        {...field}
+                        placeholder="Doe"
+                        disabled={form.formState.isSubmitting}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      disabled={form.formState.isSubmitting}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput
+                      {...field}
+                      placeholder="min. 8 characters"
+                      autoComplete="new-password"
+                      disabled={form.formState.isSubmitting}
+                    />
+                  </FormControl>
+                  {password && password.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-foreground/50">
+                          Password strength
+                        </span>
+                        <span
+                          className={
+                            passwordStrength.score <= 2
+                              ? "text-red-400"
+                              : passwordStrength.score <= 4
+                                ? "text-yellow-400"
+                                : "text-green-400"
+                          }
                         >
-                          {showPassword ? "Hide" : "Show"}
-                        </button>
+                          {passwordStrength.label}
+                        </span>
                       </div>
-                    </FormControl>
-                    {password && password.length > 0 && (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-white/50">
-                            Password strength
-                          </span>
-                          <span
-                            className={
-                              passwordStrength.score <= 2
-                                ? "text-red-400"
-                                : passwordStrength.score <= 4
-                                  ? "text-yellow-400"
-                                  : "text-green-400"
-                            }
-                          >
-                            {passwordStrength.label}
-                          </span>
-                        </div>
-                        <Progress
-                          value={(passwordStrength.score / 6) * 100}
-                          className="h-1.5"
-                        />
-                        <div className="grid grid-cols-2 gap-1 text-xs text-white/40">
-                          <span
-                            className={
-                              password.length >= 8 ? "text-green-400" : ""
-                            }
-                          >
-                            8+ characters
-                          </span>
-                          <span
-                            className={
-                              /[A-Z]/.test(password ?? "")
-                                ? "text-green-400"
-                                : ""
-                            }
-                          >
-                            Uppercase letter
-                          </span>
-                          <span
-                            className={
-                              /[a-z]/.test(password ?? "")
-                                ? "text-green-400"
-                                : ""
-                            }
-                          >
-                            Lowercase letter
-                          </span>
-                          <span
-                            className={
-                              /[0-9]/.test(password ?? "")
-                                ? "text-green-400"
-                                : ""
-                            }
-                          >
-                            Number
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white/70">
-                      Confirm Password
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
-                        autoComplete="new-password"
-                        disabled={form.formState.isSubmitting}
+                      <SegmentProgressBar
+                        progressValue={(passwordStrength.score / 6) * 100}
+                        gradient={passwordStrength.gradient}
+                        className="h-2"
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="terms"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-start gap-3">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          className="mt-1 h-4 w-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          disabled={form.formState.isSubmitting}
-                        />
-                      </FormControl>
-                      <div className="text-sm leading-none">
-                        <span className="text-white/50">
-                          I agree to the{" "}
-                          <Link
-                            href="/terms"
-                            target="_blank"
-                            className="text-white hover:text-white/80 underline underline-offset-2"
-                          >
-                            Terms of Use
-                          </Link>{" "}
-                          and{" "}
-                          <Link
-                            href="/privacy"
-                            target="_blank"
-                            className="text-white hover:text-white/80 underline underline-offset-2"
-                          >
-                            Privacy Policy
-                          </Link>
+                      <div className="grid grid-cols-2 gap-1 text-xs text-foreground/40">
+                        <span
+                          className={
+                            password.length >= 8 ? "text-foreground" : ""
+                          }
+                        >
+                          8+ characters
+                        </span>
+                        <span
+                          className={
+                            /[A-Z]/.test(password ?? "")
+                              ? "text-foreground"
+                              : ""
+                          }
+                        >
+                          Uppercase letter
+                        </span>
+                        <span
+                          className={
+                            /[a-z]/.test(password ?? "")
+                              ? "text-foreground"
+                              : ""
+                          }
+                        >
+                          Lowercase letter
+                        </span>
+                        <span
+                          className={
+                            /[0-9]/.test(password ?? "")
+                              ? "text-foreground"
+                              : ""
+                          }
+                        >
+                          Number
                         </span>
                       </div>
                     </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  )}
+                </FormItem>
+              )}
+            />
 
-              <Button
-                type="submit"
-                disabled={form.formState.isSubmitting}
-                className="mt-1 w-full"
-              >
-                {form.formState.isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account…
-                  </>
-                ) : (
-                  "Create Account"
-                )}
-              </Button>
-            </form>
-          </Form>
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput
+                      {...field}
+                      placeholder="Confirm your password"
+                      autoComplete="new-password"
+                      showToggle={false}
+                      disabled={form.formState.isSubmitting}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-white/50">
-              Already have an account?{" "}
-              <Link
-                href="/auth/sign-in"
-                className="text-white hover:text-white/80 transition-colors"
-              >
-                Sign in
-              </Link>
-            </p>
-          </div>
+            <FormField
+              control={form.control}
+              name="terms"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-start gap-3">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={form.formState.isSubmitting}
+                        className="mt-0.5"
+                      />
+                    </FormControl>
+                    <div className="text-sm mt-0.5 leading-none">
+                      <span className="text-foreground/50">
+                        I agree to the{" "}
+                        <Link
+                          href="/terms"
+                          target="_blank"
+                          className="text-foreground hover:text-foreground/80 underline underline-offset-2"
+                        >
+                          Terms of Use
+                        </Link>{" "}
+                        and{" "}
+                        <Link
+                          href="/privacy"
+                          target="_blank"
+                          className="text-foreground hover:text-foreground/80 underline underline-offset-2"
+                        >
+                          Privacy Policy
+                        </Link>
+                      </span>
+                    </div>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <LoadingButton
+              type="submit"
+              loading={form.formState.isSubmitting}
+              loadingText="Creating account…"
+              className="mt-1 w-full"
+            >
+              Create Account
+            </LoadingButton>
+          </form>
+        </Form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              href="/auth/sign-in"
+              className="text-foreground hover:text-foreground/80 transition-colors"
+            >
+              Sign in
+            </Link>
+          </p>
         </div>
       </div>
     </div>

@@ -1,140 +1,147 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod/v4";
-import { Button } from "~/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/fields/password";
+import { LoadingButton } from "~/components/forms/button";
 import { authClient } from "~/lib/auth-client";
-
-type SignInState = {
-  error?: string;
-  success?: boolean;
-  timestamp: number;
-};
 
 const signInSchema = z.object({
   email: z.email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
-async function signInAction(
-  _prev: SignInState,
-  formData: FormData,
-): Promise<SignInState> {
-  const raw = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
+type SignInValues = z.infer<typeof signInSchema>;
 
-  const parsed = signInSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { timestamp: Date.now(), error: parsed.error.issues[0].message };
-  }
-
-  const { error } = await authClient.signIn.email(parsed.data);
-  if (error)
-    return { timestamp: Date.now(), error: error.message ?? "Sign in failed" };
-
-  return { timestamp: Date.now(), success: true };
-}
+const defaultValues: Partial<SignInValues> = {
+  email: "",
+  password: "",
+};
 
 export default function SignInForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
 
-  const [state, action, pending] = useActionState<SignInState, FormData>(
-    signInAction,
-    {
-      timestamp: 0,
-    },
-  );
+  const form = useForm<SignInValues>({
+    resolver: zodResolver(signInSchema),
+    defaultValues,
+    mode: "onBlur",
+  });
 
-  useEffect(() => {
-    if (state.success) {
-      toast.success("Welcome back!");
-      router.push(redirectTo);
+  async function onSubmit(values: SignInValues) {
+    const { error } = await authClient.signIn.email(values);
+
+    if (error) {
+      toast.error("Sign in failed", { description: error.message });
+      return;
     }
-  }, [state.success, redirectTo, router]);
+
+    toast.success("Welcome back!");
+    router.push(redirectTo ? (redirectTo as never) : "/dashboard");
+  }
+
+  function onError() {
+    const errors = form.formState.errors;
+    const firstError = Object.values(errors)[0];
+    if (firstError?.message) {
+      toast.error("Validation error", { description: firstError.message });
+    }
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex items-center justify-center">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-white">Welcome back</h1>
-          <p className="mt-2 text-sm text-white/50">
+        <div className="mb-8 text-start">
+          <h1 className="text-3xl font-semibold text-foreground">
+            Welcome back
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Sign in to your account to continue
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-lg backdrop-blur-sm">
-          <form action={action} className="flex flex-col gap-4">
-            {state.error && (
-              <p className="text-sm text-red-400 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
-                {state.error}
-              </p>
-            )}
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                disabled={pending}
-                autoComplete="email"
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-xs text-white/50 hover:text-white transition-colors"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                disabled={pending}
-                autoComplete="current-password"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <Button type="submit" disabled={pending} className="mt-1 w-full">
-              {pending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in…
-                </>
-              ) : (
-                "Sign In"
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit, onError)}
+            className="flex flex-col gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      disabled={form.formState.isSubmitting}
+                    />
+                  </FormControl>
+                </FormItem>
               )}
-            </Button>
-          </form>
+            />
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-white/50">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/auth/sign-up"
-                className="text-white hover:text-white/80 transition-colors"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Password</FormLabel>
+                    <Link
+                      href="/auth/forgot-password"
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <FormControl>
+                    <PasswordInput
+                      {...field}
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      disabled={form.formState.isSubmitting}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <LoadingButton
+              type="submit"
+              loading={form.formState.isSubmitting}
+              loadingText="Signing in…"
+              className="mt-1 w-full"
+            >
+              Sign In
+            </LoadingButton>
+          </form>
+        </Form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            New to Rever?{" "}
+            <Link
+              href="/auth/sign-up"
+              className="text-foreground hover:text-foreground/80 transition-colors"
+            >
+              Create an account
+            </Link>
+          </p>
         </div>
       </div>
     </div>
