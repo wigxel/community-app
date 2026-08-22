@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { toast } from "~/lib/toast";
 import { z } from "zod/v4";
 import { LoadingButton } from "~/components/forms/button";
 import {
@@ -12,6 +12,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 
@@ -59,14 +60,6 @@ export default function ForgotPasswordForm() {
     toast.success("Check your email for a reset link");
   }
 
-  function onError() {
-    const errors = form.formState.errors;
-    const firstError = Object.values(errors)[0];
-    if (firstError?.message) {
-      toast.error("Validation error", { description: firstError.message });
-    }
-  }
-
   return (
     <div className="flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -81,7 +74,7 @@ export default function ForgotPasswordForm() {
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit, onError)}
+            onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
             <FormField
@@ -99,6 +92,7 @@ export default function ForgotPasswordForm() {
                       disabled={form.formState.isSubmitting}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

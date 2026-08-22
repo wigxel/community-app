@@ -5,7 +5,7 @@ const { toast } = vi.hoisted(() => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock("sonner", () => ({
+vi.mock("~/lib/toast", () => ({
   toast,
 }));
 

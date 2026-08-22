@@ -5,7 +5,7 @@ import { ArrowLeft, FolderOpen, Plus, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { toast } from "~/lib/toast";
 import { z } from "zod";
 import { pendingFiles } from "~/components/dashboard/projects/edit/media-row";
 import { ProjectCard } from "~/components/dashboard/projects/edit/project-card";

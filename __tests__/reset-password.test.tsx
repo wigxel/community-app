@@ -6,7 +6,7 @@ const { toast, useRouter } = vi.hoisted(() => ({
   useRouter: vi.fn(() => ({ push: vi.fn() })),
 }));
 
-vi.mock("sonner", () => ({ toast }));
+vi.mock("~/lib/toast", () => ({ toast }));
 vi.mock("next/navigation", () => ({ useRouter }));
 
 const resetPasswordMock = vi.fn();

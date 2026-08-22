@@ -1,5 +1,4 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,6 +12,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { authClient } from "~/lib/auth-client";
@@ -51,14 +51,6 @@ export default function SignInForm({ redirectTo }: { redirectTo: string }) {
     router.push(redirectTo ? (redirectTo as never) : "/dashboard");
   }
 
-  function onError() {
-    const errors = form.formState.errors;
-    const firstError = Object.values(errors)[0];
-    if (firstError?.message) {
-      toast.error("Validation error", { description: firstError.message });
-    }
-  }
-
   return (
     <div className="flex items-center justify-center">
       <div className="w-full max-w-sm">
@@ -73,7 +65,7 @@ export default function SignInForm({ redirectTo }: { redirectTo: string }) {
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit, onError)}
+            onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
             <FormField
@@ -91,6 +83,7 @@ export default function SignInForm({ redirectTo }: { redirectTo: string }) {
                       disabled={form.formState.isSubmitting}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -117,6 +110,7 @@ export default function SignInForm({ redirectTo }: { redirectTo: string }) {
                       disabled={form.formState.isSubmitting}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
