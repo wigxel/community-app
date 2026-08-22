@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { toast } from "~/lib/toast";
 import { z } from "zod/v4";
 import { PasswordInput } from "~/components/fields/password";
 import { LoadingButton } from "~/components/forms/button";
@@ -19,6 +18,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { SegmentProgressBar } from "~/components/ui/segmented-gradient-progress";
 import { authClient } from "~/lib/auth-client";
+import { toast } from "~/lib/toast";
 
 const signUpSchema = z
   .object({

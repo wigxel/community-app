@@ -173,7 +173,7 @@ body::selection {
 }
 
 @layer system {
-  [data-sonner-toaster] {
-    font-family: var(--font-sans) !important;
+  ol[data-sonner-toaster] > li[data-sonner-toast] {
+    font-family: var(--font-body);
   }
 }

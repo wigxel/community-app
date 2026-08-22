@@ -11,7 +11,8 @@
       "**",
       "!**/.next/**/*",
       "!**/convex/_generated/**/*",
-      "!public/**/*"
+      "!public/**/*",
+      "!**/*.test.*"
     ]
   },
   "formatter": {

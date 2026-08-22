@@ -5,16 +5,16 @@ import { ArrowLeft, FolderOpen, Plus, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { Form, useFieldArray, useForm } from "react-hook-form";
-import { toast } from "~/lib/toast";
 import { z } from "zod";
-import { pendingFiles } from "./media-row";
-import { ProjectCard } from "./project-card";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
 import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { safeArray } from "~/lib/data.helpers";
+import { toast } from "~/lib/toast";
 import { projectSchema } from "~/lib/validators/schema";
+import { pendingFiles } from "./media-row";
+import { ProjectCard } from "./project-card";
 
 const EMPTY_PROJECT = {
   userId: "",

@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { toast } from "~/lib/toast";
 import { z } from "zod/v4";
 import { LoadingButton } from "~/components/forms/button";
 import {
@@ -15,6 +14,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { toast } from "~/lib/toast";
 
 const forgotPasswordSchema = z.object({
   email: z.email("Invalid email address"),

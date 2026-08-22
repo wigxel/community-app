@@ -1,7 +1,6 @@
 "use client";
 import { Link as LinkIcon, X } from "lucide-react";
 import { type Control, Controller } from "react-hook-form";
-import type { ProjectFormSchema } from "./edit-projects-form";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -11,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import type { ProjectFormSchema } from "./edit-projects-form";
 
 const LINK_TAGS = [
   { value: "github", label: "GitHub" },

@@ -8,7 +8,6 @@ import {
   type UseFormRegister,
   type UseFormWatch,
 } from "react-hook-form";
-import type { ProjectFormSchema } from "./edit-projects-form";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -19,6 +18,7 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
+import type { ProjectFormSchema } from "./edit-projects-form";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB

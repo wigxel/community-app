@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "~/lib/toast";
 import { z } from "zod/v4";
 import { PasswordInput } from "~/components/fields/password";
 import { LoadingButton } from "~/components/forms/button";
@@ -17,6 +16,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { authClient } from "~/lib/auth-client";
+import { toast } from "~/lib/toast";
 
 const resetPasswordSchema = z
   .object({

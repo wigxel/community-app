@@ -1,5 +1,5 @@
 import z from "zod";
-import { Id } from "~/convex/_generated/dataModel";
+import type { Id } from "~/convex/_generated/dataModel";
 
 export const timelineDate = z.union([
   z.null(),

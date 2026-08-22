@@ -11,8 +11,6 @@ import {
 } from "lucide-react";
 import React, { Fragment } from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
-
-import { ProjectFormSchema } from "./edit-projects-form";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -32,6 +30,7 @@ import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import type { Media, ProjectLink } from "~/types/models";
+import type { ProjectFormSchema } from "./edit-projects-form";
 import LinkRow from "./link-row";
 import MediaRow from "./media-row";
 import TimelineSelect from "./timeline-select";
