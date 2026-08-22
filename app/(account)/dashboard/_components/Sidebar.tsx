@@ -1,19 +1,20 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import {
-  FolderOpenDot,
-  Heart,
-  Home,
-  LogOut,
-  Menu,
-  Settings,
-  User,
-  X,
-} from "lucide-react";
+import { Logout } from "iconsax-reactjs";
+import { LogOut, type LucideProps, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import {
+  DirectNotificationIcon,
+  Folder2,
+  Home,
+  SaveIcon,
+  SettingsIcon,
+  TeacherIcon,
+  UserIcon,
+} from "~/components/icons";
 import { AuthUserAvatar } from "~/components/profile/auth-user-avatar";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
@@ -22,15 +23,52 @@ import { authClient } from "~/lib/auth-client";
 import { ProfileImpl } from "~/lib/factories/profile";
 import { cn } from "~/lib/utils";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const IconHoc = (IconComponent: React.FC<any>) => {
+  return (props: LucideProps) => (
+    <IconComponent variant={"Twotone"} {...props} />
+  );
+};
+
 const navigation = [
-  { name: "Home", href: "/dashboard/home", icon: Home },
-  { name: "Profile", href: "/dashboard/profile", icon: User },
-  { name: "Projects", href: "/dashboard/projects", icon: FolderOpenDot },
-  { name: "Favourites", href: "/dashboard/favourites", icon: Heart },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  {
+    name: "Home",
+    href: "/dashboard/home",
+    icon: IconHoc(Home),
+  },
+  {
+    name: "Projects",
+    href: "/dashboard/projects",
+    icon: IconHoc(Folder2),
+  },
+  {
+    name: "Saves",
+    href: "/dashboard/favourites",
+    icon: IconHoc(SaveIcon),
+  },
+  {
+    name: "Profile",
+    href: "/dashboard/profile",
+    icon: IconHoc(UserIcon),
+  },
+  {
+    name: "Notifications",
+    href: "/dashboard/notifications",
+    icon: IconHoc(DirectNotificationIcon),
+  },
+  {
+    name: "Tutorials",
+    href: "/dashboard/mentorship",
+    icon: IconHoc(TeacherIcon),
+  },
+  {
+    name: "Settings",
+    href: "/dashboard/settings",
+    icon: IconHoc(SettingsIcon),
+  },
 ];
 
-export default function Sidebar() {
+export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -51,51 +89,37 @@ export default function Sidebar() {
   const email = profile?.email ?? session?.user?.email ?? "—";
 
   const SidebarContent = (
-    <div className="flex h-full flex-col border-r border-white/10">
-      <div className="flex h-16 items-center px-5 border-b border-white/10 shrink-0">
-        <span className="text-lg font-semibold tracking-wide">Dashboard</span>
-      </div>
-
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+    <div className="flex flex-col pt-10 justify-between h-full w-full">
+      <nav className="flex-1 overflow-y-auto space-y-10">
         {navigation.map((item) => {
           const active = pathname.startsWith(item.href);
+
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                active
-                  ? "bg-blue-500/15 text-blue-300"
-                  : "text-white/70 hover:bg-white/8 hover:text-white",
-              )}
-            >
-              <item.icon size={16} className="shrink-0" />
-              {item.name}
+            <Link key={item.href} href={item.href}>
+              <NavItem item={item} isActive={active} />
             </Link>
           );
         })}
       </nav>
 
-      <Separator className="bg-white/10" />
-
-      <div className="flex items-center gap-3 px-4 py-4 shrink-0">
-        <AuthUserAvatar className="size-8" />
-
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{displayName}</p>
-          <p className="text-xs text-white/50 truncate">{email}</p>
-        </div>
-
-        <Button
-          variant="ghost"
-          size="icon"
+      <div className="pb-4 flex flex-col">
+        <button
+          type="button"
+          className="appearance-none"
           onClick={handleSignOut}
-          className="shrink-0 size-8 text-white/40 hover:text-white hover:bg-white/10"
-          title="Sign out"
         >
-          <LogOut size={15} />
-        </Button>
+          <NavItem
+            item={{
+              name: "Logout",
+              icon: () => <Logout size={24} />,
+            }}
+          />
+        </button>
+
+        <div className="ps-2 mt-2 flex justify-between text-xs text-muted-foreground/50">
+          <span>All rights reserved.</span>
+          <span>&copy; 2026.</span>
+        </div>
       </div>
     </div>
   );
@@ -140,9 +164,33 @@ export default function Sidebar() {
       </div>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64">
-        {SidebarContent}
-      </aside>
+      <aside className="self-stretch flex  w-full">{SidebarContent}</aside>
     </>
+  );
+}
+
+type NavItemProps = {
+  item: Pick<(typeof navigation)[0], "name" | "icon">;
+  isActive?: boolean;
+};
+
+function NavItem(props: NavItemProps) {
+  const { item, isActive } = props;
+
+  return (
+    <li
+      className={cn(
+        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-normal transition-colors",
+        isActive
+          ? "bg-muted text-foreground"
+          : "text-white/70 hover:bg-white/8 hover:text-white",
+      )}
+    >
+      <item.icon
+        size={"1.5rem"}
+        className={cn("shrink-0", isActive ? "text-lime-500" : "")}
+      />
+      <span>{item.name}</span>
+    </li>
   );
 }
