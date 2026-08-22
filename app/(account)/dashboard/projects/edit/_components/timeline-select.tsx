@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
-import type { z } from "zod";
-import type { timelineDate } from "~/app/(dashboard)/dashboard/projects/edit/page";
+import type z from "zod/v4";
 import { Label } from "~/components/ui/label";
+import type { timelineDate } from "~/lib/validators/schema";
 
 const MONTHS = [
   "January",
@@ -22,7 +22,7 @@ const MONTHS = [
 const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 30 }, (_, i) => currentYear - i);
 
-type TimelineDate = z.infer<typeof timelineDate>;
+type TimelineDate = z.Infer<typeof timelineDate>;
 
 function tsToMonthYear(val: TimelineDate): {
   month: string;

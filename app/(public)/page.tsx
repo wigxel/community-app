@@ -1,5 +1,6 @@
 "use client";
 
+// @ts-expect-error No declaration file yet
 import { Type } from "@wigxel/react-components/lib/typography";
 import { ArrowRight } from "lucide-react";
 import { Balancer } from "react-wrap-balancer";
