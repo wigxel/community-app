@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "convex/react";
+import { usePaginatedQuery } from "convex/react";
 import { Pencil } from "lucide-react";
 import { RedirectType, redirect, useRouter } from "next/navigation";
 import { ProjectCard } from "~/components/dashboard/projects/project-card";
@@ -8,11 +8,15 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
 
 export default function Projects() {
-  const projects = useQuery(api.project.listProject);
-  const isFetching = projects === undefined;
+  const { results, status } = usePaginatedQuery(
+    api.project.listProject,
+    {},
+    { initialNumItems: 50 },
+  );
+  const isFetching = status === "LoadingFirstPage";
   const router = useRouter();
 
-  if (projects && projects.length < 1)
+  if (status === "Exhausted" && results.length < 1)
     redirect("/dashboard/projects/edit", RedirectType.replace);
 
   return (
@@ -33,10 +37,9 @@ export default function Projects() {
       {isFetching ? (
         <ProjectCardSkeleton />
       ) : (
-        projects &&
-        projects.length > 0 && (
+        results.length > 0 && (
           <div className="flex flex-col gap-8">
-            {projects.map((project) => {
+            {results.map((project) => {
               return <ProjectCard key={project._id} {...project} />;
             })}
           </div>

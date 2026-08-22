@@ -12,14 +12,18 @@ import { authComponent } from "./auth";
 import { project_schema } from "./schema";
 
 export const listProject = query({
-  handler: async (ctx) => {
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
-    if (!authUser) throw new Error("Not authenticated");
+    if (!authUser) {
+      console.error("Not authenticated");
+      return { page: [], isDone: true, continueCursor: "" };
+    }
 
     return await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", authUser._id))
-      .collect();
+      .paginate(args.paginationOpts);
   },
 });
 

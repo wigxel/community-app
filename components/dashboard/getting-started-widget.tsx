@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { usePaginatedQuery, useQuery } from "convex/react";
 import { CheckCircle2, Circle } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -11,12 +11,16 @@ import { SegmentProgressBar } from "../ui/segmented-gradient-progress";
 
 export function GettingStartedWidget() {
   const profile = useQuery(api.profiles.getProfile);
-  const modify = useQuery(api.project.listProject);
+  const { results: projects } = usePaginatedQuery(
+    api.project.listProject,
+    {},
+    { initialNumItems: 1 },
+  );
 
   // Check for Getting Started widget
-  const hasShortBio = safeStr(profile.shortBio).length > 0;
-  const hasProjects = safeArray(modify).length > 0;
-  const hasWorkExperience = safeArray(profile.workExperience).length > 0;
+  const hasShortBio = safeStr(profile?.shortBio).length > 0;
+  const hasProjects = projects.length > 0;
+  const hasWorkExperience = safeArray(profile?.workExperience).length > 0;
 
   const steps = [
     {

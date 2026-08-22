@@ -1,6 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, usePaginatedQuery } from "convex/react";
 import { ArrowLeft, FolderOpen, Plus, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -37,8 +37,12 @@ export function EditProjects() {
   const [uploadProgress, setUploadProgress] = React.useState<string | null>(
     null,
   );
-  const projects = useQuery(api.project.listProject);
-  const isFetching = projects === undefined;
+  const { results: projects, status } = usePaginatedQuery(
+    api.project.listProject,
+    {},
+    { initialNumItems: 50 },
+  );
+  const isFetching = status === "LoadingFirstPage";
   const router = useRouter();
 
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);

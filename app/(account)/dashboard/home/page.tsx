@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { usePaginatedQuery, useQuery } from "convex/react";
 import { Briefcase, Folder, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { GettingStartedWidget } from "~/components/dashboard/getting-started-widget";
@@ -188,15 +188,18 @@ const DashboardPage = () => {
 };
 
 function TopProjects() {
-  const projects = useQuery(api.project.listProject);
-  const safeProjects = safeArray(projects);
+  const { results } = usePaginatedQuery(
+    api.project.listProject,
+    {},
+    { initialNumItems: 2 },
+  );
 
   return (
     <>
-      {safeProjects.length > 0 && (
+      {results.length > 0 && (
         <div>
           <p className="text-sm text-white/60 mb-2">Recent Projects</p>
-          {safeProjects.slice(0, 2).map((project) => (
+          {results.map((project) => (
             <WorkItem
               key={project.title}
               position={project.title}
