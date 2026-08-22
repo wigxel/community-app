@@ -4,9 +4,9 @@ import { useQuery } from "convex/react";
 import { Heart, HeartCrack } from "lucide-react";
 import Link from "next/link";
 import { api } from "~/convex/_generated/api";
+import type { FavouritedProject } from "~/types/models";
 import { FavouritedProjectCard } from "./_components/FavouritedProjectCard";
 import { FavouritedProjectCardSkeleton } from "./_components/FavouritedProjectCardSkeleton";
-import { FavouritedProject } from "~/types/models";
 
 const skeletonIds = [
   "skeleton-1",

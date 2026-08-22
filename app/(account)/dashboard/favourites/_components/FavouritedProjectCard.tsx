@@ -6,14 +6,14 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { FavouriteButton } from "~/app/_components/FavouriteButton";
 
-import { FavouritedProject } from "~/types/models";
+import type { FavouritedProject } from "~/types/models";
 
 export function FavouritedProjectCard(props: { project: FavouritedProject }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const { project } = props;
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [_modalOpen, setModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   const firstMedia = project.media?.[0] ?? null;
