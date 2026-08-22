@@ -101,6 +101,16 @@ export interface Project extends Doc<"project"> {
   link: ProjectLink[];
 }
 
+export type FavouritedProject = Project & {
+  favouritedAt: number;
+  owner: {
+    firstName: string;
+    lastName: string;
+    username: string;
+    profileImage: string | null;
+  } | null;
+};
+
 export interface WorkExperience {
   logo?: string;
   companyName: string;

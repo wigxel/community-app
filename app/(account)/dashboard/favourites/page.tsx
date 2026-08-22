@@ -6,6 +6,7 @@ import Link from "next/link";
 import { api } from "~/convex/_generated/api";
 import { FavouritedProjectCard } from "./_components/FavouritedProjectCard";
 import { FavouritedProjectCardSkeleton } from "./_components/FavouritedProjectCardSkeleton";
+import { FavouritedProject } from "~/types/models";
 
 const skeletonIds = [
   "skeleton-1",
@@ -61,7 +62,10 @@ export default function FavouritesPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {favourites.map((project) => (
-            <FavouritedProjectCard key={project._id} project={project} />
+            <FavouritedProjectCard
+              key={project._id}
+              project={project as FavouritedProject}
+            />
           ))}
         </div>
       )}

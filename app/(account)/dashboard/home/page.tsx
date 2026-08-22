@@ -11,6 +11,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 import { api } from "~/convex/_generated/api";
+import { safeArray } from "~/lib/data.helpers";
 
 const DashboardPage = () => {
   const profile = useQuery(api.profiles.getProfile);
@@ -168,19 +169,7 @@ const DashboardPage = () => {
               </div>
             )}
 
-            {profile.projects && profile.projects.length > 0 && (
-              <div>
-                <p className="text-sm text-white/60 mb-2">Recent Projects</p>
-                {profile.projects.slice(0, 2).map((project) => (
-                  <WorkItem
-                    key={project.title}
-                    position={project.title}
-                    company={`${project.description.slice(0, 50)}...`}
-                    timeline={`${new Date(project.timeline.start).getFullYear()} — ${new Date(project.timeline.end).getFullYear()}`}
-                  />
-                ))}
-              </div>
-            )}
+            <TopProjects />
 
             <Link href={"/dashboard/settings/profile"}>
               <Button
@@ -197,5 +186,28 @@ const DashboardPage = () => {
     </div>
   );
 };
+
+function TopProjects() {
+  const projects = useQuery(api.project.listProject);
+  const safeProjects = safeArray(projects);
+
+  return (
+    <>
+      {safeProjects.length > 0 && (
+        <div>
+          <p className="text-sm text-white/60 mb-2">Recent Projects</p>
+          {safeProjects.slice(0, 2).map((project) => (
+            <WorkItem
+              key={project.title}
+              position={project.title}
+              company={`${project.description.slice(0, 50)}...`}
+              timeline={`${new Date(project.timeline.start).getFullYear()} — ${new Date(project.timeline.end).getFullYear()}`}
+            />
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
 
 export default DashboardPage;

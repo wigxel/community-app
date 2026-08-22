@@ -5,29 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { FavouriteButton } from "~/app/_components/FavouriteButton";
-import { ProjectModal } from "~/app/_components/ProjectModal";
 
-import type { Doc } from "~/convex/_generated/dataModel";
+import { FavouritedProject } from "~/types/models";
 
-type FavouritedProject = Doc<"project"> & {
-  favouritedAt: number;
-  owner: {
-    firstName: string;
-    lastName: string;
-    username: string;
-    profileImage: string | null;
-  } | null;
-};
+export function FavouritedProjectCard(props: { project: FavouritedProject }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-export function FavouritedProjectCard({
-  project,
-}: {
-  project: FavouritedProject;
-}) {
+  const { project } = props;
+
   const [modalOpen, setModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const firstMedia = project.media?.[0] ?? null;
   const mimeType = firstMedia?.metadata?.mimeType ?? "";
@@ -143,11 +130,11 @@ export function FavouritedProjectCard({
         )}
       </div>
 
-      <ProjectModal
+      {/*<ProjectModal
         project={project}
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-      />
+      />*/}
     </>
   );
 }

@@ -6,11 +6,11 @@ import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
 import type { Project } from "~/types/models";
 
-export default async function ProjectsPage({
-  params,
-}: {
+type PageProps = {
   params: Promise<{ projectId: string }>;
-}) {
+};
+
+export default async function ProjectsPage({ params }: PageProps) {
   const { projectId } = await params;
 
   const project_response = await fetchQuery(api.project.getProject, {
@@ -18,15 +18,15 @@ export default async function ProjectsPage({
   }).catch(() => null);
 
   return Result.match(project_response, {
+    error: () => {
+      return notFound();
+    },
     success: (project) => {
       return (
         <Container level={"max"}>
           <ProjectDetails project={project as Project} />
         </Container>
       );
-    },
-    error: () => {
-      return notFound();
     },
   });
 }

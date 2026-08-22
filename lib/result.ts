@@ -19,7 +19,9 @@ export const Result = {
       success: (data: TData) => TSuccess;
       error: (error: TError) => TErrorResult;
     },
-  ) => {
+  ): TLoading extends unknown
+    ? TSuccess | TErrorResult | undefined
+    : TLoading | TSuccess | TErrorResult => {
     if (result === undefined) {
       return matchers.loading?.();
     }
@@ -36,6 +38,7 @@ export const Result = {
       }),
     );
   },
+
   parse<TRight, TLeft>(
     record: ResultShape<TRight, TLeft>,
   ): ResultShape<TRight, TLeft> {

@@ -1,4 +1,5 @@
 import { queryGeneric as query } from "convex/server";
+import type { Profile } from "../types/models";
 import { ConvexError, v } from "convex/values";
 import { validateUsernameFormat } from "../lib/username";
 import type { Id } from "./_generated/dataModel";
@@ -95,7 +96,7 @@ export const checkUsernameAvailability = query({
 
 export const getProfile = query({
   args: {},
-  async handler(ctx) {
+  async handler(ctx): Promise<Profile | null> {
     try {
       const authUser = await authComponent.getAuthUser(ctx);
       if (!authUser) return null;

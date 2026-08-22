@@ -5,7 +5,7 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import { Result } from "../lib/result";
-import type { BasicProject } from "../types/models";
+import type { BasicProject, Project } from "../types/models";
 import type { Doc } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
@@ -25,7 +25,7 @@ export const listProject = query({
 
 export const listProjectByUserId = query({
   args: { userId: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<Doc<"project">[]> => {
     return await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
