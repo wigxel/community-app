@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import type { PropsWithChildren } from "react";
 import { getToken } from "~/lib/auth-server";
 import { bodyFont } from "~/styles/font";
 import "./globals.css";
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   description: "Connect Local Businesses with Students for Internship",
 };
 
-export default async function RootLayout({ children }) {
+export default async function RootLayout({ children }: PropsWithChildren) {
   const token = await getToken().catch(() => null);
 
   return (

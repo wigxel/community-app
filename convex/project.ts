@@ -11,45 +11,53 @@ import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 import { project_schema } from "./schema";
 
+function toProject(doc: Doc<"project">): Project {
+  return doc as unknown as Project;
+}
+
 export const listProject = query({
   args: { paginationOpts: paginationOptsValidator },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<PaginationResult<Project>> => {
     const authUser = await authComponent.getAuthUser(ctx);
     if (!authUser) {
       console.error("Not authenticated");
       return { page: [], isDone: true, continueCursor: "" };
     }
 
-    return await ctx.db
+    const result = await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", authUser._id))
       .paginate(args.paginationOpts);
+
+    return { ...result, page: result.page.map(toProject) };
   },
 });
 
 export const listProjectByUserId = query({
   args: { userId: v.string() },
-  handler: async (ctx, args): Promise<Doc<"project">[]> => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Project[]> => {
+    const docs = await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .collect();
+
+    return docs.map(toProject);
   },
 });
 
 export const getProject = query({
   args: { id: v.nullable(v.string()) },
   handler: async (ctx, args) => {
-    const project: Doc<"project"> | null = await ctx.db
+    const doc: Doc<"project"> | null = await ctx.db
       .query("project")
       .filter((q) => q.eq(q.field("_id"), args.id))
       .first();
 
-    if (project === null) {
+    if (doc === null) {
       return Result.error("Not found");
     }
 
-    return Result.ok(project);
+    return Result.ok(toProject(doc));
   },
 });
 

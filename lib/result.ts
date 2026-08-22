@@ -19,15 +19,17 @@ export const Result = {
       success: (data: TData) => TSuccess;
       error: (error: TError) => TErrorResult;
     },
-  ): TLoading extends unknown
-    ? TSuccess | TErrorResult | undefined
-    : TLoading | TSuccess | TErrorResult => {
+  ) => {
+    type Matchers = typeof matchers;
+
     if (result === undefined) {
-      return matchers.loading?.();
+      return matchers.loading?.() as keyof Matchers extends "loading"
+        ? TLoading
+        : undefined;
     }
 
     if (result === null) {
-      return matchers.error(result as TError);
+      return matchers.error(result as TError) as TErrorResult;
     }
 
     return pipe(
@@ -36,7 +38,7 @@ export const Result = {
         onLeft: matchers.error,
         onRight: matchers.success,
       }),
-    );
+    ) as TSuccess | TErrorResult;
   },
 
   parse<TRight, TLeft>(

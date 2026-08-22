@@ -1,4 +1,4 @@
-import type { Doc } from "../convex/_generated/dataModel";
+import type { Doc, Id } from "../convex/_generated/dataModel";
 
 export interface ProfileLocation {
   city: string;
@@ -21,7 +21,7 @@ export interface Profile {
   workExperience?: ProfileWorkExperience[];
   interests?: string[];
   location?: ProfileLocation;
-  skills?: Skill[];
+  skills?: string[];
 }
 
 export interface ProfileWorkExperience {
@@ -33,6 +33,7 @@ export interface ProfileWorkExperience {
 }
 
 export interface Title {
+  _id: Id<"titles">;
   name: string;
   description: string | null;
   color?: string;

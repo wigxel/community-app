@@ -21,7 +21,10 @@ import {
 import type { Project, TimelineDate } from "~/types/models";
 
 const getLinkIcon = (tag: string) => {
-  const iconMap = {
+  const iconMap: Record<
+    string,
+    React.ComponentType<{ size?: number; className?: string }>
+  > = {
     linkedin: LinkedIn,
     github: Github,
     portfolio: Globe,

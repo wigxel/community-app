@@ -7,7 +7,7 @@ import { useRef } from "react";
 import { MediaThumb } from "~/app/_components/MediaThumb";
 import { HeartIcon } from "~/components/icons";
 import { ProfileAvatar } from "~/components/profile/avatar";
-import type { BasicProject, Project } from "~/types/models";
+import type { BasicProject, Media } from "~/types/models";
 
 const LandingProjectCard = ({ project }: { project: BasicProject }) => {
   const firstMedia = project.media?.[0] ?? null;
@@ -48,6 +48,7 @@ const LandingProjectCard = ({ project }: { project: BasicProject }) => {
           <MediaThumbnail
             variant={isVideo ? "video" : "image"}
             media={firstMedia}
+            alt={firstMedia?.metadata?.title ?? ""}
           />
         </div>
 
@@ -74,8 +75,8 @@ const LandingProjectCard = ({ project }: { project: BasicProject }) => {
 
 type MediaProps = {
   variant: "video" | "image";
-  media: Project["media"] | null;
-  alt: string | undefined;
+  media: Media | null;
+  alt: string;
 };
 
 function MediaThumbnail({ variant, media, alt }: MediaProps) {

@@ -11,7 +11,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 import { api } from "~/convex/_generated/api";
-import { safeArray } from "~/lib/data.helpers";
+import { ProjectImpl } from "~/lib/factories/project";
+import type { Project } from "~/types/models";
 
 const DashboardPage = () => {
   const profile = useQuery(api.profiles.getProfile);
@@ -204,7 +205,7 @@ function TopProjects() {
               key={project.title}
               position={project.title}
               company={`${project.description.slice(0, 50)}...`}
-              timeline={`${new Date(project.timeline.start).getFullYear()} — ${new Date(project.timeline.end).getFullYear()}`}
+              timeline={ProjectImpl.timeline(project as Project) ?? ""}
             />
           ))}
         </div>

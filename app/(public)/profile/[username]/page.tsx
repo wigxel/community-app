@@ -22,7 +22,10 @@ import { WorkExperienceSection } from "./_components/WorkExperience";
 
 // Helper function to get the appropriate icon for each link type
 const getLinkIcon = (tag: string) => {
-  const iconMap = {
+  const iconMap: Record<
+    string,
+    React.ComponentType<{ size?: number; className?: string }>
+  > = {
     linkedin: LinkedIn,
     github: Github,
     portfolio: Globe,
@@ -347,13 +350,13 @@ export default async function ProfileCard({
                 </h2>
               </div>
               <div className="flex flex-wrap gap-2">
-                {profile.skills.map((skill) => (
+                {profile.skills.map((skillId) => (
                   <div
-                    key={skill.name}
+                    key={skillId}
                     className="group rounded-xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 px-4 py-1 transition-all hover:border-white/30 hover:shadow-lg"
                   >
                     <span className="text-sm font-semibold text-white/95 group-hover:text-cyan-300 transition-colors">
-                      {skill.name}
+                      {skillId}
                     </span>
                   </div>
                 ))}

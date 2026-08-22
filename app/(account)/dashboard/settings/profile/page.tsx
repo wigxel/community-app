@@ -39,6 +39,7 @@ import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { useTitles } from "~/hooks/useTitles";
 import { safeArray } from "~/lib/data.helpers";
+import { Result } from "~/lib/result";
 
 // ─── Link types ────────────────────────────────────────────────────────────────
 
@@ -80,8 +81,9 @@ const normalizeLinkForEdit = (link: {
   tag: string;
   title: string;
   value: string;
-}) => {
-  const normalizedTag = link.tag === "website" ? "portfolio" : link.tag;
+}): { tag: LinkTag; title: string; value: string } => {
+  const normalizedTag: LinkTag =
+    link.tag === "website" ? "portfolio" : (link.tag as LinkTag);
 
   if (normalizedTag === "linkedin") {
     const match = link.value.match(
@@ -289,6 +291,7 @@ const formSchema = z.object({
 
 export default function Profile() {
   const profile = useQuery(api.profiles.getProfile);
+  const skills = useQuery(api.profiles.getSkills);
   const existingWorkExp = useQuery(
     api.workExperience.getByUserId,
     profile?.userId ? { userId: profile.userId } : "skip",
@@ -336,7 +339,11 @@ export default function Profile() {
             workExperience: mappedWorkExperience,
             links:
               profile.links?.map((link) => normalizeLinkForEdit(link)) ?? [],
-            skills: profile.skills || [],
+            skills: Result.match(skills, {
+              loading: () => [],
+              success: (data) => data?.map((s) => s._id) ?? [],
+              error: () => [],
+            }),
           }}
         />
       ) : (

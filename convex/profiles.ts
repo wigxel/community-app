@@ -1,7 +1,8 @@
 import { queryGeneric as query } from "convex/server";
-import type { Profile } from "../types/models";
 import { ConvexError, v } from "convex/values";
+import { Result } from "../lib/result";
 import { validateUsernameFormat } from "../lib/username";
+import type { Profile } from "../types/models";
 import type { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
@@ -62,12 +63,7 @@ export const getProfileByUsername = query({
     if (!user) return null;
 
     const title = user.title ? await ctx.db.get(user.title) : null;
-    const skills = user.skills
-      ? await Promise.all(
-          user.skills.map((skillId: Id<"skills">) => ctx.db.get(skillId)),
-        )
-      : [];
-    return { ...user, title, skills };
+    return { ...user, title };
   },
 });
 
@@ -127,6 +123,27 @@ export const getForCurrentUser = query({
       .query("profile")
       .withIndex("by_email", (q) => q.eq("email", authUser.email))
       .unique();
+  },
+});
+
+export const getSkills = query({
+  args: {},
+  async handler(ctx) {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) return Result.error("Not authenticated");
+
+    const user = await ctx.db
+      .query("profile")
+      .withIndex("by_email", (q) => q.eq("email", authUser.email))
+      .unique();
+
+    if (!user?.skills?.length) return Result.ok([]);
+
+    const skills = await Promise.all(
+      user.skills.map((skillId: Id<"skills">) => ctx.db.get(skillId)),
+    );
+
+    return Result.ok(skills);
   },
 });
 
