@@ -1,8 +1,7 @@
 "use client";
 import { Link as LinkIcon, X } from "lucide-react";
 import { type Control, Controller } from "react-hook-form";
-import type { z } from "zod";
-import type { formSchema } from "~/app/(dashboard)/dashboard/projects/edit/page";
+import type { ProjectFormSchema } from "./edit-projects-form";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -31,7 +30,7 @@ const normalizeUrl = (val: string) => {
 interface LinkRowProps {
   projectIndex: number;
   linkIndex: number;
-  control: Control<z.infer<typeof formSchema>>;
+  control: Control<ProjectFormSchema>;
   remove: (i: number) => void;
   error: string | undefined;
 }

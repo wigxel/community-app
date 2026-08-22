@@ -10,18 +10,9 @@ import {
   Trash2,
 } from "lucide-react";
 import React, { Fragment } from "react";
-import {
-  type Control,
-  Controller,
-  type FormState,
-  type UseFormRegister,
-  type UseFormSetValue,
-  type UseFormWatch,
-  useFieldArray,
-} from "react-hook-form";
-import type { z } from "zod";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
-import type { formSchema } from "~/app/(dashboard)/dashboard/projects/edit/page";
+import { ProjectFormSchema } from "./edit-projects-form";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -45,7 +36,7 @@ import LinkRow from "./link-row";
 import MediaRow from "./media-row";
 import TimelineSelect from "./timeline-select";
 
-const emptyMedia = (): Media => ({
+const EMPTY_MEDIA: Media = {
   type: "photo",
   metadata: {
     url: "",
@@ -55,32 +46,27 @@ const emptyMedia = (): Media => ({
     width: 0,
     height: 0,
   },
-});
+};
 
-const emptyLink = (): ProjectLink => ({
+const EMPTY_LINK: ProjectLink = {
   tag: "github",
   value: "",
-});
+};
 
 interface ProjectCardProps {
   index: number;
-  control: Control<z.infer<typeof formSchema>>;
-  register: UseFormRegister<z.infer<typeof formSchema>>;
-  remove: (i: number) => void;
-  watch: UseFormWatch<z.infer<typeof formSchema>>;
-  setValue: UseFormSetValue<z.infer<typeof formSchema>>;
-  formState: FormState<z.infer<typeof formSchema>>;
+  onRemove: (index: number) => void;
 }
 
-export function ProjectCard({
-  index,
-  control,
-  register,
-  remove,
-  watch,
-  setValue,
-  formState: { errors },
-}: ProjectCardProps) {
+export function ProjectCard({ index, onRemove: remove }: ProjectCardProps) {
+  const {
+    control,
+    register,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useFormContext<ProjectFormSchema>();
+
   const [open, setOpen] = React.useState(true);
 
   const title = watch(`projects.${index}.title`);
@@ -263,7 +249,7 @@ export function ProjectCard({
                   variant="ghost"
                   size="sm"
                   className="h-7 gap-1.5 text-xs text-blue-300/70 hover:bg-blue-500/15 hover:text-blue-200"
-                  onClick={() => appendMedia(emptyMedia())}
+                  onClick={() => appendMedia(EMPTY_MEDIA)}
                 >
                   <Plus size={12} />
                   Add media
@@ -307,7 +293,7 @@ export function ProjectCard({
                   variant="ghost"
                   size="sm"
                   className="h-7 gap-1.5 text-xs text-blue-300/70 hover:bg-blue-500/15 hover:text-blue-200"
-                  onClick={() => appendLink(emptyLink())}
+                  onClick={() => appendLink(EMPTY_LINK)}
                 >
                   <Plus size={12} />
                   Add link

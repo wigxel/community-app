@@ -8,8 +8,7 @@ import {
   type UseFormRegister,
   type UseFormWatch,
 } from "react-hook-form";
-import type { z } from "zod";
-import type { formSchema } from "~/app/(dashboard)/dashboard/projects/edit/page";
+import type { ProjectFormSchema } from "./edit-projects-form";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -171,9 +170,9 @@ export function MediaPreviewModal({
 interface MediaRowProps {
   projectIndex: number;
   mediaIndex: number;
-  control: Control<z.infer<typeof formSchema>>;
-  register: UseFormRegister<z.infer<typeof formSchema>>;
-  watch: UseFormWatch<z.infer<typeof formSchema>>;
+  control: Control<ProjectFormSchema>;
+  register: UseFormRegister<ProjectFormSchema>;
+  watch: UseFormWatch<ProjectFormSchema>;
   remove: (i: number) => void;
 }
 
@@ -197,7 +196,7 @@ export default function MediaRow({
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     field: {
-      value: z.infer<typeof formSchema>["projects"][number]["media"][number];
+      value: ProjectFormSchema["projects"][number]["media"][number];
       onChange: (v: unknown) => void;
     },
   ) => {
