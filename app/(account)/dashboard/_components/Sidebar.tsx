@@ -14,11 +14,12 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { AuthUserAvatar } from "~/components/profile/auth-user-avatar";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { api } from "~/convex/_generated/api";
 import { authClient } from "~/lib/auth-client";
+import { ProfileImpl } from "~/lib/factories/profile";
 import { cn } from "~/lib/utils";
 
 const navigation = [
@@ -35,6 +36,7 @@ export default function Sidebar() {
   const [open, setOpen] = useState(false);
 
   const profile = useQuery(api.profiles.getProfile);
+
   const { data: session } = authClient.useSession();
 
   async function handleSignOut() {
@@ -42,12 +44,11 @@ export default function Sidebar() {
     router.push("/");
   }
 
-  const displayName = profile
-    ? `${profile.firstName} ${profile.lastName}`
-    : (session?.user?.name ?? "—");
+  const displayName = ProfileImpl.displayName(
+    profile,
+    session?.user?.name ?? "",
+  );
   const email = profile?.email ?? session?.user?.email ?? "—";
-  const initial = displayName.charAt(0).toUpperCase();
-  const avatarUrl = profile?.profileImage ?? session?.user?.image ?? undefined;
 
   const SidebarContent = (
     <div className="flex h-full flex-col border-r border-white/10">
@@ -79,12 +80,7 @@ export default function Sidebar() {
       <Separator className="bg-white/10" />
 
       <div className="flex items-center gap-3 px-4 py-4 shrink-0">
-        <Avatar className="size-8 shrink-0">
-          {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-          <AvatarFallback className="bg-blue-500 text-white text-xs font-semibold">
-            {initial}
-          </AvatarFallback>
-        </Avatar>
+        <AuthUserAvatar className="size-8" />
 
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{displayName}</p>
