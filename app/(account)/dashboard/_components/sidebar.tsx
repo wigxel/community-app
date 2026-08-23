@@ -17,8 +17,7 @@ import { Button } from "~/components/ui/button";
 import { authClient } from "~/lib/auth-client";
 import { cn } from "~/lib/utils";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const IconHoc = (IconComponent: React.FC<any>) => {
+const IconHoc = (IconComponent: React.FC<Record<PropertyKey, unknown>>) => {
   return (props: LucideProps) => (
     <IconComponent variant={"Twotone"} {...props} />
   );
@@ -68,8 +67,8 @@ export function Sidebar() {
   }
 
   const SidebarContent = (
-    <div className="flex flex-col pt-10 justify-between h-full w-full select-none">
-      <nav className="flex-1 flex flex-col gap-1">
+    <div className="flex h-full w-full flex-col justify-between pt-10 select-none">
+      <nav className="flex flex-1 flex-col gap-1">
         {navigation.map((item) => {
           const active = pathname.startsWith(item.href);
 
@@ -81,7 +80,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="pb-4 flex flex-col">
+      <div className="flex flex-col pb-4">
         <button
           type="button"
           className="appearance-none"
@@ -95,7 +94,7 @@ export function Sidebar() {
           />
         </button>
 
-        <div className="ps-2 mt-2 flex justify-between text-xs text-muted-foreground/50">
+        <div className="text-muted-foreground/50 mt-2 flex justify-between ps-2 text-xs">
           <span>All rights reserved</span>
           <span>&copy; 2026</span>
         </div>
@@ -110,7 +109,7 @@ export function Sidebar() {
         variant="ghost"
         size="icon"
         onClick={() => setOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 rounded-xl bg-slate-900/80 border border-white/10"
+        className="fixed top-4 left-4 z-50 rounded-xl border border-white/10 bg-slate-900/80 lg:hidden"
       >
         <Menu size={18} />
       </Button>
@@ -119,7 +118,7 @@ export function Sidebar() {
       {open && (
         <button
           type="button"
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
           onClick={() => setOpen(false)}
         />
       )}
@@ -143,7 +142,7 @@ export function Sidebar() {
       </div>
 
       {/* Desktop sidebar */}
-      <aside className="self-stretch flex  w-full">{SidebarContent}</aside>
+      <aside className="flex w-full self-stretch">{SidebarContent}</aside>
     </>
   );
 }
@@ -159,7 +158,7 @@ function NavItem(props: NavItemProps) {
   return (
     <li
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-normal transition-colors",
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-normal transition-colors",
         isActive
           ? "bg-muted text-foreground"
           : "text-foreground/50 hover:bg-muted hover:text-foreground",

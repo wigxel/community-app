@@ -15,20 +15,20 @@ export default function NavAuth() {
       ) : session ? (
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 transition-opacity hover:opacity-80"
           aria-label="Go to dashboard"
         >
           <AuthUserAvatar className="size-(--avatar-size)" />
         </Link>
       ) : (
-        <>
+        <div className="flex gap-2">
           <Link href="/auth/sign-up">
             <Button variant="secondary">Sign up</Button>
           </Link>
           <Link href="/auth/sign-in">
             <Button variant="default">Sign in</Button>
           </Link>
-        </>
+        </div>
       )}
     </div>
   );

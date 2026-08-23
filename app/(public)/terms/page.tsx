@@ -1,20 +1,21 @@
+import { CornerUpLeftIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-3xl px-4 py-16">
         <Link
           href="/"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 inline-block"
+          className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center gap-2 text-sm transition-colors"
         >
-          &larr; Back to home
+          <CornerUpLeftIcon size="0.9rem" /> Back to home
         </Link>
 
-        <h1 className="text-3xl font-bold mb-8">Terms of Use</h1>
+        <h1 className="mb-8 text-3xl font-bold">Terms of Use</h1>
 
-        <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-muted-foreground">
-          <p className="text-sm text-muted-foreground/70">
+        <div className="prose prose-neutral dark:prose-invert text-muted-foreground max-w-none space-y-6">
+          <p className="text-muted-foreground/70 text-sm">
             Last updated:{" "}
             {new Date().toLocaleDateString("en-US", {
               year: "numeric",
@@ -24,7 +25,7 @@ export default function TermsPage() {
           </p>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               1. Acceptance of Terms
             </h2>
             <p>
@@ -35,7 +36,7 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               2. Use of Service
             </h2>
             <p>
@@ -46,7 +47,7 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               3. User Accounts
             </h2>
             <p>
@@ -63,7 +64,7 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               4. Intellectual Property
             </h2>
             <p>
@@ -75,7 +76,7 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               5. Termination
             </h2>
             <p>
@@ -86,7 +87,7 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               6. Limitation of Liability
             </h2>
             <p>
@@ -97,7 +98,7 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               7. Changes to Terms
             </h2>
             <p>
@@ -108,7 +109,7 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               8. Contact Us
             </h2>
             <p>
