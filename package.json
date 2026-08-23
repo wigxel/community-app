@@ -22,6 +22,7 @@
     "format": "npm run format:prettier && npm run format:biome",
     "format:prettier": "prettier --write .",
     "format:biome": "biome format --no-errors-on-unmatched --write .",
+    "format:tsx": "nurm .",
     "test": "vitest --watch=false",
     "test:watch": "vitest",
     "round-check": "npm run lint && npm run format && npm run test && npm run build",
