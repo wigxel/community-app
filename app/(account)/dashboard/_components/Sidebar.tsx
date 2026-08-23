@@ -12,7 +12,6 @@ import {
   SaveIcon,
   SettingsIcon,
   TeacherIcon,
-  UserIcon,
 } from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import { authClient } from "~/lib/auth-client";
@@ -35,11 +34,6 @@ const navigation = [
     name: "Projects",
     href: "/dashboard/projects",
     icon: IconHoc(Folder2),
-  },
-  {
-    name: "Profile",
-    href: "/dashboard/profile",
-    icon: IconHoc(UserIcon),
   },
   {
     name: "Saves",

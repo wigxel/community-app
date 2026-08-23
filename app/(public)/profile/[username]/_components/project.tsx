@@ -3,7 +3,7 @@ import { useQuery } from "convex/react";
 import { Calendar, ExternalLink, FileText, Video } from "lucide-react";
 import Image from "next/image";
 import { FavouriteButton } from "~/app/_components/FavouriteButton";
-import { EmptyStateContentLegacy } from "~/components/layouts/empty-state";
+import { EmptyState } from "~/components/layouts/empty-state";
 import { api } from "~/convex/_generated/api";
 import { safeArray } from "~/lib/data.helpers";
 import type { Project, TimelineDate } from "~/types/models";
@@ -43,7 +43,9 @@ export default function Projects({ userId }: { userId?: string }) {
       ) : (
         <div className="space-y-6">
           {safeProjects.length === 0 ? (
-            <EmptyStateContentLegacy>No projects</EmptyStateContentLegacy>
+            <EmptyState isEmpty={true}>
+              <EmptyState.Title>No projects</EmptyState.Title>
+            </EmptyState>
           ) : null}
 
           {safeProjects.map((project) => {

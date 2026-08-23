@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import React, { useState } from "react";
 import { useEvent } from "react-use-event-hook";
-import { EmptyStateContentLegacy } from "~/components/layouts/empty-state";
+import { EmptyState } from "~/components/layouts/empty-state";
 import { FullscreenLoader } from "~/components/layouts/loader";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { api } from "~/convex/_generated/api";
@@ -75,9 +75,15 @@ export function ProjectModal() {
           },
           error: () => {
             return (
-              <EmptyStateContentLegacy>
-                Not project found
-              </EmptyStateContentLegacy>
+              <EmptyState isEmpty={true}>
+                <EmptyState.Content>
+                  <EmptyState.Title>Not project found</EmptyState.Title>
+                  <EmptyState.Description>
+                    The project you're looking for doesn't exist or has been
+                    removed
+                  </EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState>
             );
           },
         })}

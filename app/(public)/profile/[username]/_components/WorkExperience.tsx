@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { Briefcase, Building2, Clock, MapPin } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { EmptyStateContentLegacy } from "~/components/layouts/empty-state";
+import { EmptyState } from "~/components/layouts/empty-state";
 import { api } from "~/convex/_generated/api";
 import { safeArray } from "~/lib/data.helpers";
 import type { WorkExperience } from "~/types/models";
@@ -63,16 +63,20 @@ export function WorkExperienceSection({ userId }: WorkExperienceSectionProps) {
       </div>
 
       <div className="relative space-y-0">
-        {workExperiences.length === 0 ? (
-          <EmptyStateContentLegacy>No work experience</EmptyStateContentLegacy>
-        ) : (
-          <>
+        <EmptyState isEmpty={workExperiences.length === 0}>
+          <EmptyState.Content>
+            <EmptyState.Title>No work experience</EmptyState.Title>
+            <EmptyState.Description>
+              Your work history will appear here
+            </EmptyState.Description>
+          </EmptyState.Content>
+          <EmptyState.Conceal>
             <div className="absolute left-6.75 top-0 bottom-0 w-px bg-linear-to-b from-cyan-400/40 via-white/10 to-transparent hidden md:block" />
             {workExperiences.map((job) => (
               <WorkExperienceItem job={job} key={`${job._id}`} />
             ))}
-          </>
-        )}
+          </EmptyState.Conceal>
+        </EmptyState>
       </div>
     </div>
   );

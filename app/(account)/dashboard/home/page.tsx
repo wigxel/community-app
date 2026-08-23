@@ -6,6 +6,7 @@ import Link from "next/link";
 import { GettingStartedWidget } from "~/components/dashboard/getting-started-widget";
 import StatCard from "~/components/dashboard/home/StatCard";
 import WorkItem from "~/components/dashboard/home/WorkItem";
+import { FullscreenLoader } from "~/components/layouts/loader";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -22,11 +23,7 @@ function DashboardPage() {
   );
 
   if (!profile) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-white/60">Loading...</p>
-      </div>
-    );
+    return <FullscreenLoader />;
   }
 
   const fullName = `${profile.firstName} ${profile.lastName}`;
