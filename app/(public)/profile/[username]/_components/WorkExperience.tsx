@@ -5,11 +5,10 @@ import { format } from "date-fns";
 import { Briefcase, Building2, Clock, MapPin } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-
+import { EmptyStateContentLegacy } from "~/components/layouts/empty-state";
 import { api } from "~/convex/_generated/api";
 import { safeArray } from "~/lib/data.helpers";
 import type { WorkExperience } from "~/types/models";
-import { EmptyStateContent } from "./empty-state";
 
 interface WorkExperienceSectionProps {
   userId?: string;
@@ -65,7 +64,7 @@ export function WorkExperienceSection({ userId }: WorkExperienceSectionProps) {
 
       <div className="relative space-y-0">
         {workExperiences.length === 0 ? (
-          <EmptyStateContent>No work experience</EmptyStateContent>
+          <EmptyStateContentLegacy>No work experience</EmptyStateContentLegacy>
         ) : (
           <>
             <div className="absolute left-6.75 top-0 bottom-0 w-px bg-linear-to-b from-cyan-400/40 via-white/10 to-transparent hidden md:block" />

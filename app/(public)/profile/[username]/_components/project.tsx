@@ -3,10 +3,10 @@ import { useQuery } from "convex/react";
 import { Calendar, ExternalLink, FileText, Video } from "lucide-react";
 import Image from "next/image";
 import { FavouriteButton } from "~/app/_components/FavouriteButton";
+import { EmptyStateContentLegacy } from "~/components/layouts/empty-state";
 import { api } from "~/convex/_generated/api";
 import { safeArray } from "~/lib/data.helpers";
 import type { Project, TimelineDate } from "~/types/models";
-import { EmptyStateContent } from "./empty-state";
 
 const formatTimeline = (project: Project) => {
   const fmt = (d: TimelineDate) =>
@@ -43,7 +43,7 @@ export default function Projects({ userId }: { userId?: string }) {
       ) : (
         <div className="space-y-6">
           {safeProjects.length === 0 ? (
-            <EmptyStateContent>No projects</EmptyStateContent>
+            <EmptyStateContentLegacy>No projects</EmptyStateContentLegacy>
           ) : null}
 
           {safeProjects.map((project) => {

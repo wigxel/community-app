@@ -5,8 +5,8 @@ import { fetchAuthQuery, isAuthenticated } from "~/lib/auth-server";
 
 export const metadata: Metadata = {
   title: {
-    default: "Account < Reveer",
-    template: "%s | Account < Reveer",
+    default: "Account",
+    template: "%s | Reveer",
   },
 };
 

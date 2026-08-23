@@ -14,7 +14,7 @@ import { api } from "~/convex/_generated/api";
 import { ProjectImpl } from "~/lib/factories/project";
 import type { Project } from "~/types/models";
 
-const DashboardPage = () => {
+function DashboardPage() {
   const profile = useQuery(api.profiles.getProfile);
   const workExperience = useQuery(
     api.workExperience.getByUserId,
@@ -186,7 +186,7 @@ const DashboardPage = () => {
       </div>
     </div>
   );
-};
+}
 
 function TopProjects() {
   const { results } = usePaginatedQuery(

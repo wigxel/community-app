@@ -1,8 +1,7 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { Logout } from "iconsax-reactjs";
-import { LogOut, type LucideProps, Menu, X } from "lucide-react";
+import { type LucideProps, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,12 +14,8 @@ import {
   TeacherIcon,
   UserIcon,
 } from "~/components/icons";
-import { AuthUserAvatar } from "~/components/profile/auth-user-avatar";
 import { Button } from "~/components/ui/button";
-import { Separator } from "~/components/ui/separator";
-import { api } from "~/convex/_generated/api";
 import { authClient } from "~/lib/auth-client";
-import { ProfileImpl } from "~/lib/factories/profile";
 import { cn } from "~/lib/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,14 +37,14 @@ const navigation = [
     icon: IconHoc(Folder2),
   },
   {
-    name: "Saves",
-    href: "/dashboard/favourites",
-    icon: IconHoc(SaveIcon),
-  },
-  {
     name: "Profile",
     href: "/dashboard/profile",
     icon: IconHoc(UserIcon),
+  },
+  {
+    name: "Saves",
+    href: "/dashboard/favourites",
+    icon: IconHoc(SaveIcon),
   },
   {
     name: "Notifications",
@@ -73,29 +68,19 @@ export function Sidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  const profile = useQuery(api.profiles.getProfile);
-
-  const { data: session } = authClient.useSession();
-
   async function handleSignOut() {
     await authClient.signOut();
     router.push("/");
   }
 
-  const displayName = ProfileImpl.displayName(
-    profile,
-    session?.user?.name ?? "",
-  );
-  const email = profile?.email ?? session?.user?.email ?? "—";
-
   const SidebarContent = (
-    <div className="flex flex-col pt-10 justify-between h-full w-full">
-      <nav className="flex-1 overflow-y-auto space-y-10">
+    <div className="flex flex-col pt-10 justify-between h-full w-full select-none">
+      <nav className="flex-1 flex flex-col gap-1">
         {navigation.map((item) => {
           const active = pathname.startsWith(item.href);
 
           return (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.href} href={item.href} draggable={false}>
               <NavItem item={item} isActive={active} />
             </Link>
           );
@@ -117,8 +102,8 @@ export function Sidebar() {
         </button>
 
         <div className="ps-2 mt-2 flex justify-between text-xs text-muted-foreground/50">
-          <span>All rights reserved.</span>
-          <span>&copy; 2026.</span>
+          <span>All rights reserved</span>
+          <span>&copy; 2026</span>
         </div>
       </div>
     </div>
@@ -183,12 +168,12 @@ function NavItem(props: NavItemProps) {
         "flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-normal transition-colors",
         isActive
           ? "bg-muted text-foreground"
-          : "text-white/70 hover:bg-white/8 hover:text-white",
+          : "text-foreground/50 hover:bg-muted hover:text-foreground",
       )}
     >
       <item.icon
         size={"1.5rem"}
-        className={cn("shrink-0", isActive ? "text-lime-500" : "")}
+        className={cn("shrink-0", isActive ? "text-brand-primary" : "")}
       />
       <span>{item.name}</span>
     </li>

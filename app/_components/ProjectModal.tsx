@@ -3,12 +3,12 @@
 import { useQuery } from "convex/react";
 import React, { useState } from "react";
 import { useEvent } from "react-use-event-hook";
+import { EmptyStateContentLegacy } from "~/components/layouts/empty-state";
 import { FullscreenLoader } from "~/components/layouts/loader";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
 import type { Project } from "~/types/models";
-import { EmptyStateContent } from "../(public)/profile/[username]/_components/empty-state";
 import { ProjectDetails } from "./project-details";
 
 const EMPTY_VALUE = "unset";
@@ -74,7 +74,11 @@ export function ProjectModal() {
             return <ProjectDetails project={project as Project} />;
           },
           error: () => {
-            return <EmptyStateContent>Not project found</EmptyStateContent>;
+            return (
+              <EmptyStateContentLegacy>
+                Not project found
+              </EmptyStateContentLegacy>
+            );
           },
         })}
       </DialogContent>
