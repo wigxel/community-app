@@ -85,7 +85,7 @@ export default function TimelineSelect({
       <div className="flex flex-col">
         <Label
           htmlFor={`${timeline}_month`}
-          className="uppercase text-white/50 text-[10px] font-medium mb-1"
+          className="mb-1 text-[10px] font-medium text-white/50 uppercase"
         >
           {timeline} Month
         </Label>
@@ -93,7 +93,7 @@ export default function TimelineSelect({
           id={`${timeline}_month`}
           value={localMonth}
           onChange={(e) => handleMonthChange(e.target.value)}
-          className="w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+          className="w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm text-white focus:ring-1 focus:ring-white/30 focus:outline-none"
         >
           <option value="" className="bg-neutral-900" />
           {MONTHS.map((m) => (
@@ -102,12 +102,12 @@ export default function TimelineSelect({
             </option>
           ))}
         </select>
-        {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+        {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
       </div>
       <div className="flex flex-col">
         <Label
           htmlFor={`${timeline}_year`}
-          className="uppercase text-white/50 text-[10px] font-medium mb-1 after:content-['*'] after:ml-0.5"
+          className="mb-1 text-[10px] font-medium text-white/50 uppercase after:ml-0.5 after:content-['*']"
         >
           {timeline} Year
         </Label>
@@ -115,7 +115,7 @@ export default function TimelineSelect({
           id={`${timeline}_year`}
           value={localYear}
           onChange={(e) => handleYearChange(e.target.value)}
-          className="w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+          className="w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm text-white focus:ring-1 focus:ring-white/30 focus:outline-none"
         >
           <option value="" className="bg-neutral-900" />
           {YEARS.map((y) => (

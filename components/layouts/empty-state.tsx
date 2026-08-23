@@ -32,7 +32,7 @@ function EmptyStateDescription(
 
 function EmptyStateButton(props: React.ComponentProps<typeof FAButton>) {
   return (
-    <FAButton {...props} className="size-19 text-base mt-9">
+    <FAButton {...props} className="mt-9 size-19 text-base">
       <FABPlusIcon />
     </FAButton>
   );

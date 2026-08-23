@@ -46,7 +46,7 @@ export function SkillsSelect({ skills, value, onChange }: SkillsSelectProps) {
       {/* Selected skills */}
       {selectedSkills.length > 0 ? (
         <div className="space-y-1.5">
-          <p className="text-xs font-medium text-white/50 uppercase tracking-wider">
+          <p className="text-xs font-medium tracking-wider text-white/50 uppercase">
             Selected ({selectedSkills.length})
           </p>
           <div className="flex flex-wrap gap-2">
@@ -54,7 +54,7 @@ export function SkillsSelect({ skills, value, onChange }: SkillsSelectProps) {
               <Badge
                 key={skill._id}
                 variant="outline"
-                className="gap-1.5 border-blue-400/40 bg-blue-500/20 pl-3 pr-2 py-1 text-sm text-blue-100"
+                className="gap-1.5 border-blue-400/40 bg-blue-500/20 py-1 pr-2 pl-3 text-sm text-blue-100"
               >
                 {skill.name}
                 <button

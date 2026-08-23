@@ -10,7 +10,7 @@ const StatCard = ({
   label: string;
   value: string;
 }) => (
-  <Card className="bg-blue-500/20 text-blue-300 border border-white/10">
+  <Card className="border border-white/10 bg-blue-500/20 text-blue-300">
     <CardContent className="flex items-center gap-3 pt-6">
       {icon}
       <div>

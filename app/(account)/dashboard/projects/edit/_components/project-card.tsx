@@ -139,7 +139,7 @@ export function ProjectCard({ index, onRemove: remove }: ProjectCardProps) {
               <div className="flex flex-col gap-1.5">
                 <Label
                   htmlFor={`projects.${index}.title`}
-                  className="text-xs font-semibold uppercase tracking-widest text-white/50 after:content-['*'] after:ml-0.5"
+                  className="text-xs font-semibold tracking-widest text-white/50 uppercase after:ml-0.5 after:content-['*']"
                 >
                   Title
                 </Label>
@@ -160,7 +160,7 @@ export function ProjectCard({ index, onRemove: remove }: ProjectCardProps) {
               <div className="flex flex-col gap-1.5">
                 <Label
                   htmlFor={`projects.${index}.description`}
-                  className="text-xs font-semibold uppercase tracking-widest text-white/50"
+                  className="text-xs font-semibold tracking-widest text-white/50 uppercase"
                 >
                   Description
                 </Label>
@@ -173,7 +173,7 @@ export function ProjectCard({ index, onRemove: remove }: ProjectCardProps) {
                     maxLength={300}
                     className="resize-none border-white/15 bg-white/5 text-white placeholder:text-white/30"
                   />
-                  <span className="absolute bottom-2 right-3 text-[10px] text-white/30">
+                  <span className="absolute right-3 bottom-2 text-[10px] text-white/30">
                     {watch(`projects.${index}.description`)?.length ?? 0}/300
                   </span>
                 </div>
@@ -187,12 +187,12 @@ export function ProjectCard({ index, onRemove: remove }: ProjectCardProps) {
 
             {/* Timeline */}
             <div className="flex flex-col gap-1.5">
-              <Label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-white/50 mb-1">
+              <Label className="mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-widest text-white/50 uppercase">
                 <Calendar size={12} />
                 Timeline
               </Label>
 
-              <div className="flex items-center gap-2 mb-3">
+              <div className="mb-3 flex items-center gap-2">
                 <input
                   type="checkbox"
                   id={`projects.${index}.ongoing`}
@@ -201,7 +201,7 @@ export function ProjectCard({ index, onRemove: remove }: ProjectCardProps) {
                 />
                 <Label
                   htmlFor={`projects.${index}.ongoing`}
-                  className="text-xs text-white/50 font-medium"
+                  className="text-xs font-medium text-white/50"
                 >
                   I am currently working on this project
                 </Label>
@@ -231,7 +231,7 @@ export function ProjectCard({ index, onRemove: remove }: ProjectCardProps) {
             {/* Media */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-white/50">
+                <Label className="flex items-center gap-1.5 text-xs font-semibold tracking-widest text-white/50 uppercase">
                   <ImageIcon size={12} />
                   Media
                   {mediaFields.length > 0 && (
@@ -275,7 +275,7 @@ export function ProjectCard({ index, onRemove: remove }: ProjectCardProps) {
             {/* Links */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-white/50">
+                <Label className="flex items-center gap-1.5 text-xs font-semibold tracking-widest text-white/50 uppercase">
                   <Link2 size={12} />
                   Links
                   {linkFields.length > 0 && (

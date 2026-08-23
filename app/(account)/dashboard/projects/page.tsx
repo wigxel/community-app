@@ -25,7 +25,7 @@ export default function Projects() {
 
   return (
     <div>
-      <div className="mb-8 flex justify-between items-center gap-5">
+      <div className="mb-8 flex items-center justify-between gap-5">
         <Text variant={"h4"}>Projects</Text>
 
         {!isEmpty && (
@@ -45,12 +45,12 @@ export default function Projects() {
             src="/assets/images/add-files.png"
             width={120}
             height={120}
-            className="w-40 aspect-square"
+            className="aspect-square w-40"
             alt={"Empty state image"}
           />
 
           <EmptyState.Title>Add your first project</EmptyState.Title>
-          <EmptyState.Description className="max-w-[40ch] text-balance text-center">
+          <EmptyState.Description className="max-w-[40ch] text-center text-balance">
             Add screenshots and video media of the projects you’ve work on
             overtime
           </EmptyState.Description>

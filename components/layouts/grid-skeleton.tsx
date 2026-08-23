@@ -18,7 +18,7 @@ export function StandardGridSkeleton({
 
   return (
     <StandardGrid
-      className={cn("relative pointer-events-none", className)}
+      className={cn("pointer-events-none relative", className)}
       style={{
         "--in-skeleton-bg":
           variant === "base" ? "var(--background)" : "var(--muted)",
@@ -27,7 +27,7 @@ export function StandardGridSkeleton({
       {SKELETON_KEYS.map((k) => (
         <Component key={k} />
       ))}
-      <div className="bg-linear-to-b from-transparent to-(--in-skeleton-bg) absolute inset-0" />
+      <div className="absolute inset-0 bg-linear-to-b from-transparent to-(--in-skeleton-bg)" />
     </StandardGrid>
   );
 }

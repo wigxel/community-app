@@ -96,7 +96,7 @@ export default function LinkRow({
             </Button>
           </div>
           {error && (
-            <p className="text-xs font-medium text-red-400 ml-34">{error}</p>
+            <p className="ml-34 text-xs font-medium text-red-400">{error}</p>
           )}
         </div>
       )}

@@ -8,9 +8,9 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
     <>
       <div
         id="dashboard-root"
-        className="h-svh py-2 flex-col w-full flex gap-x-4 max-w-[99%] mx-auto bg-background"
+        className="bg-background mx-auto flex h-svh w-full max-w-[99%] flex-col gap-x-4 py-2"
       >
-        <header className="shrink-0 col-span-2 py-2 justify-between basis-12 bg-background min-h-12 flex items-center px-4">
+        <header className="bg-background col-span-2 flex min-h-12 shrink-0 basis-12 items-center justify-between px-4 py-2">
           <div className="pl-4">
             <BrandLogo />
           </div>

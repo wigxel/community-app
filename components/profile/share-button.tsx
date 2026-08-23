@@ -32,7 +32,7 @@ export function ShareButton({ username }: ShareButtonProps) {
     <Button
       onClick={handleShare}
       variant="outline"
-      className="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/40 transition-all"
+      className="gap-2 border-white/30 bg-white/10 text-white transition-all hover:border-white/40 hover:bg-white/20"
     >
       {copied ? (
         <>

@@ -64,10 +64,10 @@ export default function ForgotPasswordForm() {
     <div className="flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-start">
-          <h1 className="text-3xl font-semibold text-foreground">
+          <h1 className="text-foreground text-3xl font-semibold">
             Forgot password?
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-sm">
             Enter your email and we'll send you a reset link.
           </p>
         </div>
@@ -111,7 +111,7 @@ export default function ForgotPasswordForm() {
         <div className="mt-6 text-center">
           <Link
             href="/auth/sign-in"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground text-sm transition-colors"
           >
             Back to sign in
           </Link>

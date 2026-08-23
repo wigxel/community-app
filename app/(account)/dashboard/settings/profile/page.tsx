@@ -145,15 +145,15 @@ function DraggableLinkItem({
     >
       <div key={field.id} className="flex items-start gap-3">
         <div
-          className="mt-6 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted"
+          className="bg-muted mt-6 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border"
           title="Drag to reorder"
           onPointerDown={(event) => dragControls.start(event)}
         >
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
+          <GripVertical className="text-muted-foreground h-4 w-4" />
         </div>
 
-        <div className="mt-6.25 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted">
-          <Icon className="h-4 w-4 text-muted-foreground" />
+        <div className="bg-muted mt-6.25 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border">
+          <Icon className="text-muted-foreground h-4 w-4" />
         </div>
 
         <FormField
@@ -164,12 +164,12 @@ function DraggableLinkItem({
               <FormLabel className="select-none">{typeConfig.title}</FormLabel>
               <FormControl>
                 {typeConfig.prefix ? (
-                  <div className="flex items-center rounded-md border overflow-hidden focus-within:ring-1 focus-within:ring-ring">
-                    <span className="px-3 py-2 text-sm text-muted-foreground bg-muted border-r shrink-0 select-none">
+                  <div className="focus-within:ring-ring flex items-center overflow-hidden rounded-md border focus-within:ring-1">
+                    <span className="text-muted-foreground bg-muted shrink-0 border-r px-3 py-2 text-sm select-none">
                       {typeConfig.prefix}
                     </span>
                     <Input
-                      className="border-0 rounded-none shadow-none focus-visible:ring-0"
+                      className="rounded-none border-0 shadow-none focus-visible:ring-0"
                       placeholder={typeConfig.placeholder}
                       {...inputField}
                       onChange={(e) => {
@@ -322,7 +322,7 @@ export default function Profile() {
 
   return (
     <div className="px-2 md:px-4">
-      <h1 className="text-4xl font-semibold mb-8">Edit Profile</h1>
+      <h1 className="mb-8 text-4xl font-semibold">Edit Profile</h1>
 
       {profile && existingWorkExp !== undefined ? (
         <ProfileForm
@@ -521,10 +521,10 @@ export function ProfileForm({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {message && (
             <div
-              className={`p-4 rounded-lg ${
+              className={`rounded-lg p-4 ${
                 message.type === "success"
-                  ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                  : "bg-red-500/20 text-red-300 border border-red-500/30"
+                  ? "border border-green-500/30 bg-green-500/20 text-green-300"
+                  : "border border-red-500/30 bg-red-500/20 text-red-300"
               }`}
             >
               {message.text}
@@ -532,14 +532,14 @@ export function ProfileForm({
           )}
 
           {/* ── Basic Information ─────────────────────────────────────────── */}
-          <Card className="bg-blue-500/10 border-white/10">
+          <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
               <CardTitle className="text-xl text-white">
                 Basic Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="firstname"
@@ -608,7 +608,7 @@ export function ProfileForm({
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="location.city"
@@ -734,9 +734,9 @@ export function ProfileForm({
           </Card>
 
           {/* ── Profile Links ─────────────────────────────────────────────── */}
-          <Card className="bg-blue-500/10 border-white/10">
+          <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
-              <CardTitle className="text-xl text-white flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between text-xl text-white">
                 Profile Links
                 {availableLinkTypes.length > 0 && (
                   <Select onValueChange={(val) => addLink(val as LinkTag)}>
@@ -765,7 +765,7 @@ export function ProfileForm({
             </CardHeader>
             <CardContent className="space-y-4">
               {linkFields.length === 0 && (
-                <p className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded-md">
+                <p className="text-muted-foreground rounded-md border border-dashed py-4 text-center text-sm">
                   No links added yet.
                 </p>
               )}
@@ -809,9 +809,9 @@ export function ProfileForm({
           </Card>
 
           {/* ── Work Experience ───────────────────────────────────────────── */}
-          <Card className="bg-blue-500/10 border-white/10">
+          <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
-              <CardTitle className="text-xl text-white flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between text-xl text-white">
                 Work Experience
                 <Button
                   type="button"
@@ -829,10 +829,10 @@ export function ProfileForm({
                       isCurrent: false,
                     })
                   }
-                  className="group flex items-center bg-white border-gray-300"
+                  className="group flex items-center border-gray-300 bg-white"
                 >
-                  <Plus className="h-4 w-4 text-gray-900 group-hover:mr-2 transition-all shrink-0" />
-                  <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap text-gray-900">
+                  <Plus className="h-4 w-4 shrink-0 text-gray-900 transition-all group-hover:mr-2" />
+                  <span className="max-w-0 overflow-hidden whitespace-nowrap text-gray-900 transition-all duration-300 ease-in-out group-hover:max-w-xs">
                     Add Experience
                   </span>
                 </Button>
@@ -840,7 +840,7 @@ export function ProfileForm({
             </CardHeader>
             <CardContent className="space-y-6">
               {workFields.length === 0 ? (
-                <p className="text-white/60 text-sm text-center py-4">
+                <p className="py-4 text-center text-sm text-white/60">
                   No work experience added yet. Click "Add Experience" to get
                   started.
                 </p>
@@ -848,9 +848,9 @@ export function ProfileForm({
                 workFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-4"
+                    className="space-y-4 rounded-lg border border-white/10 bg-white/5 p-3"
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                       <h4 className="text-sm font-semibold text-white">
                         Experience {index + 1}
                       </h4>
@@ -859,13 +859,13 @@ export function ProfileForm({
                         size="sm"
                         variant="ghost"
                         onClick={() => removeWork(index)}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <FormField
                         control={form.control}
                         name={`workExperience.${index}.position`}
@@ -898,7 +898,7 @@ export function ProfileForm({
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <FormField
                         control={form.control}
                         name={`workExperience.${index}.location`}
@@ -954,7 +954,7 @@ export function ProfileForm({
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <FormField
                         control={form.control}
                         name={`workExperience.${index}.startDate`}
@@ -1035,7 +1035,7 @@ export function ProfileForm({
           </Card>
 
           {/*── Skills ─────────────────────────────────────────────────── */}
-          <Card className="bg-blue-500/10 border-white/10">
+          <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
               <CardTitle className="text-xl text-white">Skills</CardTitle>
             </CardHeader>
@@ -1064,7 +1064,7 @@ export function ProfileForm({
           </Card>
 
           {/* ── Interests ─────────────────────────────────────────────────── */}
-          <Card className="bg-blue-500/10 border-white/10">
+          <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
               <CardTitle className="text-xl text-white">Interests</CardTitle>
             </CardHeader>

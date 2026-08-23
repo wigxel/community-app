@@ -57,7 +57,7 @@ export function ProjectModal() {
         }, 16);
       }}
     >
-      <DialogContent className="max-w-2xl aspect-4/6 w-full p-0 gap-0 max-h-[90svh] overflow-hidden">
+      <DialogContent className="aspect-4/6 max-h-[90svh] w-full max-w-2xl gap-0 overflow-hidden p-0">
         <DialogTitle className="sr-only">
           {Result.match(project_res, {
             loading: () => "Loading...",

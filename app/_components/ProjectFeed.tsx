@@ -72,13 +72,13 @@ function SearchBox() {
   const [searchTerm, setSearchTerm] = React.useState("");
 
   return (
-    <div className="flex gap-2 flex-col">
-      <label className="flex bg-muted/50 focus-within:bg-muted py-[0.4rem] ps-4 pe-[0.4em] rounded-xl gap-4 items-center">
+    <div className="flex flex-col gap-2">
+      <label className="bg-muted/50 focus-within:bg-muted flex items-center gap-4 rounded-xl py-[0.4rem] ps-4 pe-[0.4em]">
         <SearchIcon className="text-muted-foreground size-4.5" />
-        <div className="flex-1 relative self-stretch">
+        <div className="relative flex-1 self-stretch">
           <input
             type="text"
-            className="text-base absolute inset-0 outline-none"
+            className="absolute inset-0 text-base outline-none"
             placeholder="What you looking for?"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -90,7 +90,7 @@ function SearchBox() {
         </Button>
       </label>
 
-      <div className="text-xs text-foreground inline-flex items-center gap-2 mb-4 px-[1.8em]">
+      <div className="text-foreground mb-4 inline-flex items-center gap-2 px-[1.8em] text-xs">
         {/* @todo: Integrate this */}
         <span className="inline-block">Popular &nbsp;&nbsp;—&nbsp;&nbsp;</span>
         <span className="inline-flex gap-2">
@@ -98,7 +98,7 @@ function SearchBox() {
             return (
               <span
                 key={tag}
-                className="inline-block rounded-sm p-1 cursor-pointer hover:text-accent-foreground hover:bg-muted"
+                className="hover:text-accent-foreground hover:bg-muted inline-block cursor-pointer rounded-sm p-1"
               >
                 {tag}
               </span>
@@ -112,7 +112,7 @@ function SearchBox() {
 
 function CatalogEmptyStateContent() {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-neutral-500 gap-2">
+    <div className="flex flex-col items-center justify-center gap-2 py-24 text-neutral-500">
       <p className="text-sm">No projects yet — be the first to add one.</p>
     </div>
   );

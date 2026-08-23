@@ -15,7 +15,7 @@ const FAButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         className={cn(
-          "bg-brand-primary text-foreground shadow hover:bg-brand-primary/90 inline-flex items-center justify-center p-2 aspect-square rounded-full",
+          "bg-brand-primary text-foreground hover:bg-brand-primary/90 inline-flex aspect-square items-center justify-center rounded-full p-2 shadow",
           className,
         )}
         ref={ref}
@@ -35,10 +35,10 @@ function FABPlusIcon() {
   return (
     <span
       title="Plus Icon"
-      className="relative inline-flex justify-center items-center text-background"
+      className="text-background relative inline-flex items-center justify-center"
     >
-      <span className="block h-[1em] w-0.5 bg-current absolute" />
-      <span className="block h-[1em] w-0.5 bg-current absolute rotate-90" />
+      <span className="absolute block h-[1em] w-0.5 bg-current" />
+      <span className="absolute block h-[1em] w-0.5 rotate-90 bg-current" />
     </span>
   );
 }

@@ -54,17 +54,17 @@ export function GettingStartedWidget() {
   }
 
   return (
-    <Card className="lg:fixed bottom-0 right-0 lg:max-w-md bg-gray-800 border-white/10">
+    <Card className="right-0 bottom-0 border-white/10 bg-gray-800 lg:fixed lg:max-w-md">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-xl text-white flex justify-between items-center gap-2">
+            <CardTitle className="flex items-center justify-between gap-2 text-xl text-white">
               Almost There!
               <Badge variant={"secondary"} className="tabular-nums">
                 {Math.round(progress)}%
               </Badge>
             </CardTitle>
-            <p className="text-sm text-white/60 text-balance mt-1">
+            <p className="mt-1 text-sm text-balance text-white/60">
               Complete the remaining steps in the checklist before going live.
             </p>
           </div>
@@ -82,12 +82,12 @@ export function GettingStartedWidget() {
             <Link
               key={step.id}
               href={step.href}
-              className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+              className="group flex items-center gap-3 rounded-lg bg-white/5 p-3 transition-colors hover:bg-white/10"
             >
               {step.completed ? (
-                <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
               ) : (
-                <Circle className="h-5 w-5 text-white/40 shrink-0 group-hover:text-white/60" />
+                <Circle className="h-5 w-5 shrink-0 text-white/40 group-hover:text-white/60" />
               )}
               <span
                 className={`flex-1 text-sm ${

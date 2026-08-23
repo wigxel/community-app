@@ -45,7 +45,7 @@ export const SegmentProgressBar = (props: {
   }, [totalSegments]);
 
   return (
-    <div ref={containerRef} className="flex gap-1 w-full h-6">
+    <div ref={containerRef} className="flex h-6 w-full gap-1">
       {count.map(({ index }) => {
         const isActive = index < activeSegments;
         const progressPercent =
@@ -63,7 +63,7 @@ export const SegmentProgressBar = (props: {
             key={index}
             data-active={isActive}
             className={cn(
-              "w-0.75 h-6 group relative overflow-hidden rounded-sm",
+              "group relative h-6 w-0.75 overflow-hidden rounded-sm",
               className,
               !isActive && "bg-background/40",
             )}

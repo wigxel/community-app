@@ -22,7 +22,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
       <Providers initialToken={token}>
         <html lang="en" className="dark">
           <body
-            className={`${bodyFont.variable} font-sans antialiased flex flex-col min-h-screen`}
+            className={`${bodyFont.variable} flex min-h-screen flex-col font-sans antialiased`}
           >
             {children}
           </body>
