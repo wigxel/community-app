@@ -151,5 +151,8 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
+  "overrides": {
+    "effect": "3.22.1"
+  },
   "packageManager": "bun@1.3.5"
 }
