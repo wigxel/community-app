@@ -102,7 +102,7 @@
     "@testing-library/user-event": "14.6.1",
     "@types/node": "25.6.0",
     "@types/react": "19.1.2",
-    "@wigxel/react-tf": "^0.1.7",
+    "@wigxel/react-tf": "0.1.8+patch1",
     "@wigxel/react-tf-biome": "^0.1.7",
     "@vitejs/plugin-react-swc": "3.9.0",
     "@vitest/coverage-v8": "4.1.4",

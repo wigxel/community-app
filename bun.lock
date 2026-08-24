@@ -78,7 +78,7 @@
         "@types/react": "19.1.2",
         "@vitejs/plugin-react-swc": "3.9.0",
         "@vitest/coverage-v8": "4.1.4",
-        "@wigxel/react-tf": "^0.1.7",
+        "@wigxel/react-tf": "0.1.8+patch1",
         "@wigxel/react-tf-biome": "^0.1.7",
         "autoprefixer": "10.4.21",
         "commitizen": "4.3.1",
@@ -997,7 +997,7 @@
 
     "@wigxel/react-components": ["@wigxel/react-components@1.2.7", "", { "dependencies": { "lodash": "^4.17.20", "ramda": "^0.27.0", "styled-components": "^4.4.0", "typescript": "^4.9.5" }, "peerDependencies": { "react": ">=16.x", "react-dom": ">=16.x" } }, "sha512-yUTVRyla7Vht1vkFNM4UvNJ7A+Wv0uw/04KRMVadL+bJGkzQlF9emQIeqwEao7OZCdSrgaEbE5Nyl7HvlwCp0A=="],
 
-    "@wigxel/react-tf": ["@wigxel/react-tf@0.1.7", "", { "dependencies": { "@effect/cli": "^0.77.0", "@effect/platform": "^0.97.1", "@effect/platform-node": "^0.108.1", "@wigxel/cli-core": "0.1.4", "effect": "^3.22.1", "fast-fs-hash": "^0.0.3", "ignore": "^7.0.6", "ts-morph": "^28.0.0" }, "bin": { "nurm": "dist/cli.js" } }, "sha512-J+L5lMQUQY6gWv34aHQn9h00lFqxInS1E4Yvj4AcERuRmaFrruqBHSYs5zdDZJfIdF3iCBCvfcDcX7k2Dj9gXA=="],
+    "@wigxel/react-tf": ["@wigxel/react-tf@0.1.8", "", { "dependencies": { "@effect/cli": "^0.77.0", "@effect/platform": "^0.97.1", "@effect/platform-node": "^0.108.1", "@wigxel/cli-core": "0.1.4", "effect": "^3.22.1", "fast-fs-hash": "^0.0.3", "ignore": "^7.0.6", "ts-morph": "^28.0.0" }, "bin": { "nurm": "dist/cli.js" } }, "sha512-U41Eaz6+6hRSYuVMbPRNpiJjuWgsyiXq30aXT0DiIb+mzAnHuJBvae4D2y+/pOoHkT0kNLIuQrEih+z9XdK+Yg=="],
 
     "@wigxel/react-tf-biome": ["@wigxel/react-tf-biome@0.1.7", "", { "dependencies": { "@wigxel/cli-core": "0.1.4" }, "peerDependencies": { "@biomejs/biome": ">=2.0.0" }, "optionalPeers": ["@biomejs/biome"], "bin": { "react-tf-biome": "bin/setup.js" } }, "sha512-0C4qh2E6HZejkfHa8YyllnpTvJ3oTGZiZmktP2k1aWFrpB9ryaeB4cm4XSyFSS6R15Jt1FeqEof4IouUY3O1qQ=="],
 
