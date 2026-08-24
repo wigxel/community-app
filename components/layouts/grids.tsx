@@ -10,7 +10,7 @@ export function StandardGrid({
     <div
       {...props}
       className={cn(
-        "grid [--s-grid-value:repeat(auto-fill,minmax(18rem,1fr))] gap-[1.2rem]",
+        "grid gap-[1.2rem] [--s-grid-value:repeat(auto-fill,minmax(18rem,1fr))]",
         className,
       )}
       style={{

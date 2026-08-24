@@ -12,12 +12,12 @@ export function SearchInput() {
 
   return (
     <div className="relative w-full max-w-md">
-      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-white/50">
+      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-white/50">
         <Search className="h-4 w-4" />
       </div>
       <input
         type="search"
-        className="block w-full p-4 pl-10 text-sm text-white border border-white/20 rounded-2xl bg-white/10 focus:ring-blue-500 focus:border-blue-500 placeholder-white/50 backdrop-blur-sm transition-all hover:bg-white/20"
+        className="block w-full rounded-2xl border border-white/20 bg-white/10 p-4 pl-10 text-sm text-white placeholder-white/50 backdrop-blur-sm transition-all hover:bg-white/20 focus:border-blue-500 focus:ring-blue-500"
         placeholder="Search profiles..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}

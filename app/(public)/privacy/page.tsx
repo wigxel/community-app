@@ -1,20 +1,21 @@
+import { CornerUpLeftIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-3xl px-4 py-16">
         <Link
           href="/"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 inline-block"
+          className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center gap-2 text-sm transition-colors"
         >
-          &larr; Back to home
+          <CornerUpLeftIcon size="0.9rem" /> Back to home
         </Link>
 
-        <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
+        <h1 className="mb-8 text-3xl font-bold">Privacy Policy</h1>
 
-        <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-muted-foreground">
-          <p className="text-sm text-muted-foreground/70">
+        <div className="prose prose-neutral dark:prose-invert text-muted-foreground max-w-none space-y-6">
+          <p className="text-muted-foreground/70 text-sm">
             Last updated:{" "}
             {new Date().toLocaleDateString("en-US", {
               year: "numeric",
@@ -24,7 +25,7 @@ export default function PrivacyPage() {
           </p>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               1. Information We Collect
             </h2>
             <p>
@@ -36,11 +37,11 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               2. How We Use Your Information
             </h2>
             <p>We use the information we collect to:</p>
-            <ul className="list-disc pl-6 space-y-2">
+            <ul className="list-disc space-y-2 pl-6">
               <li>Provide, maintain, and improve our Service</li>
               <li>Send you technical notices, updates, and support messages</li>
               <li>
@@ -55,7 +56,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               3. Information Sharing
             </h2>
             <p>
@@ -67,7 +68,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               4. Data Security
             </h2>
             <p>
@@ -79,7 +80,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               5. Your Rights
             </h2>
             <p>
@@ -90,7 +91,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               6. Cookies
             </h2>
             <p>
@@ -102,7 +103,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               7. Changes to This Policy
             </h2>
             <p>
@@ -113,7 +114,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-foreground text-xl font-semibold">
               8. Contact Us
             </h2>
             <p>

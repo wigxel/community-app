@@ -86,13 +86,13 @@ export function FavouriteButton({
         onClick={handleClick}
         title={title}
         className={cn(
-          "relative flex items-center justify-center w-11 h-11 rounded-full",
-          "backdrop-blur-sm border",
-          "transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer",
+          "relative flex h-11 w-11 items-center justify-center rounded-full",
+          "border backdrop-blur-sm",
+          "cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95",
           optimisticFavourited
-            ? "bg-rose-500/30 border-rose-400/50 text-rose-300"
-            : "bg-white/15 hover:bg-rose-500/25 border-white/25 hover:border-rose-400/50 text-white hover:text-rose-300",
-          isUnauthenticated && "opacity-50 cursor-default hover:scale-100",
+            ? "border-rose-400/50 bg-rose-500/30 text-rose-300"
+            : "border-white/25 bg-white/15 text-white hover:border-rose-400/50 hover:bg-rose-500/25 hover:text-rose-300",
+          isUnauthenticated && "cursor-default opacity-50 hover:scale-100",
           className,
         )}
       >
@@ -100,12 +100,12 @@ export function FavouriteButton({
           size={20}
           className={cn(
             "transition-all duration-200",
-            optimisticFavourited ? "fill-rose-400 text-rose-400 scale-110" : "",
+            optimisticFavourited ? "scale-110 fill-rose-400 text-rose-400" : "",
           )}
         />
         {/* Count badge — floats top-right corner of the button */}
         {optimisticCount > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-4.5 h-4.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none tabular-nums">
+          <span className="absolute -top-1.5 -right-1.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] leading-none font-bold text-white tabular-nums">
             {optimisticCount}
           </span>
         )}
@@ -125,11 +125,11 @@ export function FavouriteButton({
         title={title}
         className={cn(
           "group/fav flex items-center gap-1 rounded-full px-2.5 py-1",
-          "backdrop-blur-sm border transition-all duration-200 select-none cursor-pointer",
+          "cursor-pointer border backdrop-blur-sm transition-all duration-200 select-none",
           optimisticFavourited
-            ? "bg-rose-500/30 border-rose-400/50 text-rose-300"
-            : "bg-black/40 border-white/10 text-white/60 hover:text-rose-300 hover:border-rose-400/40 hover:bg-rose-500/20",
-          isUnauthenticated && "opacity-60 cursor-default",
+            ? "border-rose-400/50 bg-rose-500/30 text-rose-300"
+            : "border-white/10 bg-black/40 text-white/60 hover:border-rose-400/40 hover:bg-rose-500/20 hover:text-rose-300",
+          isUnauthenticated && "cursor-default opacity-60",
           className,
         )}
       >
@@ -138,12 +138,12 @@ export function FavouriteButton({
           className={cn(
             "transition-all duration-200",
             optimisticFavourited
-              ? "fill-rose-400 text-rose-400 scale-110"
+              ? "scale-110 fill-rose-400 text-rose-400"
               : "group-hover/fav:fill-rose-400/30",
           )}
         />
         {optimisticCount > 0 && (
-          <span className="text-xs font-semibold tabular-nums leading-none">
+          <span className="text-xs leading-none font-semibold tabular-nums">
             {optimisticCount}
           </span>
         )}
@@ -162,11 +162,11 @@ export function FavouriteButton({
       title={title}
       className={cn(
         "flex items-center gap-1.5 rounded-full px-3 py-1.5",
-        "border text-sm font-medium transition-all duration-200 select-none cursor-pointer",
+        "cursor-pointer border text-sm font-medium transition-all duration-200 select-none",
         optimisticFavourited
-          ? "bg-rose-500/15 border-rose-400/40 text-rose-300"
-          : "bg-white/5 border-white/15 text-white/50 hover:text-rose-300 hover:border-rose-400/30 hover:bg-rose-500/10",
-        isUnauthenticated && "opacity-50 cursor-default",
+          ? "border-rose-400/40 bg-rose-500/15 text-rose-300"
+          : "border-white/15 bg-white/5 text-white/50 hover:border-rose-400/30 hover:bg-rose-500/10 hover:text-rose-300",
+        isUnauthenticated && "cursor-default opacity-50",
         className,
       )}
     >

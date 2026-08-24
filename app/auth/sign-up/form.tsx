@@ -111,10 +111,10 @@ export default function SignUpForm({ redirectTo }: { redirectTo: string }) {
     <div className="flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-start">
-          <h1 className="text-3xl font-semibold text-foreground">
+          <h1 className="text-foreground text-3xl font-semibold">
             Create account
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-sm">
             Get started with your free account
           </p>
         </div>
@@ -220,7 +220,7 @@ export default function SignUpForm({ redirectTo }: { redirectTo: string }) {
                         className="h-2"
                       />
 
-                      <div className="grid grid-cols-2 gap-1 text-xs text-foreground/40">
+                      <div className="text-foreground/40 grid grid-cols-2 gap-1 text-xs">
                         <span
                           className={
                             password.length >= 8 ? "text-foreground" : ""
@@ -297,7 +297,7 @@ export default function SignUpForm({ redirectTo }: { redirectTo: string }) {
                         className="mt-0.5"
                       />
                     </FormControl>
-                    <div className="text-sm mt-0.5 leading-none">
+                    <div className="mt-0.5 text-sm leading-none">
                       <span className="text-foreground/50">
                         I agree to the{" "}
                         <Link
@@ -335,7 +335,7 @@ export default function SignUpForm({ redirectTo }: { redirectTo: string }) {
         </Form>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Already have an account?{" "}
             <Link
               href="/auth/sign-in"

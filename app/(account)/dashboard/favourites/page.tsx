@@ -24,8 +24,8 @@ export default function FavouritesPage() {
   return (
     <div>
       <div className="mb-8 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/15 border border-rose-400/30">
-          <Heart size={18} className="text-rose-300 fill-rose-300" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-rose-400/30 bg-rose-500/15">
+          <Heart size={18} className="fill-rose-300 text-rose-300" />
         </div>
         <div>
           <h1 className="text-4xl font-semibold">Favourites</h1>
@@ -54,7 +54,7 @@ export default function FavouritesPage() {
           </div>
           <Link
             href="/"
-            className="mt-2 inline-flex items-center gap-2 rounded-full bg-blue-500 hover:bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors"
+            className="mt-2 inline-flex items-center gap-2 rounded-full bg-blue-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-600"
           >
             Browse projects
           </Link>

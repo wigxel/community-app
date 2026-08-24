@@ -21,15 +21,15 @@ export function RoleFilter({ titles }: RoleFilterProps) {
   });
 
   return (
-    <div className="max-w-md w-full flex items-center border border-white/20 rounded-2xl overflow-hidden">
-      <span className="text-nowrap p-4 text-sm font-semibold text-white ">
+    <div className="flex w-full max-w-md items-center overflow-hidden rounded-2xl border border-white/20">
+      <span className="p-4 text-sm font-semibold text-nowrap text-white">
         Filter by role
       </span>
       <Select
         value={filter}
         onValueChange={(value) => setFilter(() => (value !== "#" ? value : ""))}
       >
-        <SelectTrigger className="w-full grow rounded-none border-0 p-4 h-full bg-white text-zinc-700">
+        <SelectTrigger className="h-full w-full grow rounded-none border-0 bg-white p-4 text-zinc-700">
           <SelectValue placeholder="All" />
         </SelectTrigger>
         <SelectContent>

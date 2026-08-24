@@ -6,6 +6,7 @@ import Link from "next/link";
 import { GettingStartedWidget } from "~/components/dashboard/getting-started-widget";
 import StatCard from "~/components/dashboard/home/StatCard";
 import WorkItem from "~/components/dashboard/home/WorkItem";
+import { FullscreenLoader } from "~/components/layouts/loader";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -14,7 +15,7 @@ import { api } from "~/convex/_generated/api";
 import { ProjectImpl } from "~/lib/factories/project";
 import type { Project } from "~/types/models";
 
-const DashboardPage = () => {
+function DashboardPage() {
   const profile = useQuery(api.profiles.getProfile);
   const workExperience = useQuery(
     api.workExperience.getByUserId,
@@ -22,11 +23,7 @@ const DashboardPage = () => {
   );
 
   if (!profile) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-white/60">Loading...</p>
-      </div>
-    );
+    return <FullscreenLoader />;
   }
 
   const fullName = `${profile.firstName} ${profile.lastName}`;
@@ -56,7 +53,7 @@ const DashboardPage = () => {
     <div className="space-y-6">
       <GettingStartedWidget />
 
-      <Card className="bg-blue-500/20 text-blue-300 border border-white/10">
+      <Card className="border border-white/10 bg-blue-500/20 text-blue-300">
         <CardContent className="flex items-center gap-4 pt-6">
           <Avatar className="h-14 w-14">
             <AvatarImage src={profile.profileImage || undefined} />
@@ -74,7 +71,7 @@ const DashboardPage = () => {
                 value={completionPercentage}
                 className="h-2 bg-blue-500/30 text-blue-300"
               />
-              <p className="text-xs text-white/50 mt-1">
+              <p className="mt-1 text-xs text-white/50">
                 Profile {completionPercentage}% complete
               </p>
             </div>
@@ -83,7 +80,7 @@ const DashboardPage = () => {
           <Link href={`/profile/${profile.username}`}>
             <Button
               size="sm"
-              className="bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 cursor-pointer"
+              className="cursor-pointer bg-blue-500/20 text-blue-300 hover:bg-blue-500/30"
             >
               View profile
             </Button>
@@ -91,7 +88,7 @@ const DashboardPage = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard
           icon={<Briefcase className="h-5 w-5 text-blue-300" />}
           label="Work Experience"
@@ -114,7 +111,7 @@ const DashboardPage = () => {
       </div>
 
       <div>
-        <Card className="bg-blue-500/20 text-blue-300 border border-white/10">
+        <Card className="border border-white/10 bg-blue-500/20 text-blue-300">
           <CardHeader>
             <CardTitle className="text-base text-white">
               Work Experience & Interests
@@ -123,14 +120,14 @@ const DashboardPage = () => {
           <CardContent className="space-y-4">
             {profile.shortBio && (
               <div>
-                <p className="text-sm text-white/60 mb-1">Bio</p>
+                <p className="mb-1 text-sm text-white/60">Bio</p>
                 <p className="text-white">{profile.shortBio}</p>
               </div>
             )}
 
             {workExperience && workExperience.length > 0 ? (
               <div>
-                <p className="text-sm text-white/60 mb-2">
+                <p className="mb-2 text-sm text-white/60">
                   Recent Work Experience
                 </p>
                 {workExperience.slice(0, 3).map((exp) => {
@@ -149,19 +146,19 @@ const DashboardPage = () => {
                 })}
               </div>
             ) : (
-              <p className="text-white/60 text-sm">
+              <p className="text-sm text-white/60">
                 No work experience added yet.
               </p>
             )}
 
             {profile.interests && profile.interests.length > 0 && (
               <div>
-                <p className="text-sm text-white/60 mb-2">Interests</p>
+                <p className="mb-2 text-sm text-white/60">Interests</p>
                 <div className="flex flex-wrap gap-2">
                   {profile.interests.map((interest) => (
                     <span
                       key={interest}
-                      className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm border border-blue-400/30"
+                      className="rounded-full border border-blue-400/30 bg-blue-500/20 px-3 py-1 text-sm text-blue-300"
                     >
                       {interest}
                     </span>
@@ -176,7 +173,7 @@ const DashboardPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-blue-300 hover:bg-blue-500/20 cursor-pointer"
+                className="cursor-pointer text-blue-300 hover:bg-blue-500/20"
               >
                 Edit profile →
               </Button>
@@ -186,7 +183,7 @@ const DashboardPage = () => {
       </div>
     </div>
   );
-};
+}
 
 function TopProjects() {
   const { results } = usePaginatedQuery(
@@ -199,7 +196,7 @@ function TopProjects() {
     <>
       {results.length > 0 && (
         <div>
-          <p className="text-sm text-white/60 mb-2">Recent Projects</p>
+          <p className="mb-2 text-sm text-white/60">Recent Projects</p>
           {results.map((project) => (
             <WorkItem
               key={project.title}

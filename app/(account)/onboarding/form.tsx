@@ -180,7 +180,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
           <span>Step {step} of 4</span>
           <span>{Math.round(progress)}%</span>
         </div>
-        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+        <div className="h-2 overflow-hidden rounded-full bg-white/10">
           <div
             className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -189,7 +189,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
       </div>
 
       {error && (
-        <p className="text-sm text-red-400 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
+        <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
           {error}
         </p>
       )}
@@ -198,12 +198,12 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
       {step === 1 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-semibold mb-1">Basic Information</h2>
+            <h2 className="mb-1 text-xl font-semibold">Basic Information</h2>
             <p className="text-sm text-white/60">Tell us about yourself</p>
           </div>
 
           <div className="flex gap-4">
-            <div className="flex flex-col gap-2 flex-1">
+            <div className="flex flex-1 flex-col gap-2">
               <Label htmlFor="firstName">First name</Label>
               <Input
                 id="firstName"
@@ -214,7 +214,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
                 placeholder="Jane"
               />
             </div>
-            <div className="flex flex-col gap-2 flex-1">
+            <div className="flex flex-1 flex-col gap-2">
               <Label htmlFor="lastName">Last name</Label>
               <Input
                 id="lastName"
@@ -239,7 +239,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
       {step === 2 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-semibold mb-1">Profile Picture</h2>
+            <h2 className="mb-1 text-xl font-semibold">Profile Picture</h2>
             <p className="text-sm text-white/60">
               Upload your avatar (optional)
             </p>
@@ -258,7 +258,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
       {step === 3 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-semibold mb-1">Your Role</h2>
+            <h2 className="mb-1 text-xl font-semibold">Your Role</h2>
             <p className="text-sm text-white/60">
               What best describes you? (optional)
             </p>
@@ -291,7 +291,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
       {step === 4 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-semibold mb-1">Your Interests</h2>
+            <h2 className="mb-1 text-xl font-semibold">Your Interests</h2>
             <p className="text-sm text-white/60">
               Select at least one interest
             </p>
@@ -303,7 +303,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
                 key={interest}
                 type="button"
                 onClick={() => toggleInterest(interest)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
                   formData.interests.includes(interest)
                     ? "bg-blue-500 text-white"
                     : "bg-white/10 text-white/70 hover:bg-white/20"
@@ -333,7 +333,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
                 type="button"
                 onClick={addCustomInterest}
                 variant="outline"
-                className="!text-white bg-white/10 border-white/30 hover:bg-white/20"
+                className="border-white/30 bg-white/10 !text-white hover:bg-white/20"
               >
                 Add
               </Button>
@@ -349,7 +349,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
                 {formData.interests.map((interest) => (
                   <div
                     key={interest}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-sm border border-blue-400/30"
+                    className="flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/20 px-3 py-1.5 text-sm text-blue-300"
                   >
                     <span>{interest}</span>
                     <button
@@ -375,7 +375,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
             variant="outline"
             onClick={handleBack}
             disabled={isPending}
-            className="flex-1 !text-white bg-white/10 border-white/30 hover:bg-white/20"
+            className="flex-1 border-white/30 bg-white/10 !text-white hover:bg-white/20"
           >
             Back
           </Button>
@@ -385,7 +385,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
             type="button"
             onClick={handleNext}
             disabled={step === 1 && usernameStatus !== "available"}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 !text-white"
+            className="flex-1 bg-blue-600 !text-white hover:bg-blue-700"
           >
             Next
           </Button>
@@ -394,7 +394,7 @@ export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
             type="button"
             onClick={handleSubmit}
             disabled={isPending}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 !text-white"
+            className="flex-1 bg-blue-600 !text-white hover:bg-blue-700"
           >
             {isPending ? "Creating Profile..." : "Complete Setup"}
           </Button>

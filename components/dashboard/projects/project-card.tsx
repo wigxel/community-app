@@ -53,7 +53,7 @@ const formatTimeline = (project: Project) => {
 export function ProjectCard(project: Project) {
   const timeline = formatTimeline(project);
   return (
-    <Card className="group rounded-2xl bg-blue-500/20 text-blue-300 border border-white/10">
+    <Card className="group rounded-2xl border border-white/10 bg-blue-500/20 text-blue-300">
       <CardHeader>
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <CardTitle className="text-2xl text-white">{project.title}</CardTitle>
@@ -89,7 +89,7 @@ export function ProjectCard(project: Project) {
                     href={item.metadata?.url || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group/media relative overflow-hidden rounded-2xl border border-white/15 bg-linear-to-br from-white/10 to-white/5 transition-colors duration-300 ease-in-out hover:border-white/40 hover:shadow-lg hover:from-white/13 hover:to-white/7"
+                    className="group/media relative overflow-hidden rounded-2xl border border-white/15 bg-linear-to-br from-white/10 to-white/5 transition-colors duration-300 ease-in-out hover:border-white/40 hover:from-white/13 hover:to-white/7 hover:shadow-lg"
                   >
                     {/* Media Preview */}
                     <div className="relative aspect-video w-full overflow-hidden bg-linear-to-br from-slate-700/50 to-slate-800/50">
@@ -110,23 +110,23 @@ export function ProjectCard(project: Project) {
                             <source src={item.metadata.url} type="video/mp4" />
                           </video>
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <div className="rounded-full bg-white/20 p-4 transition-all duration-300 ease-in-out group-hover/media:bg-white/30 group-hover/media:scale-110">
+                            <div className="rounded-full bg-white/20 p-4 transition-all duration-300 ease-in-out group-hover/media:scale-110 group-hover/media:bg-white/30">
                               <Video size={32} className="text-white" />
                             </div>
                           </div>
                         </div>
                       ) : item.type === "pdf" ? (
                         <div className="relative h-full w-full">
-                          <div className="relative w-full h-full overflow-hidden">
-                            <div className="absolute z-1 inset-0" />
+                          <div className="relative h-full w-full overflow-hidden">
+                            <div className="absolute inset-0 z-1" />
                             <embed
                               src={`${item.metadata?.url}#toolbar=0&navpanes=0&scrollbar=0`}
                               type="application/pdf"
-                              className="w-[calc(100%+20px)] h-full border-none scale-110 transition-transform duration-300 group-hover/media:scale-120"
+                              className="h-full w-[calc(100%+20px)] scale-110 border-none transition-transform duration-300 group-hover/media:scale-120"
                             />
                           </div>
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <div className="rounded-2xl bg-linear-to-br from-red-500/20 to-orange-500/20 p-4 transition-all duration-300 ease-in-out group-hover/media:from-red-500/30 group-hover/media:to-orange-500/30 group-hover/media:scale-110">
+                            <div className="rounded-2xl bg-linear-to-br from-red-500/20 to-orange-500/20 p-4 transition-all duration-300 ease-in-out group-hover/media:scale-110 group-hover/media:from-red-500/30 group-hover/media:to-orange-500/30">
                               <FileText size={32} className="text-white" />
                             </div>
                           </div>
@@ -134,7 +134,7 @@ export function ProjectCard(project: Project) {
                       ) : null}
 
                       {/* Type Badge */}
-                      <div className="absolute top-3 right-3 rounded-lg border border-white/20 bg-black/50 px-3 py-1.5 text-xs font-semibold uppercase text-white">
+                      <div className="absolute top-3 right-3 rounded-lg border border-white/20 bg-black/50 px-3 py-1.5 text-xs font-semibold text-white uppercase">
                         {item.type}
                       </div>
                     </div>
@@ -142,12 +142,12 @@ export function ProjectCard(project: Project) {
                     {/* Media Info */}
                     <div className="p-4">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-semibold capitalize text-white/80 group-hover/media:text-white transition-colors">
+                        <p className="text-sm font-semibold text-white/80 capitalize transition-colors group-hover/media:text-white">
                           {item.metadata?.title ??
                             `Untitled ${item.type === "pdf" ? "Document" : item.type}`}
                         </p>
                         {item.metadata?.url && (
-                          <div className="flex items-center gap-1.5 text-xs text-blue-300/80 group-hover/media:text-blue-300 transition-colors font-medium">
+                          <div className="flex items-center gap-1.5 text-xs font-medium text-blue-300/80 transition-colors group-hover/media:text-blue-300">
                             <span>View</span>
                             <ExternalLink size={12} />
                           </div>
@@ -182,7 +182,7 @@ export function ProjectCard(project: Project) {
                       className="group/link flex items-center gap-2.5 rounded-xl border border-white/20 bg-linear-to-r from-white/10 to-white/5 px-5 py-2.5 text-sm font-semibold text-white/90 transition-colors duration-300 ease-in-out hover:border-white/40 hover:from-white/13 hover:to-white/7 hover:text-blue-200 hover:shadow-lg"
                     >
                       <Icon size={14} />
-                      <span className="truncate max-w-50">
+                      <span className="max-w-50 truncate">
                         {url.replace(/^https?:\/\/(www\.)?/, "")}
                       </span>
                     </Link>

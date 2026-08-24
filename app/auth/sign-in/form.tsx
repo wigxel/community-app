@@ -55,10 +55,10 @@ export default function SignInForm({ redirectTo }: { redirectTo: string }) {
     <div className="flex items-center justify-center">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-start">
-          <h1 className="text-3xl font-semibold text-foreground">
+          <h1 className="text-foreground text-3xl font-semibold">
             Welcome back
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-sm">
             Sign in to your account to continue
           </p>
         </div>
@@ -97,7 +97,7 @@ export default function SignInForm({ redirectTo }: { redirectTo: string }) {
                     <FormLabel>Password</FormLabel>
                     <Link
                       href="/auth/forgot-password"
-                      className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-muted-foreground hover:text-foreground text-xs transition-colors"
                     >
                       Forgot password?
                     </Link>
@@ -127,7 +127,7 @@ export default function SignInForm({ redirectTo }: { redirectTo: string }) {
         </Form>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             New to Rever?{" "}
             <Link
               href="/auth/sign-up"

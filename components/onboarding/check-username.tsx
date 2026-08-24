@@ -79,7 +79,7 @@ export function CheckUsername({
           }
         />
         {trimmedUsername.length > 0 && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2">
+          <span className="absolute top-1/2 right-3 -translate-y-1/2">
             {isChecking ? (
               <Loader2 size={16} className="animate-spin text-white/50" />
             ) : isAvailable ? (

@@ -34,9 +34,9 @@ export function MediaThumb({
   if (!url) {
     return (
       <div
-        className={`flex items-center aspect-post w-full justify-center bg-background ${className}`}
+        className={`aspect-post bg-background flex w-full items-center justify-center ${className}`}
       >
-        <span className="text-xs uppercase tracking-widest text-neutral-500">
+        <span className="text-xs tracking-widest text-neutral-500 uppercase">
           No Preview
         </span>
       </div>
@@ -46,10 +46,10 @@ export function MediaThumb({
   if (isPdf) {
     return (
       <div
-        className={`flex flex-col items-center aspect-post w-full justify-center gap-2 bg-background ${className}`}
+        className={`aspect-post bg-background flex w-full flex-col items-center justify-center gap-2 ${className}`}
       >
         <FileText size={28} className="text-neutral-400" />
-        <span className="text-xs text-neutral-500 uppercase tracking-widest">
+        <span className="text-xs tracking-widest text-neutral-500 uppercase">
           PDF
         </span>
       </div>

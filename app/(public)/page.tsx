@@ -14,11 +14,11 @@ export default function Home() {
       {/* Hero section */}
       <Container
         level="max"
-        className="min-h-[40svh] flex items-start gap-8 py-32"
+        className="flex min-h-[40svh] items-start gap-8 py-32"
       >
         <div className="flex-1 lg:pl-12">
-          <div className="flex flex-col flex-1 py-12 gap-4">
-            <h1 className="text-6xl text-balance font-bold tracking-tighter">
+          <div className="flex flex-1 flex-col gap-4 py-12">
+            <h1 className="text-6xl font-bold tracking-tighter text-balance">
               <Balancer>
                 Show your best works <br /> in a{" "}
                 <span className="text-accent-foreground">
@@ -31,12 +31,12 @@ export default function Home() {
               </Balancer>
             </h1>
 
-            <p className="text-balance text-base text-muted-foreground max-w-md">
+            <p className="text-muted-foreground max-w-md text-base text-balance">
               Browse real design and development work from local talents. We
               make it easy to find the right locals for the jobs
             </p>
 
-            <div className="flex mt-8">
+            <div className="mt-8 flex">
               <Button size="lg">
                 Get Started <ArrowRight />
               </Button>
@@ -44,7 +44,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="aspect-video rounded-lg bg-gray-800 flex-1"></div>
+        <div className="aspect-video flex-1 rounded-lg bg-gray-800"></div>
       </Container>
 
       {/* Project Catalog */}

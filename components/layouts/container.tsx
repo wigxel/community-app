@@ -8,11 +8,11 @@ const levels = {
 export function Container({
   children,
   className,
-  level,
+  level = "max",
   ...props
-}: React.ComponentProps<"div"> & { level: keyof typeof levels }) {
+}: React.ComponentProps<"div"> & { level?: keyof typeof levels }) {
   return (
-    <div {...props} className={cn("px-4 mx-auto ", levels[level], className)}>
+    <div {...props} className={cn("mx-auto px-4", levels[level], className)}>
       {children}
     </div>
   );

@@ -120,12 +120,12 @@ export function MediaPreviewModal({
           type="button"
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 h-6 w-6 text-white/30 hover:bg-blue-500/10 hover:text-blue-300"
+          className="absolute top-2 right-2 h-6 w-6 text-white/30 hover:bg-blue-500/10 hover:text-blue-300"
         >
           <Eye size={13} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-[#252323] border-none p-0 w-full max-w-4xl">
+      <DialogContent className="w-full max-w-4xl border-none bg-[#252323] p-0">
         <DialogHeader>
           <DialogTitle className="border-b border-white/10 p-5">
             Media Preview
@@ -134,7 +134,7 @@ export function MediaPreviewModal({
             Preview uploaded media
           </DialogDescription>
         </DialogHeader>
-        <div className="flex items-center justify-center pt-0 p-2 overflow-auto">
+        <div className="flex items-center justify-center overflow-auto p-2 pt-0">
           {type === "photo" && (
             <NextImage
               src={url}

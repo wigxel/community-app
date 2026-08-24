@@ -16,28 +16,28 @@ export function MagicLinkEmail({
     <EmailLayout preview={`Your ${emailBrand.APP_NAME} sign-in link`}>
       <Heading
         as="h1"
-        className="text-2xl font-semibold text-neutral-900 m-0 mb-4"
+        className="m-0 mb-4 text-2xl font-semibold text-neutral-900"
       >
         Sign in to {emailBrand.APP_NAME}
       </Heading>
-      <Text className="text-base text-neutral-700 leading-6 m-0 mb-4">
+      <Text className="m-0 mb-4 text-base leading-6 text-neutral-700">
         Hi {name}, click the button below to sign in. This link will expire in{" "}
         {expiresInMinutes} minutes and can only be used once.
       </Text>
       <Section className="mb-6">
         <Button
           href={magicLink}
-          className="bg-neutral-900 text-white rounded-md px-5 py-3 text-sm font-medium no-underline"
+          className="rounded-md bg-neutral-900 px-5 py-3 text-sm font-medium text-white no-underline"
         >
           Sign in
         </Button>
       </Section>
-      <Text className="text-sm text-neutral-500 leading-5 m-0 mb-4">
+      <Text className="m-0 mb-4 text-sm leading-5 text-neutral-500">
         If the button doesn&apos;t work, paste this link into your browser:
         <br />
         {magicLink}
       </Text>
-      <Text className="text-sm text-neutral-500 leading-5 m-0">
+      <Text className="m-0 text-sm leading-5 text-neutral-500">
         Didn&apos;t request this? You can safely ignore this email — no one will
         be signed in without using the link above.
       </Text>

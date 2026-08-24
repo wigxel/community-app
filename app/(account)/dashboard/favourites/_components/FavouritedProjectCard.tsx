@@ -31,7 +31,7 @@ export function FavouritedProjectCard(props: { project: FavouritedProject }) {
       <div className="flex flex-col gap-2.5">
         {/* biome-ignore lint/a11y/noStaticElementInteractions: Container needs hover state for video playback */}
         <section
-          className="group relative overflow-hidden rounded-xl bg-neutral-900 aspect-video w-full"
+          className="group relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-900"
           onMouseEnter={() => {
             setIsHovered(true);
             videoRef.current?.play().catch(() => {});
@@ -45,14 +45,14 @@ export function FavouritedProjectCard(props: { project: FavouritedProject }) {
           <div className="absolute inset-0">
             {!url ? (
               <div className="flex h-full w-full items-center justify-center bg-neutral-800">
-                <span className="text-xs uppercase tracking-widest text-neutral-500">
+                <span className="text-xs tracking-widest text-neutral-500 uppercase">
                   No Preview
                 </span>
               </div>
             ) : isPdf ? (
               <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-neutral-800">
                 <FileText size={28} className="text-neutral-400" />
-                <span className="text-xs uppercase tracking-widest text-neutral-500">
+                <span className="text-xs tracking-widest text-neutral-500 uppercase">
                   PDF
                 </span>
               </div>
@@ -79,13 +79,13 @@ export function FavouritedProjectCard(props: { project: FavouritedProject }) {
 
           {/* ── Hover overlay: Eye (open modal) + Heart (unfavourite) ── */}
           <div
-            className={`absolute inset-0 z-20 flex items-center justify-center gap-3 bg-black/55 backdrop-blur-[2px] transition-opacity duration-250 ${isHovered ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+            className={`absolute inset-0 z-20 flex items-center justify-center gap-3 bg-black/55 backdrop-blur-[2px] transition-opacity duration-250 ${isHovered ? "opacity-100" : "pointer-events-none opacity-0"}`}
           >
             <button
               type="button"
               aria-label={`View ${project.title}`}
               onClick={() => setModalOpen(true)}
-              className="flex items-center justify-center w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/25 hover:border-white/50 text-white transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/25 bg-white/15 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:border-white/50 hover:bg-white/25 active:scale-95"
             >
               <Eye size={20} />
             </button>
@@ -94,10 +94,10 @@ export function FavouritedProjectCard(props: { project: FavouritedProject }) {
           </div>
 
           {/* ── Gradient + title ── */}
-          <div className="absolute inset-0 z-10 bg-linear-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+          <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
-          <div className="absolute bottom-0 left-0 right-0 z-10 p-4 pointer-events-none">
-            <h3 className="font-semibold text-sm text-white line-clamp-1">
+          <div className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 p-4">
+            <h3 className="line-clamp-1 text-sm font-semibold text-white">
               {project.title}
             </h3>
           </div>
@@ -107,7 +107,7 @@ export function FavouritedProjectCard(props: { project: FavouritedProject }) {
         {project.owner && (
           <Link
             href={`/profile/${project.owner.username}`}
-            className="flex items-center gap-2 px-1 group/owner"
+            className="group/owner flex items-center gap-2 px-1"
           >
             <div className="relative h-5 w-5 shrink-0 overflow-hidden rounded-full border border-white/15 bg-white/10">
               {project.owner.profileImage ? (
@@ -123,7 +123,7 @@ export function FavouritedProjectCard(props: { project: FavouritedProject }) {
                 </span>
               )}
             </div>
-            <span className="truncate text-xs text-white/50 group-hover/owner:text-white/80 transition-colors">
+            <span className="truncate text-xs text-white/50 transition-colors group-hover/owner:text-white/80">
               {ownerName} · @{project.owner.username}
             </span>
           </Link>

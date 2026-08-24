@@ -126,7 +126,7 @@ export default async function ProfileCard({
 
   return (
     <div className="container mx-auto px-5 py-8 md:px-8">
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <ReturnButton />
           <ShareButton username={username} />
@@ -148,10 +148,10 @@ export default async function ProfileCard({
         )}
       </div>
 
-      <section className="flex flex-col gap-4 md:flex-row relative z-10">
+      <section className="relative z-10 flex flex-col gap-4 md:flex-row">
         {/* Profile Header */}
         <div className="-mt-30 flex flex-col items-start gap-y-4">
-          <div className="md:ml-7 ml-5 relative aspect-square h-30 overflow-hidden rounded-full border-4 border-white shadow-2xl md:h-40 bg-slate-900">
+          <div className="relative ml-5 aspect-square h-30 overflow-hidden rounded-full border-4 border-white bg-slate-900 shadow-2xl md:ml-7 md:h-40">
             {profile.profileImage?.startsWith("data:") ? (
               <Image
                 src={profile.profileImage}
@@ -159,7 +159,7 @@ export default async function ProfileCard({
                 width={200}
                 height={200}
                 unoptimized
-                className="object-cover object-center w-full h-full"
+                className="h-full w-full object-cover object-center"
               />
             ) : (
               <Image
@@ -199,13 +199,13 @@ export default async function ProfileCard({
           {/* Short Bio */}
           {profile.shortBio && (
             <div className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:border-white/30 hover:shadow-xl md:p-8">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="mb-4 flex items-center gap-2">
                 <div className="h-1 w-8 rounded-full bg-linear-to-r from-purple-400 to-pink-400"></div>
                 <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
                   Bio
                 </h2>
               </div>
-              <p className="text-xl leading-relaxed text-white/95 font-light">
+              <p className="text-xl leading-relaxed font-light text-white/95">
                 {profile.shortBio}
               </p>
             </div>
@@ -213,7 +213,7 @@ export default async function ProfileCard({
 
           {/* Contact Information */}
           <div>
-            <div className="flex items-center gap-2 mb-6">
+            <div className="mb-6 flex items-center gap-2">
               <div className="h-1 w-8 rounded-full bg-linear-to-r from-emerald-400 to-teal-400"></div>
               <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
                 Contact Information
@@ -222,14 +222,14 @@ export default async function ProfileCard({
 
             <div className="flex flex-col gap-2">
               {/* Email */}
-              <div className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:border-white/30 hover:shadow-xl hover:scale-[1.02] md:p-7">
+              <div className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:scale-[1.02] hover:border-white/30 hover:shadow-xl md:p-7">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex min-w-0 flex-1 items-start gap-4">
-                    <div className="rounded-2xl bg-linear-to-br from-emerald-500/20 to-teal-500/20 p-3 transition-all group-hover:from-emerald-500/30 group-hover:to-teal-500/30 group-hover:scale-110 md:p-3.5 shadow-lg">
+                    <div className="rounded-2xl bg-linear-to-br from-emerald-500/20 to-teal-500/20 p-3 shadow-lg transition-all group-hover:scale-110 group-hover:from-emerald-500/30 group-hover:to-teal-500/30 md:p-3.5">
                       <Mail size={22} className="text-emerald-300" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="mb-2 text-xs tracking-wider text-white/60 uppercase font-semibold">
+                      <div className="mb-2 text-xs font-semibold tracking-wider text-white/60 uppercase">
                         Email Address
                       </div>
                       <a
@@ -244,14 +244,14 @@ export default async function ProfileCard({
               </div>
 
               {/* Phone */}
-              <div className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:border-white/30 hover:shadow-xl hover:scale-[1.02] md:p-7">
+              <div className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:scale-[1.02] hover:border-white/30 hover:shadow-xl md:p-7">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex flex-1 items-start gap-4">
-                    <div className="rounded-2xl bg-linear-to-br from-blue-500/20 to-indigo-500/20 p-3 transition-all group-hover:from-blue-500/30 group-hover:to-indigo-500/30 group-hover:scale-110 md:p-3.5 shadow-lg">
+                    <div className="rounded-2xl bg-linear-to-br from-blue-500/20 to-indigo-500/20 p-3 shadow-lg transition-all group-hover:scale-110 group-hover:from-blue-500/30 group-hover:to-indigo-500/30 md:p-3.5">
                       <Phone size={22} className="text-blue-300" />
                     </div>
                     <div className="flex-1">
-                      <div className="mb-2 text-xs tracking-wider text-white/60 uppercase font-semibold">
+                      <div className="mb-2 text-xs font-semibold tracking-wider text-white/60 uppercase">
                         Phone Number
                       </div>
                       <div className="space-y-2">
@@ -276,7 +276,7 @@ export default async function ProfileCard({
           {/* Social Links */}
           {profile_links.length > 0 && (
             <div>
-              <div className="flex items-center gap-2 mb-6">
+              <div className="mb-6 flex items-center gap-2">
                 <div className="h-1 w-8 rounded-full bg-linear-to-r from-violet-400 to-fuchsia-400"></div>
                 <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
                   Links
@@ -293,14 +293,14 @@ export default async function ProfileCard({
                       href={link.value}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:border-white/30 hover:shadow-xl hover:scale-[1.02] md:p-7"
+                      className="group rounded-3xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 p-6 transition-all hover:scale-[1.02] hover:border-white/30 hover:shadow-xl md:p-7"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="rounded-2xl bg-linear-to-br from-violet-500/20 to-fuchsia-500/20 p-3 transition-all group-hover:from-violet-500/30 group-hover:to-fuchsia-500/30 group-hover:scale-110 shadow-lg">
+                        <div className="rounded-2xl bg-linear-to-br from-violet-500/20 to-fuchsia-500/20 p-3 shadow-lg transition-all group-hover:scale-110 group-hover:from-violet-500/30 group-hover:to-fuchsia-500/30">
                           <Icon size={22} className="text-violet-300" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="mb-2 text-xs tracking-wider text-white/60 uppercase font-semibold">
+                          <div className="mb-2 text-xs font-semibold tracking-wider text-white/60 uppercase">
                             {link.title}
                           </div>
                           <p className="truncate text-lg font-medium text-white/95 transition-colors group-hover:text-violet-300">
@@ -316,10 +316,10 @@ export default async function ProfileCard({
           )}
         </div>
 
-        <div className="min-h-100 flex-1 space-y-6 rounded-3xl bg-linear-to-br from-slate-50/10 to-slate-50/5 p-5 text-white shadow-2xl md:space-y-10 md:p-10 border border-white/10 md:-mt-5">
+        <div className="min-h-100 flex-1 space-y-6 rounded-3xl border border-white/10 bg-linear-to-br from-slate-50/10 to-slate-50/5 p-5 text-white shadow-2xl md:-mt-5 md:space-y-10 md:p-10">
           {profile.interests && profile.interests.length > 0 && (
             <div>
-              <div className="flex items-center gap-2 mb-6">
+              <div className="mb-6 flex items-center gap-2">
                 <div className="h-1 w-8 rounded-full bg-linear-to-r from-pink-400 to-rose-400"></div>
                 <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
                   Interests
@@ -329,9 +329,9 @@ export default async function ProfileCard({
                 {profile.interests.map((interest) => (
                   <div
                     key={interest}
-                    className="group rounded-2xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 px-5 py-3 transition-all hover:border-white/30 hover:shadow-lg hover:scale-105"
+                    className="group rounded-2xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 px-5 py-3 transition-all hover:scale-105 hover:border-white/30 hover:shadow-lg"
                   >
-                    <span className="text-base font-semibold text-white/95 group-hover:text-pink-300 transition-colors">
+                    <span className="text-base font-semibold text-white/95 transition-colors group-hover:text-pink-300">
                       {interest}
                     </span>
                   </div>
@@ -343,7 +343,7 @@ export default async function ProfileCard({
           {/* Project skills */}
           {profile.skills && profile.skills.length > 0 && (
             <div>
-              <div className="flex items-center gap-2 mb-6">
+              <div className="mb-6 flex items-center gap-2">
                 <div className="h-8 w-1 rounded-full bg-linear-to-r from-pink-400 to-purple-400"></div>
                 <h2 className="text-xs font-bold tracking-widest text-white/70 uppercase">
                   Skills
@@ -355,7 +355,7 @@ export default async function ProfileCard({
                     key={skillId}
                     className="group rounded-xl border border-white/20 bg-linear-to-br from-white/15 to-white/5 px-4 py-1 transition-all hover:border-white/30 hover:shadow-lg"
                   >
-                    <span className="text-sm font-semibold text-white/95 group-hover:text-cyan-300 transition-colors">
+                    <span className="text-sm font-semibold text-white/95 transition-colors group-hover:text-cyan-300">
                       {skillId}
                     </span>
                   </div>

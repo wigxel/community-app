@@ -43,7 +43,7 @@ const LandingProjectCard = ({ project }: { project: BasicProject }) => {
       onClick={handleNavigation}
       onKeyDown={handleNavigation}
     >
-      <section className="group flex flex-col relative text-[10px] rounded-(--project-card-media-radius) bg-muted p-(--project-card-media-padding) w-full">
+      <section className="group bg-muted relative flex w-full flex-col rounded-(--project-card-media-radius) p-(--project-card-media-padding) text-[10px]">
         <div className="overflow-hidden rounded-[calc(var(--project-card-media-radius)-calc(var(--project-card-media-padding)*0.5))]">
           <MediaThumbnail
             variant={isVideo ? "video" : "image"}
@@ -52,18 +52,18 @@ const LandingProjectCard = ({ project }: { project: BasicProject }) => {
           />
         </div>
 
-        <div className="flex items-center pt-[0.85em] pb-[0.7em] px-[0.8em] justify-between z-20 relative">
+        <div className="relative z-20 flex items-center justify-between px-[0.8em] pt-[0.85em] pb-[0.7em]">
           <div className="inline-flex items-center gap-[0.6em]">
             <ProfileAvatar
-              className="size-[2.4em] bg-blue-400! rounded-full"
+              className="size-[2.4em] rounded-full bg-blue-400!"
               name={project.ownerName}
             />
-            <h3 className="font-semibold truncate max-w-[15ch] text-sm text-foreground line-clamp-1">
+            <h3 className="text-foreground line-clamp-1 max-w-[15ch] truncate text-sm font-semibold">
               {project.username ?? "--"}
             </h3>
           </div>
 
-          <div className="inline-flex gap-0.5 text-sm items-center text-muted-foreground">
+          <div className="text-muted-foreground inline-flex items-center gap-0.5 text-sm">
             <HeartIcon size="1em" />
             <span>{likes_count}</span>
           </div>
@@ -88,7 +88,7 @@ function MediaThumbnail({ variant, media, alt }: MediaProps) {
       item={media}
       alt={alt}
       fill
-      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
       videoRef={videoRef}
     />
   );

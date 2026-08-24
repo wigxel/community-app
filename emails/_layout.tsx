@@ -39,25 +39,25 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
       </Head>
       <Preview>{preview}</Preview>
       <Tailwind>
-        <Body className="bg-neutral-50 font-sans py-10">
-          <Container className="bg-white max-w-[560px] mx-auto rounded-xl border border-solid border-neutral-200 px-10 py-8">
+        <Body className="bg-neutral-50 py-10 font-sans">
+          <Container className="mx-auto max-w-[560px] rounded-xl border border-solid border-neutral-200 bg-white px-10 py-8">
             <Section>
               <Link
                 href={APP_URL}
-                className="text-neutral-900 no-underline text-lg font-semibold tracking-tight"
+                className="text-lg font-semibold tracking-tight text-neutral-900 no-underline"
               >
                 {APP_NAME}
               </Link>
             </Section>
-            <Hr className="border-neutral-200 my-6" />
+            <Hr className="my-6 border-neutral-200" />
             <Section>{children}</Section>
-            <Hr className="border-neutral-200 my-8" />
+            <Hr className="my-8 border-neutral-200" />
             <Section>
-              <Text className="text-xs text-neutral-500 leading-5 m-0">
+              <Text className="m-0 text-xs leading-5 text-neutral-500">
                 {APP_NAME} &middot; Connecting local businesses with students
                 for internships.
               </Text>
-              <Text className="text-xs text-neutral-500 leading-5 m-0 mt-2">
+              <Text className="m-0 mt-2 text-xs leading-5 text-neutral-500">
                 Questions? Reach us at{" "}
                 <Link
                   href={`mailto:${SUPPORT_EMAIL}`}

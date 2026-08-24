@@ -14,17 +14,17 @@ export function Footer() {
         </p>
 
         <nav className="flex gap-6 text-sm text-white/40">
-          <Link href="/terms" className="hover:text-white transition-colors">
+          <Link href="/terms" className="transition-colors hover:text-white">
             Terms of Use
           </Link>
-          <Link href="/privacy" className="hover:text-white transition-colors">
+          <Link href="/privacy" className="transition-colors hover:text-white">
             Privacy Policy
           </Link>
         </nav>
       </Container>
 
-      <Container level={"max"} className="mt-8 overflow-hidden max-h-[8svh]">
-        <div className="relative text-muted-foreground text-center">
+      <Container level={"max"} className="mt-8 max-h-[8svh] overflow-hidden">
+        <div className="text-muted-foreground relative text-center">
           <Image
             src={"/brand-logo-light.svg"}
             alt={"Community app"}
@@ -32,7 +32,7 @@ export function Footer() {
             width={69}
             height={12}
           />
-          <span className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
+          <span className="from-background absolute inset-0 bg-linear-to-t to-transparent" />
         </div>
       </Container>
     </footer>

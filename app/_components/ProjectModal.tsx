@@ -3,12 +3,12 @@
 import { useQuery } from "convex/react";
 import React, { useState } from "react";
 import { useEvent } from "react-use-event-hook";
+import { EmptyState } from "~/components/layouts/empty-state";
 import { FullscreenLoader } from "~/components/layouts/loader";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
 import type { Project } from "~/types/models";
-import { EmptyStateContent } from "../(public)/profile/[username]/_components/empty-state";
 import { ProjectDetails } from "./project-details";
 
 const EMPTY_VALUE = "unset";
@@ -57,7 +57,7 @@ export function ProjectModal() {
         }, 16);
       }}
     >
-      <DialogContent className="max-w-2xl aspect-4/6 w-full p-0 gap-0 max-h-[90svh] overflow-hidden">
+      <DialogContent className="aspect-4/6 max-h-[90svh] w-full max-w-2xl gap-0 overflow-hidden p-0">
         <DialogTitle className="sr-only">
           {Result.match(project_res, {
             loading: () => "Loading...",
@@ -74,7 +74,17 @@ export function ProjectModal() {
             return <ProjectDetails project={project as Project} />;
           },
           error: () => {
-            return <EmptyStateContent>Not project found</EmptyStateContent>;
+            return (
+              <EmptyState isEmpty={true}>
+                <EmptyState.Content>
+                  <EmptyState.Title>Not project found</EmptyState.Title>
+                  <EmptyState.Description>
+                    The project you're looking for doesn't exist or has been
+                    removed
+                  </EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState>
+            );
           },
         })}
       </DialogContent>

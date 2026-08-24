@@ -46,6 +46,7 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
   --color-brand-black-500: var(--brand-black-500);
+  --color-brand-primary: var(--brand-primary);
 
   --aspect-post: 29.6/22.2;
 }
@@ -57,6 +58,8 @@ body {
 }
 
 :root {
+  --brand-primary: #dff538;
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -98,6 +101,8 @@ body {
 }
 
 .dark {
+  --brand-primary: #dff538;
+
   --background: #17161d;
   --foreground: #ffffff;
   --card: oklch(0.205 0 0);
@@ -148,8 +153,9 @@ body {
   }
 }
 
-body::selection {
-  background-color: hsl(from var(--accent-foreground) h s l / 0.3);
+*::selection {
+  background-color: oklch(from var(--color-brand-primary) l c h / 0.1);
+  color: var(--color-brand-primary);
 }
 
 .slice-backdrop-effect {
