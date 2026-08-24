@@ -2,12 +2,12 @@ import { redirect } from "next/navigation";
 import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery, isAuthenticated } from "~/lib/auth-server";
 import OnboardingForm from "./form";
-
-export default async function OnboardingPage({
-  searchParams,
-}: {
+export type OnboardingPageProps = {
   searchParams: Promise<{ redirect?: string }>;
-}) {
+};
+export default async function OnboardingPage(props: OnboardingPageProps) {
+  const { searchParams } = props;
+
   const params = await searchParams;
   const isAuth = await isAuthenticated();
 

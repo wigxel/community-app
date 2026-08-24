@@ -6,12 +6,9 @@ type MagicLinkEmailProps = {
   magicLink: string;
   expiresInMinutes?: number;
 };
+export function MagicLinkEmail(props: MagicLinkEmailProps) {
+  const { name = "there", magicLink, expiresInMinutes = 15 } = props;
 
-export function MagicLinkEmail({
-  name = "there",
-  magicLink,
-  expiresInMinutes = 15,
-}: MagicLinkEmailProps) {
   return (
     <EmailLayout preview={`Your ${emailBrand.APP_NAME} sign-in link`}>
       <Heading

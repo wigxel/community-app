@@ -9,12 +9,12 @@ export const metadata: Metadata = {
     template: "%s | Reveer",
   },
 };
-
-export default async function AccountLayout({
-  children,
-}: {
+export type AccountLayoutProps = {
   children: React.ReactNode;
-}) {
+};
+export default async function AccountLayout(props: AccountLayoutProps) {
+  const { children } = props;
+
   const authenticated = await isAuthenticated();
 
   if (!authenticated) {

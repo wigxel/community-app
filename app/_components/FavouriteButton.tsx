@@ -18,12 +18,9 @@ interface FavouriteButtonProps {
   variant?: "overlay" | "card" | "inline";
   className?: string;
 }
+export function FavouriteButton(props: FavouriteButtonProps) {
+  const { projectId, variant = "card", className } = props;
 
-export function FavouriteButton({
-  projectId,
-  variant = "card",
-  className,
-}: FavouriteButtonProps) {
   const data = useQuery(api.favourites.getProjectFavourite, { projectId });
   const toggleFavourite = useMutation(api.favourites.toggle);
 

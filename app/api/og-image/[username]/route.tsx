@@ -161,14 +161,13 @@ async function generateImage({ username }: { username: string }) {
     );
   }
 }
-
-function OGImageComponent({
-  profile,
-  hasValidImage,
-}: {
+type OGImageComponentProps = {
   profile: Profile;
   hasValidImage: boolean;
-}) {
+};
+function OGImageComponent(props: OGImageComponentProps) {
+  const { profile, hasValidImage } = props;
+
   const fullName = `${profile.firstName ?? ""} ${profile.lastName ?? ""}`;
   const initials = `${profile.firstName?.[0] ?? ""}${profile.lastName?.[0] ?? ""}`;
 
@@ -313,8 +312,10 @@ function OGImageComponent({
     </div>
   );
 }
+type InitialsAvatarProps = { initials: string };
+function InitialsAvatar(props: InitialsAvatarProps) {
+  const { initials } = props;
 
-function InitialsAvatar({ initials }: { initials: string }) {
   return (
     <div
       style={{

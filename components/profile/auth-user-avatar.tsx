@@ -6,14 +6,13 @@ import { authClient } from "~/lib/auth-client";
 import { ProfileImpl } from "~/lib/factories/profile";
 import { cn } from "~/lib/utils";
 import { ProfileAvatar } from "./avatar";
-
-export function AuthUserAvatar({
-  mode = "loaded",
-  className,
-}: {
+export type AuthUserAvatarProps = {
   mode?: "loading" | "loaded";
   className?: string;
-}) {
+};
+export function AuthUserAvatar(props: AuthUserAvatarProps) {
+  const { mode = "loaded", className } = props;
+
   const profile = useQuery(api.profiles.getProfile);
 
   const { isPending } = authClient.useSession();

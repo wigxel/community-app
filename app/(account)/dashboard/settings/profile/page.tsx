@@ -114,20 +114,16 @@ const normalizeLinkForEdit = (link: {
 };
 
 type LinkField = FieldArrayWithId<z.infer<typeof formSchema>, "links", "id">;
-
-function DraggableLinkItem({
-  field,
-  index,
-  form,
-  removeLink,
-  constraintsRef,
-}: {
+type DraggableLinkItemProps = {
   field: LinkField;
   index: number;
   form: UseFormReturn<z.infer<typeof formSchema>>;
   removeLink: (index: number) => void;
   constraintsRef: React.RefObject<HTMLDivElement | null>;
-}) {
+};
+function DraggableLinkItem(props: DraggableLinkItemProps) {
+  const { field, index, form, removeLink, constraintsRef } = props;
+
   const dragControls = useDragControls();
   const Icon = getLinkIcon(field.tag);
   const typeConfig =
@@ -352,14 +348,12 @@ export default function Profile() {
     </div>
   );
 }
-
-// ─── Form component ────────────────────────────────────────────────────────────
-
-export function ProfileForm({
-  initialData = {},
-}: {
+export type ProfileFormProps = {
   initialData: Partial<z.infer<typeof formSchema>>;
-}) {
+};
+export function ProfileForm(props: ProfileFormProps) {
+  const { initialData = {} } = props;
+
   const { titles } = useTitles();
   const skills = useQuery(api.skills.listSkills);
   const updateProfile = useMutation(api.profiles.updateProfile);

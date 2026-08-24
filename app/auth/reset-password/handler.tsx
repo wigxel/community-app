@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth-server";
 import ResetPasswordForm from "./form";
-
-export default async function ResetPasswordHandler({
-  searchParamsPromise,
-}: {
+export type ResetPasswordHandlerProps = {
   searchParamsPromise: Promise<{ token?: string }>;
-}) {
+};
+export default async function ResetPasswordHandler(
+  props: ResetPasswordHandlerProps,
+) {
+  const { searchParamsPromise } = props;
+
   const params = await searchParamsPromise;
   const authenticated = await isAuthenticated();
 

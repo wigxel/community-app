@@ -29,8 +29,10 @@ const defaultValues: Partial<SignInValues> = {
   email: "",
   password: "",
 };
+export type SignInFormProps = { redirectTo: string };
+export default function SignInForm(props: SignInFormProps) {
+  const { redirectTo } = props;
 
-export default function SignInForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
 
   const form = useForm<SignInValues>({

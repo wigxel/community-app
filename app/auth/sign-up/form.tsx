@@ -78,8 +78,10 @@ function getPasswordStrength(password: string): {
     gradient: { startColor: "#22c55e", endColor: "#10b981" },
   };
 }
+export type SignUpFormProps = { redirectTo: string };
+export default function SignUpForm(props: SignUpFormProps) {
+  const { redirectTo } = props;
 
-export default function SignUpForm({ redirectTo }: { redirectTo: string }) {
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues,

@@ -7,25 +7,21 @@ import { cn } from "~/lib/utils";
 
 type Project = Doc<"project">;
 export type MediaItem = Project["media"][number];
-
-/**
- * Shared media renderer — handles photo / video / pdf / empty states.
- * Used by the landing feed card, the dashboard favourites card, and the
- * shared project modal so all three stay visually consistent.
- */
-export function MediaThumb({
-  item,
-  alt,
-  className = "",
-  videoRef,
-  fill = false,
-}: {
+export type MediaThumbProps = {
   item: MediaItem | null;
   alt: string;
   className?: string;
   videoRef?: React.RefObject<HTMLVideoElement | null>;
   fill?: boolean;
-}) {
+};
+/**
+ * Shared media renderer — handles photo / video / pdf / empty states.
+ * Used by the landing feed card, the dashboard favourites card, and the
+ * shared project modal so all three stay visually consistent.
+ */
+export function MediaThumb(props: MediaThumbProps) {
+  const { item, alt, className = "", videoRef, fill = false } = props;
+
   const url = item?.metadata?.url ?? null;
   const mimeType = item?.metadata?.mimeType ?? "";
   const isVideo = mimeType.startsWith("video/");

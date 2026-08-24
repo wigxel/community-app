@@ -6,8 +6,10 @@ import { ProjectImpl } from "~/lib/factories/project";
 import type { Project } from "~/types/models";
 import { FavouriteButton } from "./FavouriteButton";
 import { MediaThumb } from "./MediaThumb";
+export type ProjectDetailsProps = { project: Project };
+export function ProjectDetails(props: ProjectDetailsProps) {
+  const { project } = props;
 
-export function ProjectDetails({ project }: { project: Project }) {
   const [activeIndex, setActiveIndex] = React.useState(0);
 
   const timelineLabel = ProjectImpl.timeline(project);
@@ -134,8 +136,10 @@ export function ProjectDetails({ project }: { project: Project }) {
     </>
   );
 }
+type VideoBadgeSvgProps = { size: number };
+function VideoBadgeSvg(props: VideoBadgeSvgProps) {
+  const { size } = props;
 
-function VideoBadgeSvg({ size }: { size: number }) {
   return (
     <svg
       width={size}

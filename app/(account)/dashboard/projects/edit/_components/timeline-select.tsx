@@ -40,16 +40,14 @@ function monthYearToTs(month: string, year: string): TimelineDate {
   if (!month) return { year };
   return { month, year };
 }
-
-export default function TimelineSelect({
-  timeline,
-  value,
-  onChange,
-}: {
+export type TimelineSelectProps = {
   timeline: string;
   value: TimelineDate;
   onChange: (val: TimelineDate) => void;
-}) {
+};
+export default function TimelineSelect(props: TimelineSelectProps) {
+  const { timeline, value, onChange } = props;
+
   const { month, year } = tsToMonthYear(value);
   const [localMonth, setLocalMonth] = React.useState(month);
   const [localYear, setLocalYear] = React.useState(year);

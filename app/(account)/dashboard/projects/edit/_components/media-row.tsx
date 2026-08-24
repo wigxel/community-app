@@ -107,12 +107,9 @@ interface MediaPreviewModalProps {
   url: string;
   title?: string;
 }
+export function MediaPreviewModal(props: MediaPreviewModalProps) {
+  const { type, url, title } = props;
 
-export function MediaPreviewModal({
-  type,
-  url,
-  title,
-}: MediaPreviewModalProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -175,14 +172,9 @@ interface MediaRowProps {
   watch: UseFormWatch<ProjectFormSchema>;
   remove: (i: number) => void;
 }
+export default function MediaRow(props: MediaRowProps) {
+  const { projectIndex, mediaIndex, control, watch, remove } = props;
 
-export default function MediaRow({
-  projectIndex,
-  mediaIndex,
-  control,
-  watch,
-  remove,
-}: MediaRowProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);

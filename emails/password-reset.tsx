@@ -6,12 +6,9 @@ type PasswordResetEmailProps = {
   resetLink: string;
   expiresInMinutes?: number;
 };
+export function PasswordResetEmail(props: PasswordResetEmailProps) {
+  const { name = "there", resetLink, expiresInMinutes = 30 } = props;
 
-export function PasswordResetEmail({
-  name = "there",
-  resetLink,
-  expiresInMinutes = 30,
-}: PasswordResetEmailProps) {
   return (
     <EmailLayout preview={`Reset your ${emailBrand.APP_NAME} password`}>
       <Heading

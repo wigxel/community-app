@@ -34,8 +34,10 @@ const defaultValues: Partial<ResetPasswordValues> = {
   password: "",
   confirmPassword: "",
 };
+export type ResetPasswordFormProps = { token: string };
+export default function ResetPasswordForm(props: ResetPasswordFormProps) {
+  const { token } = props;
 
-export default function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();
 
   const form = useForm<ResetPasswordValues>({

@@ -2,18 +2,15 @@ import { range } from "effect/Array";
 import React from "react";
 import { cn } from "~/lib/utils";
 import { StandardGrid } from "./grids";
-
-export function StandardGridSkeleton({
-  size = 12,
-  variant,
-  className,
-  Component,
-}: {
+export type StandardGridSkeletonProps = {
   size?: number;
   variant?: "base" | "muted";
   className?: string;
   Component: React.ComponentType;
-}) {
+};
+export function StandardGridSkeleton(props: StandardGridSkeletonProps) {
+  const { size = 12, variant, className, Component } = props;
+
   const SKELETON_KEYS = React.useMemo(() => range(1, size), [size]);
 
   return (

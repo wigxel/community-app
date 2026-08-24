@@ -54,8 +54,10 @@ const COMMON_INTERESTS = [
   "Travel",
   "Reading",
 ];
+export type OnboardingFormProps = { redirectTo: string };
+export default function OnboardingForm(props: OnboardingFormProps) {
+  const { redirectTo } = props;
 
-export default function OnboardingForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
   const createProfile = useMutation(api.profiles.createProfile);
   const updateProfile = useMutation(api.profiles.updateProfile);

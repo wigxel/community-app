@@ -4,15 +4,17 @@ const levels = {
   max: "container",
   inner: "container lg:w-[80svw]",
 };
+export type ContainerProps = React.ComponentProps<"div"> & {
+  level?: keyof typeof levels;
+};
+export function Container(props: ContainerProps) {
+  const { children, className, level = "max", ...restProps } = props;
 
-export function Container({
-  children,
-  className,
-  level = "max",
-  ...props
-}: React.ComponentProps<"div"> & { level?: keyof typeof levels }) {
   return (
-    <div {...props} className={cn("mx-auto px-4", levels[level], className)}>
+    <div
+      {...restProps}
+      className={cn("mx-auto px-4", levels[level], className)}
+    >
       {children}
     </div>
   );

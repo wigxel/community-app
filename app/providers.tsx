@@ -8,14 +8,13 @@ import { env } from "~/env";
 import { authClient } from "~/lib/auth-client";
 
 const convex = new ConvexReactClient(env.NEXT_PUBLIC_CONVEX_URL);
-
-const Providers = ({
-  children,
-  initialToken,
-}: {
+type ProvidersProps = {
   children: ReactNode;
   initialToken?: string | null;
-}) => {
+};
+function Providers(props: ProvidersProps) {
+  const { children, initialToken } = props;
+
   return (
     <ConvexBetterAuthProvider
       client={convex}
@@ -26,6 +25,6 @@ const Providers = ({
       <Toaster position="bottom-right" richColors />
     </ConvexBetterAuthProvider>
   );
-};
+}
 
 export default Providers;
