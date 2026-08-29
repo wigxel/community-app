@@ -138,7 +138,8 @@ const schema = defineSchema({
   })
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("by_title", ["title"]),
 
   project: defineTable(project_schema).index("by_userId", ["userId"]),
 

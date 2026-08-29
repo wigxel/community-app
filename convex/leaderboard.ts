@@ -40,7 +40,7 @@ export const fetchRankingData = internalQuery({
   async handler(ctx, args) {
     const profiles = await ctx.db
       .query("profile")
-      .filter((q) => q.eq(q.field("title"), args.titleId))
+      .withIndex("by_title", (q) => q.eq("title", args.titleId))
       .collect();
 
     const results = await Promise.all(
