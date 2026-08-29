@@ -1,0 +1,128 @@
+"use client";
+import React from "react";
+import type z from "zod/v4";
+import { Label } from "~/components/ui/label";
+import type { timelineDate } from "~/lib/validators/schema";
+
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const currentYear = new Date().getFullYear();
+const YEARS = Array.from({ length: 30 }, (_, i) => currentYear - i);
+
+type TimelineDate = z.Infer<typeof timelineDate>;
+
+function tsToMonthYear(val: TimelineDate): {
+  month: string;
+  year: string;
+} {
+  if (!val) return { month: "", year: "" };
+  return {
+    month: "month" in val ? val.month : "",
+    year: val.year,
+  };
+}
+
+function monthYearToTs(month: string, year: string): TimelineDate {
+  if (!year) return null;
+  if (!month) return { year };
+  return { month, year };
+}
+export type TimelineSelectProps = {
+  timeline: string;
+  value: TimelineDate;
+  onChange: (val: TimelineDate) => void;
+};
+export default function TimelineSelect(props: TimelineSelectProps) {
+  const { timeline, value, onChange } = props;
+
+  const { month, year } = tsToMonthYear(value);
+  const [localMonth, setLocalMonth] = React.useState(month);
+  const [localYear, setLocalYear] = React.useState(year);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (value === null) {
+      setLocalMonth("");
+      setLocalYear("");
+      setError(null);
+    }
+  }, [value]);
+
+  const handleMonthChange = (nextMonth: string) => {
+    setLocalMonth(nextMonth);
+    if (!localYear && nextMonth) {
+      setError("Please enter a year.");
+      onChange(null);
+    } else {
+      setError(null);
+      onChange(monthYearToTs(nextMonth, localYear));
+    }
+  };
+
+  const handleYearChange = (nextYear: string) => {
+    setLocalYear(nextYear);
+    setError(null);
+    onChange(monthYearToTs(localMonth, nextYear));
+  };
+
+  return (
+    <div className="flex flex-1 gap-2.5 *:w-full">
+      <div className="flex flex-col">
+        <Label
+          htmlFor={`${timeline}_month`}
+          className="mb-1 text-[10px] font-medium text-white/50 uppercase"
+        >
+          {timeline} Month
+        </Label>
+        <select
+          id={`${timeline}_month`}
+          value={localMonth}
+          onChange={(e) => handleMonthChange(e.target.value)}
+          className="w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm text-white focus:ring-1 focus:ring-white/30 focus:outline-none"
+        >
+          <option value="" className="bg-neutral-900" />
+          {MONTHS.map((m) => (
+            <option key={m} value={m} className="bg-neutral-900">
+              {m}
+            </option>
+          ))}
+        </select>
+        {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      </div>
+      <div className="flex flex-col">
+        <Label
+          htmlFor={`${timeline}_year`}
+          className="mb-1 text-[10px] font-medium text-white/50 uppercase after:ml-0.5 after:content-['*']"
+        >
+          {timeline} Year
+        </Label>
+        <select
+          id={`${timeline}_year`}
+          value={localYear}
+          onChange={(e) => handleYearChange(e.target.value)}
+          className="w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm text-white focus:ring-1 focus:ring-white/30 focus:outline-none"
+        >
+          <option value="" className="bg-neutral-900" />
+          {YEARS.map((y) => (
+            <option key={y} value={String(y)} className="bg-neutral-900">
+              {y}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}

@@ -14,6 +14,8 @@ jobs:
       - uses: oven-sh/setup-bun@v1
 
       - run: bun ci
+      - run: bun format:tsx
       - run: bun format
+      - run: bun lint
 
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27

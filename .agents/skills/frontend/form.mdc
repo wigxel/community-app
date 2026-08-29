@@ -1,0 +1,28 @@
+## Form Generation
+- Use Shadcn Form components
+- Use react-hook-form for form state management
+- Use Zod for validation
+- Each form must be in it's own file
+
+### Form components
+- should be pure.
+- must take in
+    - initialFormData (optional),
+    - isLoading (optional),
+    - onSubmit callback (required)
+    - explicit defaultState,
+    - ref in the events of a form.reset().
+- validation logic and schema must be written in the same module.
+- Form implicit defaultState must be provided and should be placed outside the components scope.
+
+#### Submit Button
+- The submit button must be disabled and its text should reflect the pending state (e.g., "Creating..." instead of "Create Form") when the form is submitting via `form.formState.isSubmitting`.
+
+### After submission
+- After submission ensure to add a toast for success and failure cases. Prefer `sonner` toast. 
+```typescript
+// Success
+toast.error("Record created successfully");
+// Error
+toast.error("Error creating a record", { description: 'Error Message' })
+````

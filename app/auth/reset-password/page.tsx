@@ -1,22 +1,15 @@
 import { Suspense } from "react";
+import { AuthFallback } from "../auth-fallback";
 import ResetPasswordHandler from "./handler";
-
-export default function ResetPasswordPage({
-  searchParams,
-}: {
+export type ResetPasswordPageProps = {
   searchParams: Promise<{ token?: string }>;
-}) {
+};
+export default function ResetPasswordPage(props: ResetPasswordPageProps) {
+  const { searchParams } = props;
+
   return (
     <Suspense fallback={<AuthFallback />}>
       <ResetPasswordHandler searchParamsPromise={searchParams} />
     </Suspense>
-  );
-}
-
-function AuthFallback() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="h-2 w-16 rounded-full bg-white/10 animate-pulse" />
-    </div>
   );
 }

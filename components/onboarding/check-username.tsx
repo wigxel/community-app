@@ -9,16 +9,14 @@ import { api } from "~/convex/_generated/api";
 import { validateUsernameFormat } from "~/lib/username";
 
 export type UsernameStatus = "idle" | "checking" | "available" | "invalid";
-
-export function CheckUsername({
-  value,
-  onChange,
-  onStatusChange,
-}: {
+export type CheckUsernameProps = {
   value: string;
   onChange: (value: string) => void;
   onStatusChange: (status: UsernameStatus) => void;
-}) {
+};
+export function CheckUsername(props: CheckUsernameProps) {
+  const { value, onChange, onStatusChange } = props;
+
   const trimmedUsername = value.trim().toLowerCase();
   const formatError = trimmedUsername
     ? validateUsernameFormat(trimmedUsername)
@@ -79,7 +77,7 @@ export function CheckUsername({
           }
         />
         {trimmedUsername.length > 0 && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2">
+          <span className="absolute top-1/2 right-3 -translate-y-1/2">
             {isChecking ? (
               <Loader2 size={16} className="animate-spin text-white/50" />
             ) : isAvailable ? (

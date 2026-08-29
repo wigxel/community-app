@@ -1,14 +1,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@hyperbridge/ui/styles/base";
 
-@plugin "tailwindcss-animate";
+@layer base, components, ui, external, system;
+
+/*@plugin "tailwindcss-animate";*/
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-josefin-sans);
+
+  --font-sans: var(--font-body);
+  --font-body: var(--font-body);
+  --font-mono: monospace;
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -38,22 +45,21 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --color-brand-black-500: var(--brand-black-500);
+  --color-brand-primary: var(--brand-primary);
+
+  --aspect-post: 29.6/22.2;
 }
 
 body {
-  background: #343333;
-  font-family: var(--font-josefin-sans), Arial, Helvetica, sans-serif;
+  background: var(--background);
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
   color: white;
 }
 
 :root {
+  --brand-primary: #dff538;
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -86,23 +92,31 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Brand colors */
+  --brand-black-500: var(--background);
+
+  --project-card-media-radius: 1.8em;
+  --project-card-media-padding: 0.6em;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  --brand-primary: #dff538;
+
+  --background: #17161d;
+  --foreground: #ffffff;
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
+  --secondary: #3d3b4b;
+  --secondary-foreground: #fff;
+  --muted: #22202e;
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --accent-foreground: #2273ff;
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -120,13 +134,52 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Brand colors */
+  /* Brand colors */
+  --brand-black-500: var(--background);
+
+  --project-card-media-radius: 1.8em;
+  --project-card-media-padding: 0.6em;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+*::selection {
+  background-color: oklch(from var(--color-brand-primary) l c h / 0.1);
+  color: var(--color-brand-primary);
+}
+
+.slice-backdrop-effect {
+  --dossier-stripe-angle: 60deg;
+  --dossier-stripe-stroke: 1px;
+  --dossier-stripe-period: 16px;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  background-image: repeating-linear-gradient(
+    var(--dossier-stripe-angle),
+    color-mix(in oklch, var(--background) 40%, transparent) 0,
+    color-mix(in oklch, var(--background) 40%, transparent)
+      var(--dossier-stripe-stroke),
+    var(--background) var(--dossier-stripe-stroke),
+    var(--background) var(--dossier-stripe-period)
+  );
+}
+
+.corner-sharp {
+  corner-shape: bevel;
+}
+
+@layer system {
+  ol[data-sonner-toaster] > li[data-sonner-toast] {
+    font-family: var(--font-body);
   }
 }

@@ -1,22 +1,24 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect } from "react";
-import { toast } from "sonner";
+import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/fields/password";
+import { LoadingButton } from "~/components/forms/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { authClient } from "~/lib/auth-client";
+import { toast } from "~/lib/toast";
 
-type ResetPasswordState = {
-  error?: string;
-  success?: boolean;
-  timestamp: number;
-};
-
-const schema = z
+const resetPasswordSchema = z
   .object({
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
@@ -26,118 +28,115 @@ const schema = z
     path: ["confirmPassword"],
   });
 
-function makeResetAction(token: string) {
-  return async function resetPasswordAction(
-    _prev: ResetPasswordState,
-    formData: FormData,
-  ): Promise<ResetPasswordState> {
-    const raw = {
-      password: formData.get("password") as string,
-      confirmPassword: formData.get("confirmPassword") as string,
-    };
+type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
-    const parsed = schema.safeParse(raw);
-    if (!parsed.success) {
-      return { timestamp: Date.now(), error: parsed.error.issues[0].message };
-    }
+const defaultValues: Partial<ResetPasswordValues> = {
+  password: "",
+  confirmPassword: "",
+};
+export type ResetPasswordFormProps = { token: string };
+export default function ResetPasswordForm(props: ResetPasswordFormProps) {
+  const { token } = props;
 
+  const router = useRouter();
+
+  const form = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues,
+    mode: "onBlur",
+  });
+
+  async function onSubmit(values: ResetPasswordValues) {
     const { error } = await authClient.resetPassword({
-      newPassword: parsed.data.password,
+      newPassword: values.password,
       token,
     });
 
     if (error) {
-      return {
-        timestamp: Date.now(),
-        error: error.message ?? "Something went wrong",
-      };
+      toast.error("Reset failed", {
+        description: error.message ?? "Something went wrong",
+      });
+      return;
     }
 
-    return { timestamp: Date.now(), success: true };
-  };
-}
-
-export default function ResetPasswordForm({ token }: { token: string }) {
-  const router = useRouter();
-
-  const [state, action, pending] = useActionState<ResetPasswordState, FormData>(
-    makeResetAction(token),
-    { timestamp: 0 },
-  );
-
-  useEffect(() => {
-    if (state.success) {
-      toast.success("Password reset! Please sign in.");
-      router.push("/auth");
-    }
-  }, [state.success, router]);
+    toast.success("Password reset! Please sign in.");
+    router.push("/auth/sign-in");
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-lg backdrop-blur-sm">
-          <h1 className="text-xl font-semibold text-white mb-2">
+        <div className="mb-8 text-start">
+          <h1 className="text-foreground text-3xl font-semibold">
             Reset your password
           </h1>
-          <p className="text-sm text-white/50 mb-6">
+          <p className="text-muted-foreground mt-2 text-sm">
             Choose a new password for your account.
           </p>
+        </div>
 
-          <form action={action} className="flex flex-col gap-4">
-            {state.error && (
-              <p className="text-sm text-red-400 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
-                {state.error}
-              </p>
-            )}
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">New Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                disabled={pending}
-                minLength={8}
-                autoComplete="new-password"
-                placeholder="min. 8 characters"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                disabled={pending}
-                minLength={8}
-                autoComplete="new-password"
-                placeholder="Confirm your password"
-              />
-            </div>
-
-            <Button type="submit" disabled={pending} className="mt-1 w-full">
-              {pending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Resetting...
-                </>
-              ) : (
-                "Reset password"
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>New Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput
+                      {...field}
+                      placeholder="min. 8 characters"
+                      autoComplete="new-password"
+                      disabled={form.formState.isSubmitting}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </Button>
+            />
 
-            <div className="text-center">
-              <a
-                href="/auth"
-                className="text-sm text-white/50 hover:text-white transition-colors"
-              >
-                Back to sign in
-              </a>
-            </div>
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput
+                      {...field}
+                      placeholder="Confirm your password"
+                      autoComplete="new-password"
+                      showToggle={false}
+                      disabled={form.formState.isSubmitting}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <LoadingButton
+              type="submit"
+              loading={form.formState.isSubmitting}
+              loadingText="Resetting..."
+              className="mt-1 w-full"
+            >
+              Reset password
+            </LoadingButton>
           </form>
+        </Form>
+
+        <div className="mt-6 text-center">
+          <Link
+            href="/auth/sign-in"
+            className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+          >
+            Back to sign in
+          </Link>
         </div>
       </div>
     </div>

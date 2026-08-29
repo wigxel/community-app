@@ -1,196 +1,92 @@
 "use client";
 
-import { Calendar, ExternalLink, Figma, FileText, Github } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { FavouriteButton } from "~/app/_components/FavouriteButton";
+import { useQuery } from "convex/react";
+import React, { useState } from "react";
+import { useEvent } from "react-use-event-hook";
+import { EmptyState } from "~/components/layouts/empty-state";
+import { FullscreenLoader } from "~/components/layouts/loader";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
-import type { Doc } from "~/convex/_generated/dataModel";
-import { MediaThumb } from "./MediaThumb";
+import { api } from "~/convex/_generated/api";
+import { Result } from "~/lib/result";
+import type { Project } from "~/types/models";
+import { ProjectDetails } from "./project-details";
 
-type Project = Doc<"project">;
+const EMPTY_VALUE = "unset";
 
-function getTimelineLabel(project: Project): string | null {
-  const start = project.timeline?.start?.year;
-  const end = project.timeline?.end?.year;
+export function ProjectModal() {
+  const [open, setOpen] = useState(false);
+  const [projectId, setProjectId] = React.useState<string | null>(null);
 
-  if (!start) return null;
-  if (project.ongoing) return `${start} – Present`;
-  if (end && end !== start) return `${start} – ${end}`;
-  return start;
-}
+  const project_res = useQuery(api.project.getProject, { id: projectId });
 
-const LINK_META: Record<string, { label: string; Icon: React.ElementType }> = {
-  live: { label: "Live Site", Icon: ExternalLink },
-  github: { label: "GitHub", Icon: Github },
-  figma: { label: "Figma", Icon: Figma },
-};
+  const handleHashChange = useEvent(() => {
+    const url_hash = window.location.hash;
+    const regex = /^#preview:(.+)/;
+    const matchingId = regex.exec(url_hash)?.[1];
 
-function getLinkMeta(tag: string) {
-  return LINK_META[tag] ?? { label: tag, Icon: ExternalLink };
-}
+    if (matchingId === EMPTY_VALUE) return;
+    if (matchingId == null) return;
 
-function VideoBadgeSvg({ size }: { size: number }) {
+    if (projectId === matchingId) {
+      return setOpen(false);
+    }
+
+    setOpen(true);
+    setProjectId(matchingId);
+  });
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+
+    window.addEventListener("popstate", handleHashChange, {
+      signal: controller.signal,
+    });
+
+    return () => controller.abort();
+  }, [handleHashChange]);
+
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      role="img"
-      aria-label="Video"
+    <Dialog
+      open={open}
+      onOpenChange={(isOpenState) => {
+        setOpen(isOpenState);
+        setProjectId(null);
+
+        setTimeout(() => {
+          window.location.hash = `#preview:${EMPTY_VALUE}`;
+        }, 16);
+      }}
     >
-      <title>Video</title>
-      <path d="M15 12l-6 4V8l6 4z" />
-      <rect
-        x="2"
-        y="3"
-        width="20"
-        height="18"
-        rx="3"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
+      <DialogContent className="aspect-4/6 max-h-[90svh] w-full max-w-2xl gap-0 overflow-hidden p-0">
+        <DialogTitle className="sr-only">
+          {Result.match(project_res, {
+            loading: () => "Loading...",
+            success: (project) => project?.title,
+            error: () => "Not found",
+          })}
+        </DialogTitle>
 
-/**
- * Shared project detail modal — used by both the landing-page community
- * feed card and the dashboard Favourites page card.
- */
-export function ProjectModal({
-  project,
-  open,
-  onClose,
-}: {
-  project: Project;
-  open: boolean;
-  onClose: () => void;
-}) {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const timelineLabel = getTimelineLabel(project);
-  const media = project.media ?? [];
-  const links = project.link ?? [];
-  const active = media[activeIndex] ?? null;
-
-  const isVideo = active?.metadata?.mimeType?.startsWith("video/");
-  const isPdf = active?.metadata?.mimeType === "application/pdf";
-  const activeUrl = active?.metadata?.url ?? null;
-
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    if (!isVideo) return;
-    const id = setTimeout(() => {
-      videoRef.current?.play().catch(() => {});
-    }, 50);
-    return () => clearTimeout(id);
-  }, [isVideo]);
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl w-full p-0 gap-0 bg-neutral-900 border-neutral-800 text-white rounded-2xl max-h-[90vh] flex flex-col overflow-hidden">
-        <DialogTitle className="sr-only">{project.title}</DialogTitle>
-
-        <div className="relative w-full bg-neutral-950 shrink-0 max-h-[40vh] min-h-55 overflow-hidden flex items-center justify-center">
-          <MediaThumb
-            item={active}
-            alt={project.title}
-            className="max-w-full max-h-[40vh] object-contain"
-            videoRef={videoRef}
-          />
-
-          {isVideo && (
-            <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white text-xs">
-              <VideoBadgeSvg size={11} />
-              Video
-            </div>
-          )}
-
-          {isPdf && activeUrl && (
-            <a
-              href={activeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="absolute bottom-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/15 text-white text-xs transition-colors duration-150"
-            >
-              <FileText size={11} />
-              Open PDF
-            </a>
-          )}
-        </div>
-
-        {media.length > 1 && (
-          <div className="flex gap-2 px-6 pt-4 overflow-x-auto scrollbar-none shrink-0">
-            {media.map((item, i) => (
-              <button
-                key={item.metadata?.storageId ?? i}
-                type="button"
-                onClick={() => setActiveIndex(i)}
-                className={`shrink-0 w-16 h-10 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                  i === activeIndex
-                    ? "border-white/80 opacity-100"
-                    : "border-transparent opacity-40 hover:opacity-70"
-                }`}
-              >
-                <MediaThumb
-                  item={item}
-                  alt={`${project.title} media ${i + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Scrollable body */}
-        <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              {timelineLabel && (
-                <div className="flex items-center gap-1.5 text-yellow-300 text-xs uppercase tracking-widest mb-1.5">
-                  <Calendar size={11} />
-                  {timelineLabel}
-                </div>
-              )}
-              <h2 className="text-lg font-semibold leading-snug tracking-tight text-white">
-                {project.title}
-              </h2>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <FavouriteButton
-                projectId={project._id}
-                variant="card"
-                className="border-white/20 bg-white/8 hover:bg-rose-500/20"
-              />
-
-              {links.map((link) => {
-                const { label, Icon } = getLinkMeta(link.tag);
-                return (
-                  <a
-                    key={`${link.tag}-${link.value}`}
-                    href={link.value}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/8 hover:bg-white/14 border border-white/10 text-xs text-white/80 hover:text-white transition-colors duration-150"
-                  >
-                    <Icon size={12} />
-                    {label}
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-
-          {project.description && (
-            <p className="text-sm text-neutral-400 leading-relaxed whitespace-pre-line">
-              {project.description}
-            </p>
-          )}
-        </div>
+        {Result.match(project_res, {
+          loading: () => {
+            return <FullscreenLoader />;
+          },
+          success: (project) => {
+            return <ProjectDetails project={project as Project} />;
+          },
+          error: () => {
+            return (
+              <EmptyState isEmpty={true}>
+                <EmptyState.Content>
+                  <EmptyState.Title>Not project found</EmptyState.Title>
+                  <EmptyState.Description>
+                    The project you're looking for doesn't exist or has been
+                    removed
+                  </EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState>
+            );
+          },
+        })}
       </DialogContent>
     </Dialog>
   );

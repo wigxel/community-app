@@ -5,3 +5,6 @@ out/
 .vscode/
 .swcrc
 tsconfig.json
+public/
+.agents/
+.beads/

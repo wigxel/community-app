@@ -165,14 +165,14 @@ export function CoverImageUpload({
             <Image
               src={currentImage}
               alt="Cover"
-              className="h-24 w-24 rounded-lg object-cover border-2 border-white/20"
+              className="h-24 w-24 rounded-lg border-2 border-white/20 object-cover"
               width={240}
               height={240}
             />
             <button
               type="button"
               onClick={handleRemove}
-              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+              className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white transition-colors hover:bg-red-600"
             >
               <X size={16} />
             </button>
@@ -192,10 +192,10 @@ export function CoverImageUpload({
             <Button
               type="button"
               variant="outline"
-              className="!text-white bg-white/10 border-white/30 hover:bg-white/20"
+              className="border-white/30 bg-white/10 !text-white hover:bg-white/20"
               asChild
             >
-              <span className="cursor-pointer flex items-center">
+              <span className="flex cursor-pointer items-center">
                 <Upload className="mr-2 h-4 w-4" />
                 {currentImage ? "Change Cover" : "Upload Cover"}
               </span>
@@ -208,14 +208,14 @@ export function CoverImageUpload({
       </div>
 
       <Dialog open={isOpen} onOpenChange={handleCancel}>
-        <DialogContent className="!max-w-[600px] !w-[600px] p-0 gap-0 bg-white overflow-hidden [&>button]:hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b">
+        <DialogContent className="!w-[600px] !max-w-[600px] gap-0 overflow-hidden bg-white p-0 [&>button]:hidden">
+          <div className="flex items-center justify-between border-b px-4 py-3">
             <DialogTitle className="text-base font-semibold text-gray-900">
               Edit image
             </DialogTitle>
             <button
               onClick={handleCancel}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 transition-colors hover:text-gray-600"
               type="button"
             >
               <X size={20} />
@@ -223,9 +223,9 @@ export function CoverImageUpload({
           </div>
 
           <div className="flex h-[350px]">
-            <div className="flex-1 bg-gray-200 p-4 flex items-center justify-center relative overflow-hidden">
+            <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-gray-200 p-4">
               {imgSrc && (
-                <div className="relative w-full h-full flex items-center justify-center">
+                <div className="relative flex h-full w-full items-center justify-center">
                   <button
                     type="button"
                     className="relative cursor-move select-none"
@@ -249,12 +249,12 @@ export function CoverImageUpload({
                       src={imgSrc}
                       alt="Crop preview"
                       draggable={false}
-                      className="max-w-[280px] max-h-[280px] object-contain pointer-events-none"
+                      className="pointer-events-none max-h-[280px] max-w-[280px] object-contain"
                     />
                   </button>
 
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-[320px] h-[120px] rounded-lg border-4 border-white shadow-2xl relative">
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="relative h-[120px] w-[320px] rounded-lg border-4 border-white shadow-2xl">
                       <div
                         className="absolute inset-0 rounded-lg"
                         style={{
@@ -264,31 +264,31 @@ export function CoverImageUpload({
                     </div>
                   </div>
 
-                  <p className="absolute bottom-2 left-0 right-0 text-center text-xs text-gray-700 font-medium bg-white/80 py-1">
+                  <p className="absolute right-0 bottom-2 left-0 bg-white/80 py-1 text-center text-xs font-medium text-gray-700">
                     Drag to reposition • Use zoom to adjust size
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="w-52 bg-white border-l flex flex-col">
-              <Tabs defaultValue="crop" className="flex-1 flex flex-col">
-                <TabsList className="w-full grid grid-cols-3 rounded-none border-b bg-transparent h-auto p-0">
+            <div className="flex w-52 flex-col border-l bg-white">
+              <Tabs defaultValue="crop" className="flex flex-1 flex-col">
+                <TabsList className="grid h-auto w-full grid-cols-3 rounded-none border-b bg-transparent p-0">
                   <TabsTrigger
                     value="crop"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent text-gray-600 data-[state=active]:text-gray-900 py-2 text-xs"
+                    className="rounded-none border-b-2 border-transparent py-2 text-xs text-gray-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-gray-900"
                   >
                     Crop
                   </TabsTrigger>
                   <TabsTrigger
                     value="filter"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent text-gray-600 data-[state=active]:text-gray-900 py-2 text-xs"
+                    className="rounded-none border-b-2 border-transparent py-2 text-xs text-gray-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-gray-900"
                   >
                     Filter
                   </TabsTrigger>
                   <TabsTrigger
                     value="adjust"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent text-gray-600 data-[state=active]:text-gray-900 py-2 text-xs"
+                    className="rounded-none border-b-2 border-transparent py-2 text-xs text-gray-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-gray-900"
                   >
                     Adjust
                   </TabsTrigger>
@@ -296,7 +296,7 @@ export function CoverImageUpload({
 
                 <TabsContent
                   value="crop"
-                  className="flex-1 p-3 space-y-3 mt-0 overflow-y-auto"
+                  className="mt-0 flex-1 space-y-3 overflow-y-auto p-3"
                 >
                   <div>
                     <input
@@ -320,14 +320,14 @@ export function CoverImageUpload({
                   </div>
 
                   <div className="border-t pt-3">
-                    <p className="text-xs text-gray-500 mb-2">Adjust Image</p>
+                    <p className="mb-2 text-xs text-gray-500">Adjust Image</p>
                   </div>
 
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
                       onClick={handleRotateLeft}
-                      className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                      className="rounded p-1.5 transition-colors hover:bg-gray-100"
                       title="Rotate left"
                     >
                       <RotateCcw size={16} className="text-gray-700" />
@@ -335,7 +335,7 @@ export function CoverImageUpload({
                     <button
                       type="button"
                       onClick={handleRotateRight}
-                      className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                      className="rounded p-1.5 transition-colors hover:bg-gray-100"
                       title="Rotate right"
                     >
                       <RotateCw size={16} className="text-gray-700" />
@@ -343,7 +343,7 @@ export function CoverImageUpload({
                     <button
                       type="button"
                       onClick={handleResetZoom}
-                      className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                      className="rounded p-1.5 transition-colors hover:bg-gray-100"
                       title="Reset"
                     >
                       <Maximize2 size={16} className="text-gray-700" />
@@ -365,30 +365,30 @@ export function CoverImageUpload({
                       step="0.1"
                       value={zoom}
                       onChange={(e) => setZoom(Number(e.target.value))}
-                      className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-900"
+                      className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-gray-900"
                     />
-                    <div className="text-xs text-gray-500 text-right">
+                    <div className="text-right text-xs text-gray-500">
                       {Math.round(zoom * 100)}%
                     </div>
                   </div>
                 </TabsContent>
 
-                <TabsContent value="filter" className="flex-1 p-3 mt-0">
+                <TabsContent value="filter" className="mt-0 flex-1 p-3">
                   <p className="text-xs text-gray-500">Filters coming soon</p>
                 </TabsContent>
 
-                <TabsContent value="adjust" className="flex-1 p-3 mt-0">
+                <TabsContent value="adjust" className="mt-0 flex-1 p-3">
                   <p className="text-xs text-gray-500">
                     Adjustments coming soon
                   </p>
                 </TabsContent>
               </Tabs>
 
-              <div className="p-3 border-t">
+              <div className="border-t p-3">
                 <Button
                   type="button"
                   onClick={handleSave}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm py-2"
+                  className="w-full bg-blue-600 py-2 text-sm text-white hover:bg-blue-700"
                 >
                   Save changes
                 </Button>

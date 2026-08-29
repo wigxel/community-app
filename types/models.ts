@@ -1,4 +1,4 @@
-import type { Id } from "~/convex/_generated/dataModel";
+import type { Doc, Id } from "../convex/_generated/dataModel";
 
 export interface ProfileLocation {
   city: string;
@@ -21,7 +21,7 @@ export interface Profile {
   workExperience?: ProfileWorkExperience[];
   interests?: string[];
   location?: ProfileLocation;
-  skills?: Skill[];
+  skills?: string[];
 }
 
 export interface ProfileWorkExperience {
@@ -33,6 +33,7 @@ export interface ProfileWorkExperience {
 }
 
 export interface Title {
+  _id: Id<"titles">;
   name: string;
   description: string | null;
   color?: string;
@@ -67,6 +68,7 @@ type PhotoMedia = {
   type: "photo";
   metadata: BaseMediaMetadata & { width: number; height: number };
 };
+
 type VideoMedia = {
   type: "video";
   metadata: BaseMediaMetadata & {
@@ -84,10 +86,12 @@ export type TimelineDate =
   | { year: string }
   | { month: string; year: string };
 
-export interface Project {
-  _id?: Id<"project">;
-  userId: string;
-  title: string;
+export type BasicProject = Project & {
+  ownerName: string;
+  username: string;
+};
+
+export interface Project extends Doc<"project"> {
   timeline: {
     start: TimelineDate;
     end: TimelineDate;
@@ -97,6 +101,16 @@ export interface Project {
   media: Media[];
   link: ProjectLink[];
 }
+
+export type FavouritedProject = Project & {
+  favouritedAt: number;
+  owner: {
+    firstName: string;
+    lastName: string;
+    username: string;
+    profileImage: string | null;
+  } | null;
+};
 
 export interface WorkExperience {
   logo?: string;

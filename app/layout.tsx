@@ -1,40 +1,32 @@
-import { Inter } from "next/font/google";
-import Link from "next/link";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-import "./globals.css";
 import type { Metadata } from "next";
-import { Toaster } from "sonner";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import type { PropsWithChildren } from "react";
 import { getToken } from "~/lib/auth-server";
-import NavAuth from "./_components/NavAuth";
+import { bodyFont } from "~/styles/font";
+import "./globals.css";
 import Providers from "./providers";
 
-const baseFont = Inter({
-  variable: "--font-josefin-sans",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Community App",
+  title: {
+    default: "Reveer",
+    template: "%s | Reveer",
+  },
   description: "Connect Local Businesses with Students for Internship",
 };
 
-export default async function RootLayout({ children }) {
-  const token = await getToken();
+export default async function RootLayout({ children }: PropsWithChildren) {
+  const token = await getToken().catch(() => null);
 
   return (
     <NuqsAdapter>
       <Providers initialToken={token}>
-        <html lang="en">
-          <body className={`${baseFont.variable} antialiased`}>
-            <nav className="flex gap-2 justify-end items-center h-18 px-5">
-              <Link href="/">Home</Link>
-              <Link href="/catalog">Catalog</Link>
-              <NavAuth />
-            </nav>
+        <html lang="en" className="dark">
+          <body
+            className={`${bodyFont.variable} flex min-h-screen flex-col font-sans antialiased`}
+          >
             {children}
           </body>
         </html>
-        <Toaster position="top-right" />
       </Providers>
     </NuqsAdapter>
   );

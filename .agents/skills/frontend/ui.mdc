@@ -1,0 +1,9 @@
+## UI Components
+- Prefer shadcn components over custom ones
+- Use Lucide React icons exclusively
+- Always use appropriate color variables from the theme
+- Add colors to the theme (tailwind css/config file) if they don't already exist there
+- Prefer small, composable components over large monolithic ones
+- No arbitrary values that are multiples of 4. eg 24px, 32px, 48px, 64px, 168px
+- Always use `rem` units instead of `px` for all spacing, sizing, and typography
+- Use shadcn component `variant` props (e.g. `variant="destructive"`, `size="sm"`, `asChild`) instead of custom CSS classes — applies to Button, Badge, Alert, Card, Input, Label, and all other shadcn components

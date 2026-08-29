@@ -13,6 +13,19 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "sonner",
+              importNames: ["toast"],
+              message:
+                "Use '~/lib/toast' instead of importing from 'sonner' directly.",
+            },
+          ],
+        },
+      ],
     },
     ignorePatterns: [
       "node_modules",

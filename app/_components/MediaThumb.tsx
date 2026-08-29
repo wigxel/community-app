@@ -3,28 +3,25 @@
 import { FileText } from "lucide-react";
 import Image from "next/image";
 import type { Doc } from "~/convex/_generated/dataModel";
+import { cn } from "~/lib/utils";
 
 type Project = Doc<"project">;
 export type MediaItem = Project["media"][number];
-
-/**
- * Shared media renderer — handles photo / video / pdf / empty states.
- * Used by the landing feed card, the dashboard favourites card, and the
- * shared project modal so all three stay visually consistent.
- */
-export function MediaThumb({
-  item,
-  alt,
-  className = "",
-  videoRef,
-  fill = false,
-}: {
+export type MediaThumbProps = {
   item: MediaItem | null;
   alt: string;
   className?: string;
   videoRef?: React.RefObject<HTMLVideoElement | null>;
   fill?: boolean;
-}) {
+};
+/**
+ * Shared media renderer — handles photo / video / pdf / empty states.
+ * Used by the landing feed card, the dashboard favourites card, and the
+ * shared project modal so all three stay visually consistent.
+ */
+export function MediaThumb(props: MediaThumbProps) {
+  const { item, alt, className = "", videoRef, fill = false } = props;
+
   const url = item?.metadata?.url ?? null;
   const mimeType = item?.metadata?.mimeType ?? "";
   const isVideo = mimeType.startsWith("video/");
@@ -33,9 +30,9 @@ export function MediaThumb({
   if (!url) {
     return (
       <div
-        className={`flex items-center justify-center bg-neutral-800 ${className}`}
+        className={`aspect-post bg-background flex w-full items-center justify-center ${className}`}
       >
-        <span className="text-xs uppercase tracking-widest text-neutral-500">
+        <span className="text-xs tracking-widest text-neutral-500 uppercase">
           No Preview
         </span>
       </div>
@@ -45,10 +42,10 @@ export function MediaThumb({
   if (isPdf) {
     return (
       <div
-        className={`flex flex-col items-center justify-center gap-2 bg-neutral-800 ${className}`}
+        className={`aspect-post bg-background flex w-full flex-col items-center justify-center gap-2 ${className}`}
       >
         <FileText size={28} className="text-neutral-400" />
-        <span className="text-xs text-neutral-500 uppercase tracking-widest">
+        <span className="text-xs tracking-widest text-neutral-500 uppercase">
           PDF
         </span>
       </div>
@@ -60,7 +57,7 @@ export function MediaThumb({
       <video
         ref={videoRef}
         src={url}
-        className={className}
+        className={cn("aspect-post", className)}
         muted
         playsInline
         loop
@@ -75,7 +72,7 @@ export function MediaThumb({
         src={url}
         alt={alt}
         fill
-        className={className}
+        className={cn(className, "aspect-post")}
         loading="lazy"
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
       />
@@ -88,7 +85,7 @@ export function MediaThumb({
       alt={alt}
       width={item?.metadata?.width ?? 800}
       height={item?.metadata?.height ?? 450}
-      className={className}
+      className={cn(className, "aspect-post")}
       loading="lazy"
     />
   );

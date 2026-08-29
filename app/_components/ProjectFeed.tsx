@@ -1,16 +1,23 @@
 "use client";
 
 import { usePaginatedQuery } from "convex/react";
-import { useEffect, useRef } from "react";
+import { Loader } from "lucide-react";
+import React, { useEffect, useRef } from "react";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
+import { SearchIcon } from "~/components/icons";
+import { Container } from "~/components/layouts/container";
+import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
+import { StandardGrid } from "~/components/layouts/grids";
+import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
 import LandingProjectCard from "./LandingProjectCard";
+import { ProjectModal } from "./ProjectModal";
 
 const PAGE_SIZE = 12;
-const SKELETON_KEYS = Array.from({ length: PAGE_SIZE }, (_, i) => `sk-${i}`);
-const SKELETON_MORE_KEYS = ["sk-more-0", "sk-more-1", "sk-more-2"];
+type ScrollTriggerProps = { onVisible: () => void };
+function ScrollTrigger(props: ScrollTriggerProps) {
+  const { onVisible } = props;
 
-function ScrollTrigger({ onVisible }: { onVisible: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,58 +38,113 @@ function ScrollTrigger({ onVisible }: { onVisible: () => void }) {
   return <div ref={ref} aria-hidden="true" />;
 }
 
-export default function ProjectFeed() {
+function CatalogGrid() {
   const { results, status, loadMore } = usePaginatedQuery(
     api.project.listAll,
     {},
     { initialNumItems: PAGE_SIZE },
   );
 
-  const isLoading = status === "LoadingFirstPage";
   const canLoadMore = status === "CanLoadMore";
 
   return (
-    <section className="py-6 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-baseline justify-between flex-wrap gap-3 mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            Community Projects
-          </h2>
-          <p className="text-sm text-neutral-500">
-            Work shipped by members of the community
-          </p>
+    <>
+      <ProjectModal />
+
+      <StandardGrid className="mb-12">
+        {results.map((project) => (
+          <LandingProjectCard key={project._id} project={project} />
+        ))}
+      </StandardGrid>
+
+      {status === "LoadingMore" ? (
+        <span className="animate-spin">
+          <Loader />
+        </span>
+      ) : null}
+
+      {/* Scroll trigger */}
+      {canLoadMore && <ScrollTrigger onVisible={() => loadMore(PAGE_SIZE)} />}
+    </>
+  );
+}
+
+// @todo: Integrate search function. url should be the source of truth
+function SearchBox() {
+  const [searchTerm, setSearchTerm] = React.useState("");
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="bg-muted/50 focus-within:bg-muted flex items-center gap-4 rounded-xl py-[0.4rem] ps-4 pe-[0.4em]">
+        <SearchIcon className="text-muted-foreground size-4.5" />
+        <div className="relative flex-1 self-stretch">
+          <input
+            type="text"
+            className="absolute inset-0 text-base outline-none"
+            placeholder="What you looking for?"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {isLoading
-            ? SKELETON_KEYS.map((k) => <ProjectCardSkeleton key={k} />)
-            : results.map((project) => (
-                <LandingProjectCard key={project._id} project={project} />
-              ))}
-        </div>
+        <Button size="lg" className="rounded-xl">
+          Search
+        </Button>
+      </label>
 
-        {/* Loading more skeletons */}
-        {status === "LoadingMore" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-            {SKELETON_MORE_KEYS.map((k) => (
-              <ProjectCardSkeleton key={k} />
-            ))}
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!isLoading && results.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-neutral-500 gap-2">
-            <p className="text-sm">
-              No projects yet — be the first to add one.
-            </p>
-          </div>
-        )}
-
-        {/* Scroll trigger */}
-        {canLoadMore && <ScrollTrigger onVisible={() => loadMore(PAGE_SIZE)} />}
+      <div className="text-foreground mb-4 inline-flex items-center gap-2 px-[1.8em] text-xs">
+        {/* @todo: Integrate this */}
+        <span className="inline-block">Popular &nbsp;&nbsp;—&nbsp;&nbsp;</span>
+        <span className="inline-flex gap-2">
+          {["Web3", "E-commerce", "Blog", "Fintech"].map((tag) => {
+            return (
+              <span
+                key={tag}
+                className="hover:text-accent-foreground hover:bg-muted inline-block cursor-pointer rounded-sm p-1"
+              >
+                {tag}
+              </span>
+            );
+          })}
+        </span>
       </div>
-    </section>
+    </div>
+  );
+}
+
+function CatalogEmptyStateContent() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 py-24 text-neutral-500">
+      <p className="text-sm">No projects yet — be the first to add one.</p>
+    </div>
+  );
+}
+
+export default function PublicProjectsCatalog() {
+  const { results, status } = usePaginatedQuery(
+    api.project.listAll,
+    {},
+    { initialNumItems: PAGE_SIZE },
+  );
+
+  const isLoading = status === "LoadingFirstPage";
+
+  return (
+    <Container level="max" className="flex flex-col gap-[3.2rem]">
+      <SearchBox />
+
+      {/* Grid */}
+      {isLoading ? (
+        <StandardGridSkeleton
+          size={PAGE_SIZE}
+          Component={ProjectCardSkeleton}
+        />
+      ) : (
+        <CatalogGrid />
+      )}
+
+      {/* Empty state */}
+      {!isLoading && results.length === 0 && <CatalogEmptyStateContent />}
+    </Container>
   );
 }

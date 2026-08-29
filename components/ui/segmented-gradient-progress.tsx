@@ -1,11 +1,11 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-
-export const SegmentProgressBar = (props: {
+export type SegmentProgressBarProps = {
   className?: string;
   progressValue?: number;
   gradient?: { startColor: string; endColor: string };
-}) => {
+};
+export function SegmentProgressBar(props: SegmentProgressBarProps) {
   const {
     gradient = {
       startColor: "#ef4444",
@@ -45,7 +45,7 @@ export const SegmentProgressBar = (props: {
   }, [totalSegments]);
 
   return (
-    <div ref={containerRef} className="flex gap-1 w-full h-6">
+    <div ref={containerRef} className="flex h-6 w-full gap-1">
       {count.map(({ index }) => {
         const isActive = index < activeSegments;
         const progressPercent =
@@ -63,7 +63,7 @@ export const SegmentProgressBar = (props: {
             key={index}
             data-active={isActive}
             className={cn(
-              "w-0.75 h-6 group relative overflow-hidden rounded-sm",
+              "group relative h-6 w-0.75 overflow-hidden rounded-sm",
               className,
               !isActive && "bg-background/40",
             )}
@@ -80,4 +80,4 @@ export const SegmentProgressBar = (props: {
       })}
     </div>
   );
-};
+}

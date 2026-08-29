@@ -1,28 +1,63 @@
-import { paginationOptsValidator, queryGeneric as query } from "convex/server";
+import {
+  type PaginationResult,
+  paginationOptsValidator,
+  queryGeneric as query,
+} from "convex/server";
 import { v } from "convex/values";
+import { Result } from "../lib/result";
+import type { BasicProject, Project } from "../types/models";
+import type { Doc } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 import { project_schema } from "./schema";
 
-export const listProject = query({
-  handler: async (ctx) => {
-    const authUser = await authComponent.getAuthUser(ctx);
-    if (!authUser) throw new Error("Not authenticated");
+function toProject(doc: Doc<"project">): Project {
+  return doc as unknown as Project;
+}
 
-    return await ctx.db
+export const listProject = query({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args): Promise<PaginationResult<Project>> => {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) {
+      console.error("Not authenticated");
+      return { page: [], isDone: true, continueCursor: "" };
+    }
+
+    const result = await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", authUser._id))
-      .collect();
+      .paginate(args.paginationOpts);
+
+    return { ...result, page: result.page.map(toProject) };
   },
 });
 
 export const listProjectByUserId = query({
   args: { userId: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args): Promise<Project[]> => {
+    const docs = await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .collect();
+
+    return docs.map(toProject);
+  },
+});
+
+export const getProject = query({
+  args: { id: v.nullable(v.string()) },
+  handler: async (ctx, args) => {
+    const doc: Doc<"project"> | null = await ctx.db
+      .query("project")
+      .filter((q) => q.eq(q.field("_id"), args.id))
+      .first();
+
+    if (doc === null) {
+      return Result.error("Not found");
+    }
+
+    return Result.ok(toProject(doc));
   },
 });
 
@@ -84,7 +119,32 @@ export const deleteProject = mutation({
 
 export const listAll = query({
   args: { paginationOpts: paginationOptsValidator },
-  handler: async (ctx, { paginationOpts }) => {
-    return await ctx.db.query("project").order("desc").paginate(paginationOpts);
+  handler: async (
+    ctx,
+    { paginationOpts },
+  ): Promise<PaginationResult<BasicProject>> => {
+    const records = await ctx.db
+      .query("project")
+      .order("desc")
+      .paginate({
+        ...paginationOpts,
+        numItems: Math.min(50, paginationOpts.numItems),
+      });
+
+    return {
+      ...records,
+      page: await Promise.all(
+        records.page.map(async (project) => {
+          const profile: Doc<"profile"> = await ctx.db.get(project.userId);
+
+          return {
+            ...project,
+            username: profile?.username ?? "@anonymous",
+            ownerName:
+              `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
+          };
+        }),
+      ),
+    };
   },
 });

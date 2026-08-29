@@ -1,0 +1,134 @@
+# Table Component Rules
+
+## Overview
+All tables must use TanStack Table via the `AppDataTable` wrapper component from `@/components/DataTable`. Column definitions must be defined at module scope, never inside a component's render function.
+
+## Rules
+
+### 1. Use `AppDataTable` Only
+Use the `AppDataTable` component for all table rendering. Never import or use `useReactTable`, `flexRender`, `getCoreRowModel`, or raw TanStack Table components (`<Table>`, `<TableHeader>`, `<TableBody>`, `<TableRow>`, `<TableCell>`) directly. Those are internal to `AppDataTable`.
+
+### 2. Column Definitions in Outer Scope
+Column definitions must be defined outside the component scope as module-level `const` or a `createColumns()` factory function. Never define `ColumnDef<T>[]` inside a component render.
+
+- **Simple tables** (no callbacks): export a `const columns: ColumnDef<T>[]` at module scope
+- **Tables with actions**: use a `createColumns()` factory function exported from a dedicated `columns.ts` file
+
+### 3. Hidable Columns
+Tables must support column visibility toggling. `AppDataTable` provides a built-in "Columns" dropdown. Ensure every column has an explicit `id` property so it appears in the visibility menu.
+
+### 4. Empty State
+`AppDataTable` handles empty state implicitly via the `emptyState` prop which accepts `<EmptyStateContent>{...}</EmptyStateContent>`. When omitted, a default "No results" placeholder is shown. Callers must not add their own empty-state conditionals or inline "No results." text.
+
+## Code Snippets
+
+### Column Definitions at Module Scope
+
+```typescript
+import type { ColumnDef } from "@tanstack/react-table";
+
+type MyRow = {
+  id: string;
+  name: string;
+  email: string | null;
+};
+
+const columns: ColumnDef<MyRow>[] = [
+  { id: "sn", header: "S/N", cell: ({ row }) => row.index + 1 },
+  { id: "name", header: "Name", accessorKey: "name" },
+  { id: "email", header: "Email", accessorKey: "email" },
+];
+```
+
+### createColumns Factory (with callbacks)
+
+```typescript
+// columns.ts
+export function createColumns(actions: {
+  onView: (id: string) => void;
+}): ColumnDef<MyRow>[] {
+  return [
+    {
+      id: "name",
+      header: "Name",
+      accessorKey: "name",
+      cell: ({ row }) => (
+        <button onClick={() => actions.onView(row.original.id)}>
+          {row.getValue("name")}
+        </button>
+      ),
+    },
+    { id: "email", header: "Email", accessorKey: "email" },
+  ];
+}
+```
+
+### Usage with AppDataTable
+
+```typescript
+const cols = React.useMemo(() => createColumns({ onView: handleView }), []);
+
+return (
+  <AppDataTable
+    columns={cols}
+    data={rows}
+    onRowClick={(row) => handleSelect(row.id)}
+    emptyState={
+      <EmptyStateContent>
+        <EmptyStateTitle>No items found</EmptyStateTitle>
+        <EmptyStateDescription>Try adjusting your filters.</EmptyStateDescription>
+      </EmptyStateContent>
+    }
+  />
+);
+```
+
+### Column Visibility Dropdown (built into AppDataTable)
+
+```typescript
+// DataTable.tsx — no action needed from callers
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="outline" className="ml-auto">
+      Columns <ChevronDown />
+    </Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="end">
+    {table
+      .getAllColumns()
+      .filter((column) => column.getCanHide())
+      .map((column) => (
+        <DropdownMenuCheckboxItem
+          key={column.id}
+          className="capitalize"
+          checked={column.getIsVisible()}
+          onCheckedChange={(value) => column.toggleVisibility(!!value)}
+        >
+          {column.id}
+        </DropdownMenuCheckboxItem>
+      ))}
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+## Bad Examples
+
+```typescript
+// ❌ Raw TanStack table setup inside component
+const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+return (
+  <Table>
+    <TableHeader>...</TableHeader>
+    <TableBody>{flexRender(...)}</TableBody>
+  </Table>
+);
+
+// ❌ Column definitions inside component render
+function MyTable() {
+  const columns: ColumnDef<Row>[] = [...]; // wrong scope
+  return <AppDataTable columns={columns} ... />;
+}
+
+// ❌ Caller handling empty state inline
+{data.length === 0 && <p>No results</p>} // AppDataTable handles this
+```

@@ -2,6 +2,11 @@
   "name": "wigxel-nextjs-typescript-boilerplate",
   "version": "0.1.0",
   "private": true,
+  "keywords": [
+    "boilerplate",
+    "nextjs",
+    "wigxel"
+  ],
   "type": "module",
   "scripts": {
     "dev:backend": "convex dev",
@@ -17,6 +22,7 @@
     "format": "npm run format:prettier && npm run format:biome",
     "format:prettier": "prettier --write .",
     "format:biome": "biome format --no-errors-on-unmatched --write .",
+    "format:tsx": "nurm .",
     "test": "vitest --watch=false",
     "test:watch": "vitest",
     "round-check": "npm run lint && npm run format && npm run test && npm run build",
@@ -28,12 +34,15 @@
     "@convex-dev/better-auth": "0.11.4",
     "@google/genai": "^2.11.0",
     "@hookform/resolvers": "5.2.2",
+    "@hyperbridge/ui": "^0.0.50",
     "@radix-ui/react-avatar": "1.1.11",
+    "@radix-ui/react-checkbox": "^1.3.11",
     "@radix-ui/react-collapsible": "1.1.12",
     "@radix-ui/react-dialog": "1.1.15",
     "@radix-ui/react-label": "2.1.8",
     "@radix-ui/react-popover": "1.1.15",
     "@radix-ui/react-progress": "1.1.8",
+    "@radix-ui/react-scroll-area": "^1.2.18",
     "@radix-ui/react-select": "2.2.6",
     "@radix-ui/react-separator": "1.1.8",
     "@radix-ui/react-slot": "1.2.4",
@@ -43,7 +52,7 @@
     "@t3-oss/env-nextjs": "0.13.10",
     "@tanstack/react-query": "5.90.12",
     "@tanstack/react-query-devtools": "5.91.1",
-    "@wigxel/react-components": "1.2.7",
+    "@wigxel/react-components": "^1.2.7",
     "@wigxel/utils": "1.0.10",
     "better-auth": "1.5.3",
     "class-variance-authority": "0.7.1",
@@ -54,8 +63,12 @@
     "effect": "3.21.2",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "5.2.0",
+    "hooks-ts": "^0.12.0",
+    "iconsax-reactjs": "^0.0.8",
     "lodash-es": "4.17.21",
+    "lucide": "^1.33.0",
     "lucide-react": "0.562.0",
+    "morphicons": "^1.7.0",
     "motion": "12.9.2",
     "next": "16.2.3",
     "nuqs": "2.8.6",
@@ -68,6 +81,8 @@
     "react-hook-form": "7.71.1",
     "react-image-crop": "11.0.10",
     "react-markdown": "^10.1.0",
+    "react-use-event-hook": "^0.9.6",
+    "react-wrap-balancer": "^1.1.1",
     "sharp": "0.34.5",
     "sonner": "2.0.7",
     "tailwind-merge": "3.4.0",
@@ -90,6 +105,8 @@
     "@testing-library/user-event": "14.6.1",
     "@types/node": "25.6.0",
     "@types/react": "19.1.2",
+    "@wigxel/react-tf": "^0.1.9",
+    "@wigxel/react-tf-biome": "^0.1.9",
     "@vitejs/plugin-react-swc": "3.9.0",
     "@vitest/coverage-v8": "4.1.4",
     "autoprefixer": "10.4.21",
@@ -118,11 +135,6 @@
     "vitest": "4.1.4",
     "watch": "0.13.0"
   },
-  "keywords": [
-    "wigxel",
-    "boilerplate",
-    "nextjs"
-  ],
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
@@ -137,10 +149,13 @@
       "prettier --write"
     ]
   },
-  "packageManager": "bun@1.3.5",
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  }
+  },
+  "overrides": {
+    "effect": "3.22.1"
+  },
+  "packageManager": "bun@1.3.5"
 }

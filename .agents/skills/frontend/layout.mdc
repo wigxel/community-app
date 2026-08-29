@@ -1,0 +1,68 @@
+# Form
+- Every form must be in a section/dialog/card/sheet/drawer.
+- Card forms have a title and content (form content) and footer area.
+- Use Shadcn Card component.
+- Ensure all fields are fullwidth unless specified otherwise.
+- Action buttons should be located at the footer area (bottom right). eg Save, Cancel etc.
+- Submit button must have a loading state for better UX
+
+# Data Fetching
+### Loading & Empty States
+Every data-fetching component must handle three states:
+
+1. **Loading** - Show skeleton placeholder matching the content layout:
+   ```typescript
+   if (!data) return <Skeleton />;
+   ```
+
+2. **Empty** - Show empty state message:
+   ```tsx
+   <EmptyState isEmpty={data.length === 0}>
+    <EmptyStateContent>
+      <EmptyStateTitle>
+      [...title]
+      </EmptyStateTitle>
+      <EmptyStateDescription>
+      [...detailed description]
+      </EmptyStateDescription>
+    </EmptyStateContent>
+
+    <EmptyStateConceal>
+      <Content data={data} />
+    </EmptyStateConceal>
+   </EmptyState>
+   ```
+
+3. **Success** - Render the data:
+   ```tsx
+    <EmptyState>
+        ... 
+      <EmptyStateConceal>
+          <Content data={data} />
+      </EmptyStateConceal>
+    </EmptyState>
+   ```
+
+Prefer shadcn `Skeleton` component while loading
+  ```tsx
+   {isLoading ? <SkeletonContainer /> : null}
+   
+   {!isLoading ? <EmptyState isEmpty={data.length === 0}>
+    <EmptyStateContent>
+      <EmptyStateTitle>
+      [...title]
+      </EmptyStateTitle>
+      <EmptyStateDescription>
+      [...detailed description]
+      </EmptyStateDescription>
+    </EmptyStateContent>
+
+    <EmptyStateConceal>
+      <Content data={data} />
+    </EmptyStateConceal>
+   </EmptyState> : null}
+   ```
+
+# Grids
+### For Catalogs
+Maintain a 5 column grid for xl screens. a 4 column for lag and a 3 colume for tablet and single column for mobile

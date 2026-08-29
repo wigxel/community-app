@@ -1,0 +1,131 @@
+## React Patterns
+- Prefer controlled components over uncontrolled ones
+- Implement proper error boundaries
+- Extract reusable hooks for shared logic
+- Prefer abortController.signal over removeEventListener
+- Must not use forwardRef from react 19 up. ref is now automatically injected into the props
+
+
+## Overlay as Wrapper Pattern
+- When an overlay (`Dialog`, `AlertDialog`, `Sheet`, `Drawer`, `Popover`)
+  encloses business logic (mutation, loading, error handling, form state), it
+  should be its own standalone component that wraps the trigger as `children`.
+- The wrapper owns all overlay state (`open`/`onOpenChange`), mutation hooks,
+  form state (e.g., `comment`), loading via hooks eg (`useMutation`),
+  and toast calls. Keep wrapper components in the same module as the parent
+  unless reused across multiple features.
+- The parent renders only the trigger element as a child of the wrapper —
+  no business logic, no loading flags, no handlers are needed in the parent.
+- When the wrapper contains form state, reset it on close in `onOpenChange`:
+  ```tsx
+  <Dialog open={open} onOpenChange={(next) => {
+    setOpen(next);
+    if (!next) setComment("");
+  }}>
+  ```
+
+  ```tsx
+  // ✅ Good: wrapper owns everything
+  function DeleteAlert({ id, children }: { id: Id<"records">; children: ReactNode }) {
+    const [open, setOpen] = useState(false);
+    const deleteRecord = useMutation(api.deleteRecord);
+    const { loading, attachLoader } = useAsyncLoader({ default: false });
+
+    return (
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={loading.default}
+              onClick={attachLoader("default", async () => {
+                try {
+                  await deleteRecord({ id });
+                  toast.success("Deleted");
+                  setOpen(false);
+                } catch (error) {
+                  toast.error("Failed", { description: getErrorMessage(error) });
+                }
+              })}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
+  // Parent is clean — no hooks, no handlers, just a button
+  function Item({ record }: { record: Doc<"records"> }) {
+    return (
+      <div>
+        <span>{record.title}</span>
+        <DeleteAlert id={record._id}>
+          <Button variant="ghost" size="sm"><Trash2 /></Button>
+        </DeleteAlert>
+      </div>
+    );
+  }
+  ```
+
+- **When NOT to use this pattern:** If the parent needs to coordinate
+  open/close state across siblings (e.g., "only one dialog open at a time",
+  "close all on escape"), lift `open`/`onOpenChange` to the parent instead.
+- If the overlay has multiple independent async actions, give each its own hook eg (`useMutation`) call or use distinct keys.
+
+## React Components
+- Extract `.map()` rendering into a dedicated Item component **when the map closure exceeds 15 lines**. Simpler inline maps (e.g., basic list items, dropdown options) are acceptable.
+  ```tsx
+  // Acceptable: Simple inline map (under 15 lines)
+  {items.map(item => (
+    <SelectItem key={item.id} value={item.id}>
+      {item.label}
+    </SelectItem>
+  ))}
+  
+  // Refactor: Map closure exceeds 15 lines → extract to Item component
+  {records.map(record => (
+    <AttendanceRecord
+      key={record._id}
+      record={record}
+      onApprove={handleApprove}
+      onReject={handleReject}
+    />
+  ))}
+  ```
+- Move constant objects/maps/sets (values that never change) outside the
+  component to avoid recreating them on every render. However, if the
+  module is eagerly imported (e.g., barrel export) and the component is
+  rarely used, keeping them inside the component scope wrapped in
+  `React.useMemo` is acceptable to avoid allocating memory for unused
+  constants at module load time. Ignore this rule if react-compiler is
+  enabled in the project.
+  ```tsx
+  // ✅ Good when component renders frequently or module is code-split
+  const STATUS_COLORS = {
+    open: "text-foreground",
+    approved: "text-green-500",
+    completed: "text-violet-500",
+    rejected: "text-red-500",
+  } as const;
+
+  function StatusBadge({ status }: { status: keyof typeof STATUS_COLORS }) {
+    return <span className={STATUS_COLORS[status]}>{status}</span>;
+  }
+
+  // ✅ Good when component is rarely used but module is eagerly imported
+  function RarelyUsedStatusBadge({ status }: { status: string }) {
+    const statusColorMap = React.useMemo(() => ({
+      open: "text-foreground",
+      approved: "text-green-500",
+      completed: "text-violet-500",
+      rejected: "text-red-500",
+    } as const), []);
+    return <span className={statusColorMap[status] ?? ""}>{status}</span>;
+  }
+  ```
