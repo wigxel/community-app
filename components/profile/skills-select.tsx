@@ -101,11 +101,11 @@ export function SkillsSelect(props: SkillsSelectProps) {
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-(--radix-popover-trigger-width) border-white/20 bg-[#1a1f2e] p-0 flex flex-col overflow-hidden max-h-[var(--radix-popover-content-available-height)]"
+          className="flex max-h-[var(--radix-popover-content-available-height)] w-(--radix-popover-trigger-width) flex-col overflow-hidden border-white/20 bg-[#1a1f2e] p-0"
           align="start"
         >
           {/* Search */}
-          <div className="border-b border-white/10 p-2 shrink-0">
+          <div className="shrink-0 border-b border-white/10 p-2">
             <Input
               placeholder="Search skills..."
               value={search}
@@ -115,7 +115,7 @@ export function SkillsSelect(props: SkillsSelectProps) {
           </div>
 
           {/* Skill list */}
-          <ul className="overflow-y-auto p-1 flex-1">
+          <ul className="flex-1 overflow-y-auto p-1">
             {availableSkills.length === 0 ? (
               <li className="px-3 py-4 text-center text-sm text-white/40">
                 {search

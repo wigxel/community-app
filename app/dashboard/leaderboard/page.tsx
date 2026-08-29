@@ -16,12 +16,12 @@ export default function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState("engineers");
 
   return (
-    <div className="container mx-auto py-8 max-w-6xl">
-      <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+    <div className="container mx-auto max-w-6xl py-8">
+      <div className="flex flex-col items-start justify-between gap-8 md:flex-row">
         {/* Left Side - Leaderboard */}
-        <div className="w-full md:w-2/3 space-y-6">
+        <div className="w-full space-y-6 md:w-2/3">
           <div className="flex items-center gap-3">
-            <Trophy className="w-8 h-8 text-yellow-400" />
+            <Trophy className="h-8 w-8 text-yellow-400" />
             <h1 className="text-3xl font-bold">Community Leaderboard</h1>
           </div>
 
@@ -51,22 +51,24 @@ export default function LeaderboardPage() {
     </div>
   );
 }
+type LeaderboardListProps = { titleName: string };
+function LeaderboardList(props: LeaderboardListProps) {
+  const { titleName } = props;
 
-function LeaderboardList({ titleName }: { titleName: string }) {
   const leaderboard = useQuery(api.leaderboard.getLeaderboard, { titleName });
 
   if (leaderboard === undefined) {
     return (
-      <div className="flex justify-center items-center h-48">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <div className="flex h-48 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     );
   }
 
   if (leaderboard.length === 0) {
     return (
-      <Card className="bg-white/5 border-white/10">
-        <CardContent className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+      <Card className="border-white/10 bg-white/5">
+        <CardContent className="text-muted-foreground flex h-48 flex-col items-center justify-center">
           <p>No candidates found for {titleName}.</p>
         </CardContent>
       </Card>
@@ -78,16 +80,16 @@ function LeaderboardList({ titleName }: { titleName: string }) {
       {leaderboard.map((profile) => (
         <Card
           key={profile._id}
-          className="bg-white/5 border-white/10 overflow-hidden transition-all hover:bg-white/10"
+          className="overflow-hidden border-white/10 bg-white/5 transition-all hover:bg-white/10"
         >
-          <CardContent className="p-6 flex items-start gap-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center font-bold text-blue-400">
+          <CardContent className="flex items-start gap-4 p-6">
+            <div className="mt-1 flex-shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20 font-bold text-blue-400">
                 #{profile.ranking}
               </div>
             </div>
 
-            <Avatar className="w-12 h-12 border-2 border-white/10">
+            <Avatar className="h-12 w-12 border-2 border-white/10">
               <AvatarImage src={profile.profileImage || ""} />
               <AvatarFallback>
                 {profile.firstName[0]}
@@ -95,11 +97,11 @@ function LeaderboardList({ titleName }: { titleName: string }) {
               </AvatarFallback>
             </Avatar>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-lg font-semibold truncate">
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 flex items-center justify-between">
+                <h3 className="truncate text-lg font-semibold">
                   {profile.firstName} {profile.lastName}
-                  <span className="text-sm font-normal text-muted-foreground ml-2">
+                  <span className="text-muted-foreground ml-2 text-sm font-normal">
                     @{profile.username}
                   </span>
                 </h3>
@@ -108,28 +110,28 @@ function LeaderboardList({ titleName }: { titleName: string }) {
                 </Badge>
               </div>
 
-              <p className="text-sm text-white/70 line-clamp-2 mb-3">
+              <p className="mb-3 line-clamp-2 text-sm text-white/70">
                 {profile.shortBio || "No bio provided."}
               </p>
 
-              <div className="flex flex-wrap gap-2 mb-2">
+              <div className="mb-2 flex flex-wrap gap-2">
                 {profile.resolvedSkills.slice(0, 5).map((skill) => (
                   <Badge
                     key={skill.name}
                     variant="outline"
-                    className="text-xs bg-white/5"
+                    className="bg-white/5 text-xs"
                   >
                     {skill.name}
                   </Badge>
                 ))}
                 {profile.resolvedSkills.length > 5 && (
-                  <Badge variant="outline" className="text-xs bg-white/5">
+                  <Badge variant="outline" className="bg-white/5 text-xs">
                     +{profile.resolvedSkills.length - 5} more
                   </Badge>
                 )}
               </div>
 
-              <div className="flex items-center gap-1 text-xs text-white/50 mt-2">
+              <div className="mt-2 flex items-center gap-1 text-xs text-white/50">
                 <div className="flex items-center">
                   {Array.from(
                     { length: Math.floor(profile.stars || 0) },
@@ -137,11 +139,11 @@ function LeaderboardList({ titleName }: { titleName: string }) {
                   ).map((starIdx) => (
                     <Star
                       key={`full-${starIdx}`}
-                      className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
                     />
                   ))}
                   {(profile.stars || 0) % 1 !== 0 && (
-                    <StarHalf className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <StarHalf className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                   )}
                   {Array.from(
                     { length: 5 - Math.ceil(profile.stars || 0) },
@@ -149,7 +151,7 @@ function LeaderboardList({ titleName }: { titleName: string }) {
                   ).map((starIdx) => (
                     <Star
                       key={`empty-${starIdx}`}
-                      className="w-4 h-4 text-gray-500"
+                      className="h-4 w-4 text-gray-500"
                     />
                   ))}
                   <span className="ml-1.5 font-medium text-white/80">
@@ -173,8 +175,10 @@ function LeaderboardList({ titleName }: { titleName: string }) {
     </div>
   );
 }
+type AiRecruiterChatbotProps = { titleName: string };
+function AiRecruiterChatbot(props: AiRecruiterChatbotProps) {
+  const { titleName } = props;
 
-function AiRecruiterChatbot({ titleName }: { titleName: string }) {
   const [messages, setMessages] = useState<
     { role: "user" | "ai"; text: string; id: string }[]
   >([
@@ -232,16 +236,16 @@ function AiRecruiterChatbot({ titleName }: { titleName: string }) {
   };
 
   return (
-    <Card className="bg-[#1a1f2e] border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] flex flex-col h-[600px] sticky top-8">
-      <CardHeader className="border-b border-white/10 pb-4 bg-blue-500/5">
-        <CardTitle className="text-lg flex items-center gap-2 text-white">
-          <Sparkles className="w-5 h-5 text-blue-400" />
+    <Card className="sticky top-8 flex h-[600px] flex-col border-blue-500/30 bg-[#1a1f2e] shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+      <CardHeader className="border-b border-white/10 bg-blue-500/5 pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg text-white">
+          <Sparkles className="h-5 w-5 text-blue-400" />
           AI Recruiter Matchmaker
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="flex-1 p-0 flex flex-col overflow-hidden">
-        <div className="flex-1 p-4 overflow-y-auto">
+      <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
+        <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-4 pr-4">
             {messages.map((msg) => (
               <div
@@ -251,8 +255,8 @@ function AiRecruiterChatbot({ titleName }: { titleName: string }) {
                 <div
                   className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
                     msg.role === "user"
-                      ? "bg-blue-600 text-white rounded-tr-sm"
-                      : "bg-white/10 text-white/90 rounded-tl-sm prose prose-invert prose-sm"
+                      ? "rounded-tr-sm bg-blue-600 text-white"
+                      : "prose prose-invert prose-sm rounded-tl-sm bg-white/10 text-white/90"
                   }`}
                 >
                   {msg.role === "user" ? (
@@ -265,8 +269,8 @@ function AiRecruiterChatbot({ titleName }: { titleName: string }) {
             ))}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-white/10 text-white/70 rounded-2xl rounded-tl-sm px-4 py-3 text-sm flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                <div className="flex items-center gap-2 rounded-2xl rounded-tl-sm bg-white/10 px-4 py-3 text-sm text-white/70">
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   Analyzing candidates...
                 </div>
               </div>
@@ -274,22 +278,22 @@ function AiRecruiterChatbot({ titleName }: { titleName: string }) {
           </div>
         </div>
 
-        <div className="p-4 border-t border-white/10 bg-black/20">
+        <div className="border-t border-white/10 bg-black/20 p-4">
           <form onSubmit={handleSend} className="flex gap-2">
             <Input
               placeholder="e.g. I need a backend dev with Next.js..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="bg-white/5 border-white/20 focus-visible:ring-blue-500"
+              className="border-white/20 bg-white/5 focus-visible:ring-blue-500"
               disabled={isTyping}
             />
             <Button
               type="submit"
               size="icon"
-              className="bg-blue-600 hover:bg-blue-700 text-white shrink-0"
+              className="shrink-0 bg-blue-600 text-white hover:bg-blue-700"
               disabled={!input.trim() || isTyping}
             >
-              <Send className="w-4 h-4" />
+              <Send className="h-4 w-4" />
             </Button>
           </form>
         </div>
