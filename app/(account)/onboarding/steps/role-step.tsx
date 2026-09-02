@@ -1,3 +1,5 @@
+"use client";
+
 import type { UseFormReturn } from "react-hook-form";
 import {
   FormControl,
@@ -13,15 +15,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import type { Stepper } from "../_components/step-controls";
+import { StepControls } from "../_components/step-controls";
 import type { OnboardingValues } from "../form";
 
-export function RoleStep({
-  form,
-  titles,
-}: {
+export type RoleStepProps = {
   form: UseFormReturn<OnboardingValues>;
   titles: Array<{ _id: string; name: string }>;
-}) {
+  stepper: Stepper;
+};
+
+export function RoleStep(props: RoleStepProps) {
+  const { form, titles, stepper } = props;
+
+  const handleNext = async () => {
+    const ok = await form.trigger("title");
+    if (ok) stepper.next();
+  };
+
   return (
     <div className="space-y-5">
       <div>
@@ -55,6 +66,8 @@ export function RoleStep({
           </FormItem>
         )}
       />
+
+      <StepControls stepper={stepper} onNext={handleNext} />
     </div>
   );
 }

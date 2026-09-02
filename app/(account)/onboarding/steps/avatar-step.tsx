@@ -1,3 +1,5 @@
+"use client";
+
 import type { UseFormReturn } from "react-hook-form";
 import { ImageUpload } from "~/components/profile/image-upload";
 import {
@@ -6,13 +8,23 @@ import {
   FormItem,
   FormMessage,
 } from "~/components/ui/form";
+import type { Stepper } from "../_components/step-controls";
+import { StepControls } from "../_components/step-controls";
 import type { OnboardingValues } from "../form";
 
-export function AvatarStep({
-  form,
-}: {
+export type AvatarStepProps = {
   form: UseFormReturn<OnboardingValues>;
-}) {
+  stepper: Stepper;
+};
+
+export function AvatarStep(props: AvatarStepProps) {
+  const { form, stepper } = props;
+
+  const handleNext = async () => {
+    const ok = await form.trigger("profileImage");
+    if (ok) stepper.next();
+  };
+
   return (
     <div className="space-y-5">
       <div>
@@ -35,6 +47,8 @@ export function AvatarStep({
           </FormItem>
         )}
       />
+
+      <StepControls stepper={stepper} onNext={handleNext} />
     </div>
   );
 }

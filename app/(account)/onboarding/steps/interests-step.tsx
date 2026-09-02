@@ -1,16 +1,17 @@
+"use client";
+
 import { IconButton } from "@hyperbridge/ui";
-import { useMediaQuery } from "hooks-ts";
 import { PlusIcon } from "lucide-react";
 import React from "react";
-import { useForm } from "react-hook-form";
-import { FormField, FormItem, FormLabel } from "~/components/ui/form";
+import type { UseFormReturn } from "react-hook-form";
+import { FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { safeArray, safeStr } from "~/lib/data.helpers";
+import { safeStr } from "~/lib/data.helpers";
 import { cn } from "~/lib/utils";
-import type { OnboardingFormSchema } from "../shared";
+import type { Stepper } from "../_components/step-controls";
+import { StepControls } from "../_components/step-controls";
+import type { OnboardingValues } from "../form";
 
-// @todo: interests should be wired to backend and add see if not set. I believe there's a existing component
-// for this already
 const COMMON_INTERESTS = [
   "Web Development",
   "Mobile Development",
@@ -30,46 +31,66 @@ const COMMON_INTERESTS = [
   "Reading",
 ];
 
-export function InterestsStep() {
-  const isMobile = useMediaQuery("(max-width: 768px)") ?? true;
-  const form = useForm<OnboardingFormSchema>();
-  const [customInterest, setCustomInterest] = React.useState("");
+export type InterestsStepProps = {
+  form: UseFormReturn<OnboardingValues>;
+  stepper: Stepper;
+};
 
-  const [localInterests, setLocalInterests] = React.useState(() => {
-    const interests = safeArray(form.watch("interests"));
-    return new Set([...interests, ...COMMON_INTERESTS]);
-  });
-  const [selectedInterest, setSelectedInterest] = React.useState(
-    () => new Set(),
+export function InterestsStep(props: InterestsStepProps) {
+  const { form, stepper } = props;
+
+  const interests = form.watch("interests") ?? [];
+  const selectedInterest = React.useMemo(() => new Set(interests), [interests]);
+
+  const [customInterest, setCustomInterest] = React.useState("");
+  // ponytail: pool derived from COMMON + form values; add form field `interestsPool` if custom deselected chips must survive remount without being selected
+  const [localInterests, setLocalInterests] = React.useState(
+    () => new Set([...COMMON_INTERESTS, ...interests]),
   );
 
   const toggleInterest = (interest: string) => {
-    if (selectedInterest.has(interest)) {
-      selectedInterest.delete(interest);
+    const next = new Set(interests);
+    if (next.has(interest)) {
+      next.delete(interest);
     } else {
-      selectedInterest.add(interest);
+      next.add(interest);
     }
-
-    setSelectedInterest(new Set(selectedInterest));
+    form.setValue("interests", [...next], {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   };
 
   const addCustomInterest = () => {
     const trimmed = safeStr(customInterest)
       .split(",")
-      .map((interest_str) => interest_str.trim())
-      .filter((interest_str) => interest_str);
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (trimmed.length === 0) return;
 
     setLocalInterests(new Set([...localInterests, ...trimmed]));
     setCustomInterest("");
 
-    for (const interest of trimmed) {
-      toggleInterest(interest);
-    }
+    const next = new Set(interests);
+    for (const interest of trimmed) next.add(interest);
+    form.setValue("interests", [...next], {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   };
 
   const removeInterest = (interest: string) => {
-    localInterests.delete(interest);
-    setLocalInterests(new Set(localInterests));
+    const nextPool = new Set(localInterests);
+    nextPool.delete(interest);
+    setLocalInterests(nextPool);
+
+    const next = new Set(interests);
+    next.delete(interest);
+    form.setValue("interests", [...next], {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   };
 
   const presetInterestSet = React.useMemo(() => new Set(COMMON_INTERESTS), []);
@@ -89,9 +110,6 @@ export function InterestsStep() {
 
       <div className="group flex flex-wrap gap-2">
         {choices.map((interest) => {
-          // @todo:
-          // /frontend extract into a standalone component in this module
-          // /testing unit test
           const isPreset = presetInterestSet.has(interest);
           const isActive = selectedInterest.has(interest);
 
@@ -108,7 +126,7 @@ export function InterestsStep() {
               }}
               className={cn(
                 "inline-flex cursor-pointer items-center rounded-full border px-4 py-2 text-sm transition-all",
-                selectedInterest.size === 0 || isMobile
+                selectedInterest.size === 0
                   ? isActive
                     ? "border-brand-primary text-foreground"
                     : "bg-muted text-muted-foreground font-normal hover:bg-white/20"
@@ -129,38 +147,49 @@ export function InterestsStep() {
         })}
       </div>
 
+      <div className="flex flex-col gap-2">
+        <label htmlFor="custom-interest" className="text-sm font-medium">
+          Add Custom Interest
+        </label>
+        <div className="relative flex items-center gap-2">
+          <Input
+            id="custom-interest"
+            value={customInterest}
+            onChange={(e) => setCustomInterest(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addCustomInterest();
+              }
+            }}
+            placeholder="e.g., Cooking, Gardening"
+          />
+          <IconButton
+            size="sm"
+            rounded="full"
+            onClick={addCustomInterest}
+            className="absolute end-1 z-20"
+            variant="level_1"
+          >
+            <PlusIcon size="1em" />
+          </IconButton>
+        </div>
+      </div>
+
       <FormField
         control={form.control}
-        name="customInterests"
-        render={() => {
-          return (
-            <FormItem className="flex flex-col gap-2">
-              <FormLabel>Add Custom Interest</FormLabel>
-              <div className="relative flex items-center gap-2">
-                <Input
-                  value={customInterest}
-                  onChange={(e) => setCustomInterest(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addCustomInterest();
-                    }
-                  }}
-                  placeholder="e.g., Cooking, Gardening"
-                />
-                <IconButton
-                  size="sm"
-                  rounded="full"
-                  onClick={addCustomInterest}
-                  className="absolute end-1 z-20"
-                  variant={"level_1"}
-                >
-                  <PlusIcon size="1em" />
-                </IconButton>
-              </div>
-            </FormItem>
-          );
-        }}
+        name="interests"
+        render={() => (
+          <FormItem>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <StepControls
+        stepper={stepper}
+        isSubmit
+        isSubmitting={form.formState.isSubmitting}
       />
     </div>
   );

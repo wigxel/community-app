@@ -9,8 +9,6 @@ import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
-import type { UsernameStatus } from "~/components/onboarding/check-username";
-import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { SegmentProgressBar } from "~/components/ui/segmented-gradient-progress";
 import { api } from "~/convex/_generated/api";
@@ -19,6 +17,7 @@ import { authClient } from "~/lib/auth-client";
 import { safeArray, safeStr } from "~/lib/data.helpers";
 import { getErrorMessage } from "~/lib/error.helpers";
 import { toast } from "~/lib/toast";
+import type { Stepper } from "./_components/step-controls";
 import { AvatarStep } from "./steps/avatar-step";
 import { BasicInfoStep } from "./steps/basic-info-step";
 import { InterestsStep } from "./steps/interests-step";
@@ -61,7 +60,6 @@ export default function OnboardingForm(props: OnboardingFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
 
   const [step, setStep] = useState(4);
-  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
 
   const form = useForm<OnboardingValues>({
     resolver: zodResolver(onboardingSchema),
@@ -83,37 +81,11 @@ export default function OnboardingForm(props: OnboardingFormProps) {
     },
   });
 
-  // @todo: zod should handle validation
-  const handleNext = () => {
-    if (step === 1) {
-      if (usernameStatus === "checking") {
-        toast.warning("Please wait while we check username availability");
-        return;
-      }
-
-      if (usernameStatus !== "available") {
-        form.setError("username", {
-          message: "Please choose a valid and available username",
-        });
-        return;
-      }
-    }
-
-    if (step === 4) {
-      const { interests } = form.getValues();
-      if (interests.length === 0) {
-        form.setError("interests", {
-          message: "Select at least one interest",
-        });
-        return;
-      }
-    }
-
-    setStep(step + 1);
-  };
-
-  const handleBack = () => {
-    setStep(step - 1);
+  const stepper: Stepper = {
+    step,
+    totalSteps: 4,
+    next: () => setStep((s) => Math.min(s + 1, 4)),
+    back: () => setStep((s) => Math.max(s - 1, 1)),
   };
 
   async function onSubmit(values: OnboardingValues) {
@@ -160,7 +132,6 @@ export default function OnboardingForm(props: OnboardingFormProps) {
     }, 2000);
   }, [accountDetails.mutateAsync]);
 
-  // @todo: The next and previous buttons should be contained in each step
   return (
     <Form {...form}>
       <form
@@ -178,51 +149,12 @@ export default function OnboardingForm(props: OnboardingFormProps) {
           </div>
         </div>
 
-        {step === 1 && (
-          <BasicInfoStep
-            form={form}
-            onUsernameStatusChange={setUsernameStatus}
-          />
+        {step === 1 && <BasicInfoStep form={form} stepper={stepper} />}
+        {step === 2 && <AvatarStep form={form} stepper={stepper} />}
+        {step === 3 && (
+          <RoleStep form={form} titles={titles} stepper={stepper} />
         )}
-        {step === 2 && <AvatarStep form={form} />}
-        {step === 3 && <RoleStep form={form} titles={titles} />}
-        {step === 4 && <InterestsStep />}
-
-        <div className="flex gap-3 pt-4">
-          {step > 1 && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleBack}
-              disabled={form.formState.isSubmitting}
-              className="flex-1"
-            >
-              Back
-            </Button>
-          )}
-          {step < 4 ? (
-            <Button
-              type="button"
-              onClick={handleNext}
-              disabled={step === 1 && usernameStatus !== "available"}
-              variant="default"
-              className="flex-1"
-            >
-              Next
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              disabled={form.formState.isSubmitting}
-              variant="default"
-              className="flex-1"
-            >
-              {form.formState.isSubmitting
-                ? "Creating Profile..."
-                : "Complete Setup"}
-            </Button>
-          )}
-        </div>
+        {step === 4 && <InterestsStep form={form} stepper={stepper} />}
       </form>
     </Form>
   );
