@@ -229,7 +229,7 @@ export default async function ProfileCard({
                       <Mail size={22} className="text-emerald-300" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="mb-2 text-xs font-semibold tracking-wider text-white/60 uppercase">
+                      <div className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
                         Email Address
                       </div>
                       <a
@@ -251,7 +251,7 @@ export default async function ProfileCard({
                       <Phone size={22} className="text-blue-300" />
                     </div>
                     <div className="flex-1">
-                      <div className="mb-2 text-xs font-semibold tracking-wider text-white/60 uppercase">
+                      <div className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
                         Phone Number
                       </div>
                       <div className="space-y-2">
@@ -300,7 +300,7 @@ export default async function ProfileCard({
                           <Icon size={22} className="text-violet-300" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="mb-2 text-xs font-semibold tracking-wider text-white/60 uppercase">
+                          <div className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
                             {link.title}
                           </div>
                           <p className="truncate text-lg font-medium text-white/95 transition-colors group-hover:text-violet-300">

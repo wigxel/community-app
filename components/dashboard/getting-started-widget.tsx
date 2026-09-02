@@ -64,7 +64,7 @@ export function GettingStartedWidget() {
                 {Math.round(progress)}%
               </Badge>
             </CardTitle>
-            <p className="mt-1 text-sm text-balance text-white/60">
+            <p className="text-muted-foreground mt-1 text-sm text-balance">
               Complete the remaining steps in the checklist before going live.
             </p>
           </div>
@@ -87,12 +87,12 @@ export function GettingStartedWidget() {
               {step.completed ? (
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
               ) : (
-                <Circle className="h-5 w-5 shrink-0 text-white/40 group-hover:text-white/60" />
+                <Circle className="group-hover:text-muted-foreground h-5 w-5 shrink-0 text-white/40" />
               )}
               <span
                 className={`flex-1 text-sm ${
                   step.completed
-                    ? "text-white/60 line-through"
+                    ? "text-muted-foreground line-through"
                     : "text-white group-hover:text-white"
                 }`}
               >

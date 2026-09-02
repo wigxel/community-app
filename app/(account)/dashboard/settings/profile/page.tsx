@@ -854,7 +854,7 @@ export function ProfileForm({
             </CardHeader>
             <CardContent className="space-y-6">
               {workFields.length === 0 ? (
-                <p className="py-4 text-center text-sm text-white/60">
+                <p className="text-muted-foreground py-4 text-center text-sm">
                   No work experience added yet. Click "Add Experience" to get
                   started.
                 </p>

@@ -1,11 +1,15 @@
 "use client";
 
+import { IconButton } from "@hyperbridge/ui";
 import { Maximize2, RotateCcw, RotateCw, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useWatch } from "react-hook-form";
+import { ProfileImpl } from "~/lib/factories/profile";
 
 interface ImageUploadProps {
   currentImage?: string | null;
@@ -13,6 +17,7 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
+  const firstName = useWatch({ name: "firstName" });
   const [isOpen, setIsOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState("");
   const [zoom, setZoom] = useState(1);
@@ -165,71 +170,68 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        {currentImage && (
-          <div className="relative">
-            <Image
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative flex aspect-square w-full flex-col items-center justify-center rounded-2xl border">
+          <Avatar className="size-[40%]">
+            <AvatarImage
               src={currentImage}
               alt="Profile"
-              className="h-24 w-24 rounded-full border-2 border-white/20 object-cover"
               width={240}
               height={240}
             />
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white transition-colors hover:bg-red-600"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        )}
+            <AvatarFallback className="bg-gray-500 text-xl uppercase">
+              {firstName?.[0] ?? "--"}
+            </AvatarFallback>
+          </Avatar>
 
-        <div className="flex flex-col gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={onSelectFile}
-            className="hidden"
-            id="image-upload"
-          />
-          <label htmlFor="image-upload">
-            <Button
-              type="button"
-              variant="outline"
-              className="border-white/30 bg-white/10 !text-white hover:bg-white/20"
-              asChild
-            >
-              <span className="flex cursor-pointer items-center">
-                <Upload className="mr-2 h-4 w-4" />
-                {currentImage ? "Change Image" : "Upload Image"}
-              </span>
-            </Button>
-          </label>
-          <p className="text-xs text-white/60">
-            Max size: 5MB. Supports JPG, PNG, GIF
-          </p>
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={onSelectFile}
+              className="hidden"
+              id="image-upload"
+            />
+            <label htmlFor="image-upload">
+              <Button
+                type="button"
+                variant="outline"
+                className="border-white/30 bg-white/10 !text-white hover:bg-white/20"
+                asChild
+              >
+                <span className="flex cursor-pointer items-center">
+                  <Upload className="mr-2 h-4 w-4" />
+                  {currentImage ? "Change Image" : "Upload Image"}
+                </span>
+              </Button>
+            </label>
+            <p className="text-muted-foreground text-xs">
+              Max size: 5MB. Supports JPG, PNG, GIF
+            </p>
+          </div>
         </div>
       </div>
 
       <Dialog open={isOpen} onOpenChange={handleCancel}>
-        <DialogContent className="!w-[600px] !max-w-[600px] gap-0 overflow-hidden bg-white p-0 [&>button]:hidden">
+        <DialogContent className="bg-background aspect-2/1.5 w-[70svh] max-w-[800px] gap-0 overflow-hidden p-0 [&>button]:hidden">
           <div className="flex items-center justify-between border-b px-4 py-3">
-            <DialogTitle className="text-base font-semibold text-gray-900">
+            <DialogTitle className="text-foreground text-base font-semibold">
               Edit image
             </DialogTitle>
-            <button
-              onClick={handleCancel}
-              className="text-gray-400 transition-colors hover:text-gray-600"
+
+            <IconButton
               type="button"
+              className="text-gray-400 transition-colors hover:text-gray-600"
+              onClick={handleCancel}
+              variant={"unset"}
             >
               <X size={20} />
-            </button>
+            </IconButton>
           </div>
 
-          <div className="flex h-[350px]">
-            <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-gray-200 p-4">
+          <div className="flex">
+            <div className="bg-muted relative flex flex-1 items-center justify-center overflow-hidden p-4">
               {imgSrc && (
                 <div className="relative flex h-full w-full items-center justify-center">
                   <button
@@ -255,7 +257,7 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
                       src={imgSrc}
                       alt="Crop preview"
                       draggable={false}
-                      className="pointer-events-none max-h-[280px] max-w-[280px] object-contain"
+                      className="pointer-events-none size-70 object-contain"
                     />
                   </button>
 
@@ -269,35 +271,34 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
                       />
                     </div>
                   </div>
-
-                  <p className="absolute right-0 bottom-2 left-0 bg-white/80 py-1 text-center text-xs font-medium text-gray-700">
-                    Drag to reposition • Use zoom to adjust size
-                  </p>
                 </div>
               )}
+              <p className="bg-background/80 text-foreground absolute right-0 bottom-0 left-0 py-2 text-center text-xs font-medium">
+                Drag to reposition • Use zoom to adjust size
+              </p>
             </div>
 
-            <div className="flex w-52 flex-col border-l bg-white">
+            <div className="bg-background flex w-52 flex-col border-l">
               <Tabs defaultValue="crop" className="flex flex-1 flex-col">
                 <TabsList className="grid h-auto w-full grid-cols-3 rounded-none border-b bg-transparent p-0">
                   <TabsTrigger
                     value="crop"
-                    className="rounded-none border-b-2 border-transparent py-2 text-xs text-gray-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-gray-900"
+                    className="data-[state=active]:text-foreground rounded-none border-b-2 border-transparent py-2 text-xs text-gray-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent"
                   >
                     Crop
                   </TabsTrigger>
-                  <TabsTrigger
+                  {/*<TabsTrigger
                     value="filter"
-                    className="rounded-none border-b-2 border-transparent py-2 text-xs text-gray-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-gray-900"
+                    className="data-[state=active]:text-foreground rounded-none border-b-2 border-transparent py-2 text-xs text-gray-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent"
                   >
                     Filter
                   </TabsTrigger>
                   <TabsTrigger
                     value="adjust"
-                    className="rounded-none border-b-2 border-transparent py-2 text-xs text-gray-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-gray-900"
+                    className="data-[state=active]:text-foreground rounded-none border-b-2 border-transparent py-2 text-xs text-gray-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent"
                   >
                     Adjust
-                  </TabsTrigger>
+                  </TabsTrigger>*/}
                 </TabsList>
 
                 <TabsContent
@@ -317,7 +318,7 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="w-full text-xs text-gray-900"
+                      className="text-foreground w-full text-xs"
                       onClick={() => changeInputRef.current?.click()}
                     >
                       <Upload className="mr-2 h-3 w-3" />
@@ -333,33 +334,33 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
                     <button
                       type="button"
                       onClick={handleRotateLeft}
-                      className="rounded p-1.5 transition-colors hover:bg-gray-100"
+                      className="hover:bg-muted rounded p-1.5 transition-colors"
                       title="Rotate left"
                     >
-                      <RotateCcw size={16} className="text-gray-700" />
+                      <RotateCcw size={16} className="text-muted-foreground" />
                     </button>
                     <button
                       type="button"
                       onClick={handleRotateRight}
-                      className="rounded p-1.5 transition-colors hover:bg-gray-100"
+                      className="hover:bg-muted rounded p-1.5 transition-colors"
                       title="Rotate right"
                     >
-                      <RotateCw size={16} className="text-gray-700" />
+                      <RotateCw size={16} className="text-muted-foreground" />
                     </button>
                     <button
                       type="button"
                       onClick={handleResetZoom}
-                      className="rounded p-1.5 transition-colors hover:bg-gray-100"
+                      className="hover:bg-muted rounded p-1.5 transition-colors"
                       title="Reset"
                     >
-                      <Maximize2 size={16} className="text-gray-700" />
+                      <Maximize2 size={16} className="text-muted-foreground" />
                     </button>
                   </div>
 
                   <div className="space-y-1">
                     <label
                       htmlFor="zoom-slider"
-                      className="text-xs font-medium text-gray-700"
+                      className="text-muted-foreground text-xs font-medium"
                     >
                       Zoom
                     </label>
@@ -371,7 +372,7 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
                       step="0.1"
                       value={zoom}
                       onChange={(e) => setZoom(Number(e.target.value))}
-                      className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-gray-900"
+                      className="bg-muted h-1.5 w-full cursor-pointer appearance-none rounded-lg accent-gray-900"
                     />
                     <div className="text-right text-xs text-gray-500">
                       {Math.round(zoom * 100)}%
@@ -391,11 +392,7 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
               </Tabs>
 
               <div className="border-t p-3">
-                <Button
-                  type="button"
-                  onClick={handleSave}
-                  className="w-full bg-blue-600 py-2 text-sm text-white hover:bg-blue-700"
-                >
+                <Button type="button" onClick={handleSave} className="w-full">
                   Save changes
                 </Button>
               </div>

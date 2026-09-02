@@ -91,7 +91,7 @@ export default function Projects({ userId }: { userId?: string }) {
                 {/* Project Media with Preview */}
                 {project.media.length > 0 && (
                   <div>
-                    <h4 className="mb-4 flex items-center gap-2 text-xs font-bold tracking-widest text-white/60 uppercase">
+                    <h4 className="text-muted-foreground mb-4 flex items-center gap-2 text-xs font-bold tracking-widest uppercase">
                       <div className="h-0.5 w-6 rounded-full bg-white/40"></div>
                       Media Gallery
                     </h4>
@@ -185,7 +185,7 @@ export default function Projects({ userId }: { userId?: string }) {
                 {/* Project Links */}
                 {project.link && project.link.length > 0 && (
                   <div>
-                    <h4 className="mb-4 flex items-center gap-2 text-xs font-bold tracking-widest text-white/60 uppercase">
+                    <h4 className="text-muted-foreground mb-4 flex items-center gap-2 text-xs font-bold tracking-widest uppercase">
                       <div className="h-0.5 w-6 rounded-full bg-white/40"></div>
                       Project Links
                     </h4>
@@ -204,7 +204,7 @@ export default function Projects({ userId }: { userId?: string }) {
                           >
                             <ExternalLink
                               size={14}
-                              className="text-white/60 transition-colors group-hover/link:text-white"
+                              className="text-muted-foreground transition-colors group-hover/link:text-white"
                             />
                             <span className="max-w-50 truncate">
                               {url.replace(/^https?:\/\/(www\.)?/, "")}

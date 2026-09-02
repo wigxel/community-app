@@ -138,7 +138,7 @@ export function FavouriteButton({
           "cursor-pointer border backdrop-blur-sm transition-all duration-200 select-none",
           optimisticFavourited
             ? "border-rose-400/50 bg-rose-500/30 text-rose-300"
-            : "border-white/10 bg-black/40 text-white/60 hover:border-rose-400/40 hover:bg-rose-500/20 hover:text-rose-300",
+            : "text-muted-foreground border-white/10 bg-black/40 hover:border-rose-400/40 hover:bg-rose-500/20 hover:text-rose-300",
           isUnauthenticated && "cursor-default opacity-60",
           className,
         )}

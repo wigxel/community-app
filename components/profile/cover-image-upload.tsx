@@ -201,7 +201,7 @@ export function CoverImageUpload({
               </span>
             </Button>
           </label>
-          <p className="text-xs text-white/60">
+          <p className="text-muted-foreground text-xs">
             Max size: 5MB. Supports JPG, PNG, GIF
           </p>
         </div>
