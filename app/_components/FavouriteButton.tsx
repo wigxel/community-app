@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { Heart } from "lucide-react";
 import { useCallback, useOptimistic, useTransition } from "react";
+import posthog from "posthog-js";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { cn } from "~/lib/utils";
@@ -57,6 +58,15 @@ export function FavouriteButton({
         setOptimisticFavourited(nextState);
         setOptimisticCount(nextCount);
         await toggleFavourite({ projectId });
+        if (
+          process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+          process.env.NEXT_PUBLIC_POSTHOG_HOST
+        ) {
+          posthog.capture(
+            nextState ? "project_favourited" : "project_unfavourited",
+            { project_id: projectId },
+          );
+        }
       });
     },
     [

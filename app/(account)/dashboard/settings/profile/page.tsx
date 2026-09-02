@@ -11,6 +11,7 @@ import {
   useForm,
 } from "react-hook-form";
 import { z } from "zod";
+import posthog from "posthog-js";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -503,6 +504,19 @@ export function ProfileForm({
         skills: (values.skills || []) as Id<"skills">[],
       });
 
+      if (
+        process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+        process.env.NEXT_PUBLIC_POSTHOG_HOST
+      ) {
+        posthog.capture("profile_updated", {
+          has_cover_image: Boolean(values.coverImage),
+          has_profile_image: Boolean(values.profileImage),
+          interest_count: interests.length,
+          link_count: normalizedLinks.length,
+          skill_count: values.skills?.length ?? 0,
+          work_experience_count: values.workExperience?.length ?? 0,
+        });
+      }
       setMessage({ type: "success", text: "Profile updated successfully!" });
     } catch (error) {
       console.error("Failed to update profile:", error);
