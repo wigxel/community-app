@@ -1,15 +1,15 @@
-import { PlusIcon, X, XIcon } from "lucide-react";
+import { IconButton } from "@hyperbridge/ui";
+import { useMediaQuery } from "hooks-ts";
+import { PlusIcon } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { FormField, FormItem, FormLabel } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { OnboardingFormSchema } from "../shared";
 import { safeArray, safeStr } from "~/lib/data.helpers";
 import { cn } from "~/lib/utils";
-import { useMediaQuery } from "hooks-ts";
-import { Button, IconButton } from "@hyperbridge/ui";
+import type { OnboardingFormSchema } from "../shared";
 
-// @todo: interests should be wired to backend. I believe there's a existing component
+// @todo: interests should be wired to backend and add see if not set. I believe there's a existing component
 // for this already
 const COMMON_INTERESTS = [
   "Web Development",
@@ -89,6 +89,9 @@ export function InterestsStep() {
 
       <div className="group flex flex-wrap gap-2">
         {choices.map((interest) => {
+          // @todo:
+          // /frontend extract into a standalone component in this module
+          // /testing unit test
           const isPreset = presetInterestSet.has(interest);
           const isActive = selectedInterest.has(interest);
 
@@ -105,7 +108,7 @@ export function InterestsStep() {
               }}
               className={cn(
                 "inline-flex cursor-pointer items-center rounded-full border px-4 py-2 text-sm transition-all",
-                isMobile
+                selectedInterest.size === 0 || isMobile
                   ? isActive
                     ? "border-brand-primary text-foreground"
                     : "bg-muted text-muted-foreground font-normal hover:bg-white/20"
