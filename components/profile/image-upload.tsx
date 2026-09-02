@@ -2,17 +2,15 @@
 
 import { IconButton } from "@hyperbridge/ui";
 import { Maximize2, RotateCcw, RotateCw, Upload, X } from "lucide-react";
-import Image from "next/image";
 import { useRef, useState } from "react";
+import { useWatch } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { useWatch } from "react-hook-form";
-import { ProfileImpl } from "~/lib/factories/profile";
 
 interface ImageUploadProps {
-  currentImage?: string | null;
+  currentImage?: string;
   onImageChange: (imageDataUrl: string) => void;
 }
 
@@ -174,7 +172,7 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
         <div className="relative flex aspect-square w-full flex-col items-center justify-center rounded-2xl border">
           <Avatar className="size-[40%]">
             <AvatarImage
-              src={currentImage}
+              src={currentImage ?? undefined}
               alt="Profile"
               width={240}
               height={240}

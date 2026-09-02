@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
 import { Globe, GripVertical, Link, Plus, Trash2 } from "lucide-react";
 import { Reorder, useDragControls } from "motion/react";
+import posthog from "posthog-js";
 import { useRef, useState } from "react";
 import {
   type FieldArrayWithId,
@@ -11,7 +12,6 @@ import {
   useForm,
 } from "react-hook-form";
 import { z } from "zod";
-import posthog from "posthog-js";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -712,7 +712,7 @@ export function ProfileForm({
                     <FormLabel>Profile Image</FormLabel>
                     <FormControl>
                       <ImageUpload
-                        currentImage={field.value || null}
+                        currentImage={field.value}
                         onImageChange={field.onChange}
                       />
                     </FormControl>

@@ -36,10 +36,7 @@ export default async function OnboardingPage(props: OnboardingPageProps) {
         </div>
 
         <div className="bg-muted mx-auto max-w-md rounded-2xl p-8 shadow-lg backdrop-blur-sm">
-          <OnboardingForm
-            redirectTo={params.redirect ?? "/dashboard"}
-            initialData={{ firstName, lastName }}
-          />
+          <OnboardingForm redirectTo={params.redirect ?? "/dashboard"} />
         </div>
       </div>
     </div>

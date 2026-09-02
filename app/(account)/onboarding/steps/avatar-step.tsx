@@ -27,7 +27,7 @@ export function AvatarStep({
           <FormItem>
             <FormControl>
               <ImageUpload
-                currentImage={field.value || null}
+                currentImage={field.value}
                 onImageChange={field.onChange}
               />
             </FormControl>
