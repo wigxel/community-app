@@ -13,19 +13,21 @@ import {
 } from "react-day-picker";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  captionLayout = "label",
-  buttonVariant = "ghost",
-  formatters,
-  components,
-  ...props
-}: React.ComponentProps<typeof DayPicker> & {
+type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"];
-}) {
+};
+function Calendar(props: CalendarProps) {
+  const {
+    className,
+    classNames,
+    showOutsideDays = true,
+    captionLayout = "label",
+    buttonVariant = "ghost",
+    formatters,
+    components,
+    ...restProps
+  } = props;
+
   const defaultClassNames = getDefaultClassNames();
 
   return (
@@ -128,20 +130,23 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Root: ({ className, rootRef, ...props }) => {
+        Root: ({ className, rootRef, ...restProps }) => {
           return (
             <div
               data-slot="calendar"
               ref={rootRef}
               className={cn(className)}
-              {...props}
+              {...restProps}
             />
           );
         },
-        Chevron: ({ className, orientation, ...props }) => {
+        Chevron: ({ className, orientation, ...restProps }) => {
           if (orientation === "left") {
             return (
-              <ChevronLeftIcon className={cn("size-4", className)} {...props} />
+              <ChevronLeftIcon
+                className={cn("size-4", className)}
+                {...restProps}
+              />
             );
           }
 
@@ -149,19 +154,22 @@ function Calendar({
             return (
               <ChevronRightIcon
                 className={cn("size-4", className)}
-                {...props}
+                {...restProps}
               />
             );
           }
 
           return (
-            <ChevronDownIcon className={cn("size-4", className)} {...props} />
+            <ChevronDownIcon
+              className={cn("size-4", className)}
+              {...restProps}
+            />
           );
         },
         DayButton: CalendarDayButton,
-        WeekNumber: ({ children, ...props }) => {
+        WeekNumber: ({ children, ...restProps }) => {
           return (
-            <td {...props}>
+            <td {...restProps}>
               <div className="flex size-[--cell-size] items-center justify-center text-center">
                 {children}
               </div>
@@ -170,17 +178,13 @@ function Calendar({
         },
         ...components,
       }}
-      {...props}
+      {...restProps}
     />
   );
 }
+function CalendarDayButton(props: React.ComponentProps<typeof DayButton>) {
+  const { className, day, modifiers, ...restProps } = props;
 
-function CalendarDayButton({
-  className,
-  day,
-  modifiers,
-  ...props
-}: React.ComponentProps<typeof DayButton>) {
   const defaultClassNames = getDefaultClassNames();
 
   const ref = React.useRef<HTMLButtonElement>(null);
@@ -208,7 +212,7 @@ function CalendarDayButton({
         defaultClassNames.day,
         className,
       )}
-      {...props}
+      {...restProps}
     />
   );
 }

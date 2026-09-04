@@ -21,8 +21,10 @@ const formatTimeline = (project: Project) => {
   if (end) return end;
   return null;
 };
+export type ProjectsProps = { userId?: string };
+export default function Projects(props: ProjectsProps) {
+  const { userId } = props;
 
-export default function Projects({ userId }: { userId?: string }) {
   const projects = useQuery(
     api.project.listProjectByUserId,
     userId ? { userId } : "skip",

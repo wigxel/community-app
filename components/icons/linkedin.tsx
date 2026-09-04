@@ -3,12 +3,9 @@ import type { SVGProps } from "react";
 interface LinkedInProps extends SVGProps<SVGSVGElement> {
   size?: number;
 }
+export default function LinkedIn(props: LinkedInProps) {
+  const { size = 24, className = "", ...restProps } = props;
 
-export default function LinkedIn({
-  size = 24,
-  className = "",
-  ...props
-}: LinkedInProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -23,7 +20,7 @@ export default function LinkedIn({
       className={`lucide lucide-linkedin-icon lucide-linkedin ${className}`}
       role="img"
       aria-label="LinkedIn"
-      {...props}
+      {...restProps}
     >
       <title>LinkedIn</title>
 

@@ -1,11 +1,11 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-
-export const SegmentProgressBar = (props: {
+export type SegmentProgressBarProps = {
   className?: string;
   progressValue?: number;
   gradient?: { startColor: string; endColor: string };
-}) => {
+};
+export function SegmentProgressBar(props: SegmentProgressBarProps) {
   const {
     gradient = {
       startColor: "#ef4444",
@@ -80,4 +80,4 @@ export const SegmentProgressBar = (props: {
       })}
     </div>
   );
-};
+}

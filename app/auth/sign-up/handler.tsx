@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth-server";
 import SignUpForm from "./form";
-
-export default async function SignUpHandler({
-  searchParamsPromise,
-}: {
+export type SignUpHandlerProps = {
   searchParamsPromise: Promise<{ redirect?: string }>;
-}) {
+};
+export default async function SignUpHandler(props: SignUpHandlerProps) {
+  const { searchParamsPromise } = props;
+
   const params = await searchParamsPromise;
 
   const authenticated = await isAuthenticated();

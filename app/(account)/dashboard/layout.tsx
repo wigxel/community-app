@@ -3,8 +3,10 @@ import { BrandLogo } from "~/components/layouts/header";
 import { AuthUserAvatar } from "~/components/profile/auth-user-avatar";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Sidebar } from "./_components/sidebar";
+type DashboardLayoutProps = { children: React.ReactNode };
+async function DashboardLayout(props: DashboardLayoutProps) {
+  const { children } = props;
 
-const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div
@@ -43,6 +45,6 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
       </style>
     </>
   );
-};
+}
 
 export default DashboardLayout;

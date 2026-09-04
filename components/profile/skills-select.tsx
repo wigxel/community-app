@@ -21,8 +21,9 @@ type SkillsSelectProps = {
   value: string[];
   onChange: (ids: string[]) => void;
 };
+export function SkillsSelect(props: SkillsSelectProps) {
+  const { skills, value, onChange } = props;
 
-export function SkillsSelect({ skills, value, onChange }: SkillsSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 

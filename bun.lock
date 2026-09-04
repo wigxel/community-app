@@ -26,7 +26,7 @@
         "@tanstack/react-query": "5.90.12",
         "@tanstack/react-query-devtools": "5.91.1",
         "@wigxel/react-components": "^1.2.7",
-        "@wigxel/react-tf-oxc": "^0.1.13",
+        "@wigxel/react-tf-oxc": "^0.1.14",
         "@wigxel/utils": "1.0.10",
         "better-auth": "1.5.3",
         "class-variance-authority": "0.7.1",
@@ -80,7 +80,7 @@
         "@types/react": "19.1.2",
         "@vitejs/plugin-react-swc": "3.9.0",
         "@vitest/coverage-v8": "4.1.4",
-        "@wigxel/react-tf-biome": "^0.1.9",
+        "@wigxel/react-tf-biome": "^0.1.14",
         "autoprefixer": "10.4.21",
         "commitizen": "4.3.1",
         "cz-conventional-changelog": "3.3.0",
@@ -108,6 +108,9 @@
         "watch": "0.13.0",
       },
     },
+  },
+  "overrides": {
+    "effect": "3.22.1",
   },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.4.4", "", {}, "sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg=="],
@@ -938,9 +941,9 @@
 
     "@wigxel/react-components": ["@wigxel/react-components@1.2.7", "", { "dependencies": { "lodash": "^4.17.20", "ramda": "^0.27.0", "styled-components": "^4.4.0", "typescript": "^4.9.5" }, "peerDependencies": { "react": ">=16.x", "react-dom": ">=16.x" } }, "sha512-yUTVRyla7Vht1vkFNM4UvNJ7A+Wv0uw/04KRMVadL+bJGkzQlF9emQIeqwEao7OZCdSrgaEbE5Nyl7HvlwCp0A=="],
 
-    "@wigxel/react-tf-biome": ["@wigxel/react-tf-biome@0.1.9", "", { "dependencies": { "@wigxel/cli-core": "0.1.4" }, "peerDependencies": { "@biomejs/biome": ">=2.0.0" }, "optionalPeers": ["@biomejs/biome"], "bin": { "react-tf-biome": "bin/setup.js" } }, "sha512-e4vcjmWKr3PFp75zd8+VPwjojKGqR7QMEE03HddBeWQVXm92FX2CMhYOkH28AOT80fCxv/vccYeg3mNKD47m5Q=="],
+    "@wigxel/react-tf-biome": ["@wigxel/react-tf-biome@0.1.14", "", { "dependencies": { "@wigxel/cli-core": "0.1.4" }, "peerDependencies": { "@biomejs/biome": ">=2.0.0" }, "optionalPeers": ["@biomejs/biome"], "bin": { "react-tf-biome": "bin/setup.js" } }, "sha512-ZQo1RL4ubMXnvgutLY6nqVMVGjPtaDG9m6yza28AUm+LqFTZQ+WMeKlVY8uWk+iCFj6oC0nyqRksf3RoLvFLxg=="],
 
-    "@wigxel/react-tf-oxc": ["@wigxel/react-tf-oxc@0.1.13", "", { "dependencies": { "@wigxel/cli-core": "0.1.4", "fast-fs-hash": "^0.0.3", "ignore": "^7.0.6", "oxc-parser": "^0.146.0" }, "bin": { "oxc-nurm": "dist/cli.js" } }, "sha512-PsBLsM8yhaRptUVM8Zo+FLWNohy+giLdiCMyKi6erUbzczhItVV2zEYvEnwE8wyKiKZtYVMXdsNfYXYy+a5sCA=="],
+    "@wigxel/react-tf-oxc": ["@wigxel/react-tf-oxc@0.1.14", "", { "dependencies": { "@wigxel/cli-core": "0.1.4", "fast-fs-hash": "^0.0.3", "ignore": "^7.0.6", "oxc-parser": "^0.146.0" }, "bin": { "oxc-nurm": "dist/cli.js" } }, "sha512-JE0KNH5wi+M4EI0xMaSlQVhPhLVnuI52A0RUcrAInbArWVx5DYKtS31zyuPvvVPXxm9fq0qOWD4P3SU/+e00WQ=="],
 
     "@wigxel/utils": ["@wigxel/utils@1.0.10", "", { "dependencies": { "intl": "^1.2.5" } }, "sha512-rNIRbGbuJ+7L5zsGx+RsU1zP1/AgXl6vDCf0DjIvGNwE/UFghg0dQ31HBjLDR8eKDFRA2ULo+VASc2Lb+PkBFw=="],
 
@@ -1212,7 +1215,7 @@
 
     "dunder-proto": ["dunder-proto@1.0.1", "", { "dependencies": { "call-bind-apply-helpers": "^1.0.1", "es-errors": "^1.3.0", "gopd": "^1.2.0" } }, "sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A=="],
 
-    "effect": ["effect@3.21.2", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "fast-check": "^3.23.1" } }, "sha512-rXd2FGDM8KdjSIrc+mqEELo7ScW7xTVxEf1iInmPSpIde9/nyGuFM710cjTo7/EreGXiUX2MOonPpprbz2XHCg=="],
+    "effect": ["effect@3.22.1", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "fast-check": "^3.23.1" } }, "sha512-TNoXushmPOBAjJlthF5d2QwnX2xBPEtcNJr5XKNKbRLbDvBcOYkXlYDfvGfSA0zriwLFuCll5MDtNMAdZL17PQ=="],
 
     "electron-to-chromium": ["electron-to-chromium@1.5.359", "", {}, "sha512-8lPELWuYZIWk7NDvCNthtmMw/7Q5Wu25NpM4djFMHBmk8DubPAtL4YTOp7ou0e7HyJtwkVlWv8XMLURnrtgJQw=="],
 

@@ -81,8 +81,10 @@ export function WorkExperienceSection({ userId }: WorkExperienceSectionProps) {
     </div>
   );
 }
+type WorkExperienceItemProps = { job: WorkExperience };
+function WorkExperienceItem(props: WorkExperienceItemProps) {
+  const { job } = props;
 
-const WorkExperienceItem = ({ job }: { job: WorkExperience }) => {
   const [imgErr, setImgErr] = useState(false);
   const isCurrent = !job.timeline.end;
 
@@ -148,4 +150,4 @@ const WorkExperienceItem = ({ job }: { job: WorkExperience }) => {
       </div>
     </div>
   );
-};
+}

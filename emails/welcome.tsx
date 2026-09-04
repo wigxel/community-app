@@ -5,11 +5,12 @@ type WelcomeEmailProps = {
   name?: string;
   dashboardUrl?: string;
 };
+export function WelcomeEmail(props: WelcomeEmailProps) {
+  const {
+    name = "there",
+    dashboardUrl = `${emailBrand.APP_URL}/dashboard/home`,
+  } = props;
 
-export function WelcomeEmail({
-  name = "there",
-  dashboardUrl = `${emailBrand.APP_URL}/dashboard/home`,
-}: WelcomeEmailProps) {
   return (
     <EmailLayout preview={`Welcome to ${emailBrand.APP_NAME}, ${name}`}>
       <Heading

@@ -3,17 +3,18 @@ import React from "react";
 import { cn } from "~/lib/utils";
 import { StandardGrid } from "./grids";
 
-export function StandardGridSkeleton({
-  size = 12,
-  variant = "base",
-  className,
-  Component,
-}: {
+type StandardGridSkeletonProps = {
   size?: number;
   variant?: "base" | "muted";
   className?: string;
   Component: React.ComponentType;
-}) {
+};
+
+export const StandardGridSkeleton = React.memo(function StandardGridSkeleton(
+  props: StandardGridSkeletonProps,
+) {
+  const { size = 12, variant = "base", className, Component } = props;
+
   const SKELETON_KEYS = React.useMemo(() => range(1, size), [size]);
 
   return (
@@ -30,4 +31,4 @@ export function StandardGridSkeleton({
       <div className="absolute inset-0 bg-linear-to-b from-transparent to-(--in-skeleton-bg)" />
     </StandardGrid>
   );
-}
+});

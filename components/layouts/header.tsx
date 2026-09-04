@@ -6,14 +6,13 @@ import { usePathname } from "next/navigation";
 import NavAuth from "~/app/_components/NavAuth";
 import { cn } from "~/lib/utils";
 import { Container } from "./container";
-
-function NavItem({
-  href,
-  children,
-}: {
+type NavItemProps = {
   href: string;
   children: React.ReactNode;
-}) {
+};
+function NavItem(props: NavItemProps) {
+  const { href, children } = props;
+
   const pathname = usePathname();
   const isActive = pathname.startsWith(href);
 

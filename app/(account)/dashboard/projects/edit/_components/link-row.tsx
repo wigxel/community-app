@@ -34,14 +34,9 @@ interface LinkRowProps {
   remove: (i: number) => void;
   error: string | undefined;
 }
+export default function LinkRow(props: LinkRowProps) {
+  const { projectIndex, linkIndex, control, remove, error } = props;
 
-export default function LinkRow({
-  projectIndex,
-  linkIndex,
-  control,
-  remove,
-  error,
-}: LinkRowProps) {
   return (
     <Controller
       control={control}

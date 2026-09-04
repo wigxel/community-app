@@ -8,8 +8,10 @@ import { MediaThumb } from "~/app/_components/MediaThumb";
 import { HeartIcon } from "~/components/icons";
 import { ProfileAvatar } from "~/components/profile/avatar";
 import type { BasicProject, Media } from "~/types/models";
+type LandingProjectCardProps = { project: BasicProject };
+function LandingProjectCard(props: LandingProjectCardProps) {
+  const { project } = props;
 
-const LandingProjectCard = ({ project }: { project: BasicProject }) => {
   const firstMedia = project.media?.[0] ?? null;
   const mimeType = firstMedia?.metadata?.mimeType ?? "";
   const isVideo = mimeType.startsWith("video/");
@@ -71,15 +73,16 @@ const LandingProjectCard = ({ project }: { project: BasicProject }) => {
       </section>
     </Link>
   );
-};
+}
 
 type MediaProps = {
   variant: "video" | "image";
   media: Media | null;
   alt: string;
 };
+function MediaThumbnail(props: MediaProps) {
+  const { variant, media, alt } = props;
 
-function MediaThumbnail({ variant, media, alt }: MediaProps) {
   const isVideo = variant === "video";
   const videoRef = useRef<HTMLVideoElement>(null);
 

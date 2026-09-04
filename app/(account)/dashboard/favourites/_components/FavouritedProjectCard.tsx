@@ -7,8 +7,8 @@ import { useRef, useState } from "react";
 import { FavouriteButton } from "~/app/_components/FavouriteButton";
 
 import type { FavouritedProject } from "~/types/models";
-
-export function FavouritedProjectCard(props: { project: FavouritedProject }) {
+export type FavouritedProjectCardProps = { project: FavouritedProject };
+export function FavouritedProjectCard(props: FavouritedProjectCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const { project } = props;

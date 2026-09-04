@@ -1,16 +1,14 @@
 import { safeStr } from "~/lib/data.helpers";
 import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-
-export function ProfileAvatar({
-  name,
-  src,
-  className,
-}: {
+export type ProfileAvatarProps = {
   name: string;
   src?: string;
   className?: string;
-}) {
+};
+export function ProfileAvatar(props: ProfileAvatarProps) {
+  const { name, src, className } = props;
+
   const initial = safeStr(name).charAt(0).toUpperCase();
 
   return (

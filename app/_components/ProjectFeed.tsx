@@ -14,8 +14,10 @@ import LandingProjectCard from "./LandingProjectCard";
 import { ProjectModal } from "./ProjectModal";
 
 const PAGE_SIZE = 12;
+type ScrollTriggerProps = { onVisible: () => void };
+function ScrollTrigger(props: ScrollTriggerProps) {
+  const { onVisible } = props;
 
-function ScrollTrigger({ onVisible }: { onVisible: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
