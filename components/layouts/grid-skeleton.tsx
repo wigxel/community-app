@@ -5,7 +5,7 @@ import { StandardGrid } from "./grids";
 
 export function StandardGridSkeleton({
   size = 12,
-  variant,
+  variant = "base",
   className,
   Component,
 }: {

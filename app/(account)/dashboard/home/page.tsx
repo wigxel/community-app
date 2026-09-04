@@ -3,7 +3,6 @@
 import { usePaginatedQuery, useQuery } from "convex/react";
 import { Briefcase, Folder, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { GettingStartedWidget } from "~/components/dashboard/getting-started-widget";
 import StatCard from "~/components/dashboard/home/StatCard";
 import WorkItem from "~/components/dashboard/home/WorkItem";
 import { FullscreenLoader } from "~/components/layouts/loader";
@@ -51,8 +50,6 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <GettingStartedWidget />
-
       <Card className="border border-white/10 bg-blue-500/20 text-blue-300">
         <CardContent className="flex items-center gap-4 pt-6">
           <Avatar className="h-14 w-14">

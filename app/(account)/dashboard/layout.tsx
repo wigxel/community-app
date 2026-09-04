@@ -1,3 +1,4 @@
+import { GettingStartedWidget } from "~/components/dashboard/getting-started-widget";
 import { BrandLogo } from "~/components/layouts/header";
 import { AuthUserAvatar } from "~/components/profile/auth-user-avatar";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -28,6 +29,8 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
           </div>
         </ScrollArea>
       </div>
+
+      <GettingStartedWidget />
 
       <style>
         {`
