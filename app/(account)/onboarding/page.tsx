@@ -18,9 +18,10 @@ export default async function OnboardingPage(props: OnboardingPageProps) {
   }
 
   const profile = await fetchAuthQuery(api.profiles.getForCurrentUser);
-  // if (profile) {
-  //   redirect(params.redirect ?? "/dashboard");
-  // }
+
+  if (profile) {
+    redirect(params.redirect ?? "/dashboard");
+  }
 
   return (
     <div className="bg-background flex min-h-screen items-center justify-center px-4 py-8">
