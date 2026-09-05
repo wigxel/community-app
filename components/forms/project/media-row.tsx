@@ -171,6 +171,7 @@ interface MediaRowProps {
   watch: UseFormWatch<ProjectFormValues>;
   remove: (i: number) => void;
 }
+
 export default function MediaRow(props: MediaRowProps) {
   const { mediaIndex, control, watch, remove } = props;
 

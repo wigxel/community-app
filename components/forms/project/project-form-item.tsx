@@ -7,8 +7,6 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
-import { LinksSection } from "./links-section";
-import { MediaSection } from "./media-section";
 import type { ProjectFormValues } from "./project-form";
 import TimelineSelect from "./timeline-select";
 
@@ -44,15 +42,13 @@ export function ProjectFormItem() {
         </div>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-6 pt-0">
-        <Separator className="bg-white/10" />
-
+      <CardContent className="flex flex-col gap-6">
         {/* Title & Description */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label
               htmlFor="title"
-              className="text-foreground/50 text-xs font-semibold tracking-widest uppercase after:ml-0.5 after:content-['*']"
+              className="text-muted-foreground after:ml-0.5 after:content-['*']"
             >
               Title
             </Label>
@@ -71,10 +67,7 @@ export function ProjectFormItem() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label
-              htmlFor="description"
-              className="text-foreground/50 text-xs font-semibold tracking-widest uppercase"
-            >
+            <Label htmlFor="description" className="text-muted-foreground">
               Description
             </Label>
             <div className="relative">
@@ -100,10 +93,32 @@ export function ProjectFormItem() {
 
         {/* Timeline */}
         <div className="flex flex-col gap-1.5">
-          <Label className="text-foreground/50 mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-widest uppercase">
+          <Label className="text-muted-foreground mb-1 flex items-center gap-1.5">
             <Calendar size={12} />
             Timeline
           </Label>
+
+          <div className="mb-4 grid grid-cols-1 gap-y-4">
+            {(["start", "end"] as const)
+              .filter((key) => !(key === "end" && ongoing))
+              .map((key) => (
+                <Fragment key={key}>
+                  <Controller
+                    control={control}
+                    name={`timeline.${key}`}
+                    render={({ field }) => {
+                      return (
+                        <TimelineSelect
+                          timeline={key}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      );
+                    }}
+                  />
+                </Fragment>
+              ))}
+          </div>
 
           <div className="mb-3 flex items-center gap-2">
             <input
@@ -114,30 +129,10 @@ export function ProjectFormItem() {
             />
             <Label
               htmlFor="ongoing"
-              className="text-foreground/50 text-xs font-medium"
+              className="text-muted-foreground text-xs font-medium"
             >
               I am currently working on this project
             </Label>
-          </div>
-
-          <div className="flex items-center divide-x divide-white/15 *:w-full *:px-5 [&>*:first-child]:pl-0 [&>*:last-child]:pr-0">
-            {(["start", "end"] as const)
-              .filter((key) => !(key === "end" && ongoing))
-              .map((key) => (
-                <Fragment key={key}>
-                  <Controller
-                    control={control}
-                    name={`timeline.${key}`}
-                    render={({ field }) => (
-                      <TimelineSelect
-                        timeline={key}
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    )}
-                  />
-                </Fragment>
-              ))}
           </div>
         </div>
       </CardContent>

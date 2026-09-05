@@ -6,6 +6,6 @@ export {
   pendingFiles,
 } from "./media-row";
 export { MediaSection } from "./media-section";
-export { ProjectFormItem as ProjectCard } from "./project-card";
 export { ProjectForm } from "./project-form";
+export { ProjectFormItem as ProjectCard } from "./project-form-item";
 export { default as TimelineSelect } from "./timeline-select";

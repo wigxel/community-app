@@ -5,6 +5,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ProjectCard } from "~/components/dashboard/projects/project-card";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
+import {
+  DBHeader,
+  DBHeaderDescription,
+  DBHeaderTitle,
+} from "~/components/layouts/dashboard-page-header";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { FABPlusIcon, FAButton } from "~/components/ui/fab-button";
@@ -26,7 +31,9 @@ export default function Projects() {
   return (
     <div>
       <div className="mb-8 flex items-center justify-between gap-5">
-        <Text variant={"h4"}>Projects</Text>
+        <DBHeader>
+          <DBHeaderTitle text="Projects" />
+        </DBHeader>
 
         {!isEmpty && (
           <FAButton

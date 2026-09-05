@@ -24,11 +24,15 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+
+  /* Charts */
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+
+  /* Rings */
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -43,13 +47,17 @@
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
+
+  /* Card */
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-card-inner: var(--card-inner);
 
   --color-brand-primary: var(--brand-primary);
   --color-brand-black-450: var(--brand-black-450);
   --color-brand-black-500: var(--brand-black-500);
 
+  /* Aspect Ratio */
   --aspect-post: 29.6/22.2;
 }
 
@@ -108,6 +116,7 @@ body {
   --background: #17161d;
   --foreground: #ffffff;
   --card: var(--brand-black-450);
+  --card-inner: var(--muted);
   --card-foreground: oklch(0.985 0 0);
   --popover: var(--muted);
   --popover-foreground: #ffffff;

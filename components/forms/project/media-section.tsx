@@ -1,10 +1,14 @@
 "use client";
+import { Button } from "@hyperbridge/ui";
 import { FileVideoIcon, ImageIcon, Plus } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Label } from "~/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import type { Media } from "~/types/models";
 import MediaRow from "./media-row";
 import type { ProjectFormValues } from "./project-form";
@@ -53,35 +57,10 @@ export function MediaSection() {
 
       <CardContent>
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <Label className="flex items-center gap-1.5 text-xs font-semibold tracking-widest text-white/50 uppercase">
-              <ImageIcon size={12} />
-              Media
-              {mediaFields.length > 0 && (
-                <Badge
-                  variant="outline"
-                  className="ml-1 border-white/20 px-1.5 py-0 text-[10px] text-white/50"
-                >
-                  {mediaFields.length}
-                </Badge>
-              )}
-            </Label>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 gap-1.5 text-xs text-blue-300/70 hover:bg-blue-500/15 hover:text-blue-200"
-              onClick={() => appendMedia(EMPTY_MEDIA)}
-            >
-              <Plus size={12} />
-              Add media
-            </Button>
-          </div>
-
           {mediaFields.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/3 py-8 text-center">
-              <ImageIcon size={24} className="text-white/20" />
-              <p className="text-xs text-white/40">No media added yet</p>
+            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-white/15 bg-white/3 py-8 text-center">
+              <ImageIcon size={"2rem"} className="text-muted-foreground" />
+              <p className="text-foreground">No media added yet</p>
             </div>
           )}
 
@@ -107,6 +86,18 @@ export function MediaSection() {
           )}
         </div>
       </CardContent>
+
+      <CardFooter>
+        <Button
+          variant="outline"
+          type="button"
+          className="w-full"
+          onClick={() => appendMedia(EMPTY_MEDIA)}
+        >
+          <Plus size={12} />
+          Add media
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

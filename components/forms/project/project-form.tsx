@@ -19,7 +19,7 @@ import { HoveringFormActions } from "../shared/hovering-form-action";
 import { LinksSection } from "./links-section";
 import { pendingFiles } from "./media-row";
 import { MediaSection } from "./media-section";
-import { ProjectFormItem } from "./project-card";
+import { ProjectFormItem } from "./project-form-item";
 
 const DEFAULT_PROJECT = {
   userId: "",
@@ -201,7 +201,7 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="mx-auto flex max-w-3xl flex-col gap-8">
+        <div className="mx-auto mt-16 flex max-w-3xl flex-col gap-8">
           <ProjectFormItem />
 
           {/* Media Section */}

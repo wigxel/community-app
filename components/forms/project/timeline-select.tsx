@@ -40,11 +40,13 @@ function monthYearToTs(month: string, year: string): TimelineDate {
   if (!month) return { year };
   return { month, year };
 }
+
 export type TimelineSelectProps = {
   timeline: string;
   value: TimelineDate;
   onChange: (val: TimelineDate) => void;
 };
+
 export default function TimelineSelect(props: TimelineSelectProps) {
   const { timeline, value, onChange } = props;
 
@@ -79,11 +81,11 @@ export default function TimelineSelect(props: TimelineSelectProps) {
   };
 
   return (
-    <div className="flex flex-1 gap-2.5 *:w-full">
+    <div className="flex flex-1 gap-4 *:flex-1">
       <div className="flex flex-col">
         <Label
           htmlFor={`${timeline}_month`}
-          className="mb-1 text-[10px] font-medium text-white/50 uppercase"
+          className="text-muted-foreground mb-1 text-[10px] font-medium"
         >
           {timeline} Month
         </Label>
@@ -91,7 +93,7 @@ export default function TimelineSelect(props: TimelineSelectProps) {
           id={`${timeline}_month`}
           value={localMonth}
           onChange={(e) => handleMonthChange(e.target.value)}
-          className="w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm text-white focus:ring-1 focus:ring-white/30 focus:outline-none"
+          className="text-foreground w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm focus:ring-1 focus:ring-white/30 focus:outline-none"
         >
           <option value="" className="bg-neutral-900" />
           {MONTHS.map((m) => (
@@ -102,10 +104,11 @@ export default function TimelineSelect(props: TimelineSelectProps) {
         </select>
         {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
       </div>
+
       <div className="flex flex-col">
         <Label
           htmlFor={`${timeline}_year`}
-          className="mb-1 text-[10px] font-medium text-white/50 uppercase after:ml-0.5 after:content-['*']"
+          className="text-muted-foreground mb-1 text-[10px] font-medium after:ml-0.5 after:content-['*']"
         >
           {timeline} Year
         </Label>
@@ -113,7 +116,7 @@ export default function TimelineSelect(props: TimelineSelectProps) {
           id={`${timeline}_year`}
           value={localYear}
           onChange={(e) => handleYearChange(e.target.value)}
-          className="w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm text-white focus:ring-1 focus:ring-white/30 focus:outline-none"
+          className="text-foreground w-full rounded-md border border-white/15 bg-white/5 px-2 py-1.5 text-sm focus:ring-1 focus:ring-white/30 focus:outline-none"
         >
           <option value="" className="bg-neutral-900" />
           {YEARS.map((y) => (

@@ -7,13 +7,23 @@ const Card = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
-    ref={ref}
-    className={cn(
-      "bg-card text-card-foreground rounded-3xl border shadow-none",
-      className,
-    )}
-    {...props}
-  />
+    className="bg-card border-foreground/5 rounded-(--app-card-radius) border p-(--app-card-gap)"
+    style={{
+      "--app-card-gap": "0.375rem",
+      "--app-card-radius": "1.5rem",
+      "--app-card-inner-radius":
+        "calc(var(--app-card-radius) - var(--app-card-gap))",
+    }}
+  >
+    <div
+      ref={ref}
+      className={cn(
+        "text-card-foreground rounded-2xl border-none shadow-none",
+        className,
+      )}
+      {...props}
+    />
+  </div>
 ));
 Card.displayName = "Card";
 
@@ -23,7 +33,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    className={cn("flex flex-col space-y-1.5 px-2 pt-2 pb-4", className)}
     {...props}
   />
 ));
@@ -35,7 +45,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("leading-none font-semibold tracking-tight", className)}
+    className={cn("text-lg leading-none font-medium", className)}
     {...props}
   />
 ));
@@ -57,7 +67,14 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  <div
+    ref={ref}
+    className={cn(
+      "bg-card-inner rounded-(--app-card-inner-radius) rounded-b-none p-6 last:rounded-b-(--app-card-inner-radius)",
+      className,
+    )}
+    {...props}
+  />
 ));
 CardContent.displayName = "CardContent";
 
@@ -67,7 +84,10 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
+    className={cn(
+      "bg-card-inner flex items-center rounded-(--app-card-inner-radius) p-6 pt-0 last:rounded-t-none",
+      className,
+    )}
     {...props}
   />
 ));
