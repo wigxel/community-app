@@ -146,13 +146,6 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
     }
   }
 
-  function handleRemove() {
-    onImageChange("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }
-
   function handleRotateLeft() {
     setRotation((prev) => prev - 90);
   }

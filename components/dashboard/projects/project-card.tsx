@@ -2,6 +2,7 @@
 import {
   BookText,
   Calendar,
+  Edit,
   ExternalLink,
   FileText,
   Globe,
@@ -10,7 +11,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -51,18 +54,31 @@ const formatTimeline = (project: Project) => {
 };
 
 export function ProjectCard(project: Project) {
+  const router = useRouter();
   const timeline = formatTimeline(project);
   return (
     <Card className="group rounded-2xl border border-white/10 bg-blue-500/20 text-blue-300">
       <CardHeader>
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <CardTitle className="text-2xl text-white">{project.title}</CardTitle>
-          {timeline && (
-            <div className="flex items-center gap-2.5 rounded-full border border-amber-400/30 bg-linear-to-r from-amber-500/15 to-orange-500/15 px-4 py-2 text-sm font-medium text-amber-200/90 shadow-lg">
-              <Calendar size={16} className="text-amber-300" />
-              <span>{timeline}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {timeline && (
+              <div className="flex items-center gap-2.5 rounded-full border border-amber-400/30 bg-linear-to-r from-amber-500/15 to-orange-500/15 px-4 py-2 text-sm font-medium text-amber-200/90 shadow-lg">
+                <Calendar size={16} className="text-amber-300" />
+                <span>{timeline}</span>
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 text-white/50 hover:bg-white/10 hover:text-white"
+              onClick={() =>
+                router.push(`/dashboard/projects/edit/${project._id}`)
+              }
+            >
+              <Edit size={16} />
+            </Button>
+          </div>
         </div>
 
         {project.description && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { Text } from "@hyperbridge/ui";
 import { usePaginatedQuery } from "convex/react";
 import { Loader } from "lucide-react";
 import React, { useEffect, useRef } from "react";
@@ -114,8 +115,8 @@ function SearchBox() {
 
 function CatalogEmptyStateContent() {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 py-24 text-neutral-500">
-      <p className="text-sm">No projects yet — be the first to add one.</p>
+    <div className="flex min-h-svh flex-col items-center justify-center gap-2 py-24 text-neutral-500">
+      <Text variant="h7">No projects yet — be the first to add one.</Text>
     </div>
   );
 }

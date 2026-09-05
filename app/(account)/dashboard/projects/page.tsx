@@ -32,7 +32,7 @@ export default function Projects() {
           <FAButton
             title="Add a project"
             className="size-24"
-            onClick={() => router.push("/dashboard/projects/edit")}
+            onClick={() => router.push("/dashboard/projects/create")}
           >
             <FABPlusIcon />
           </FAButton>
@@ -58,7 +58,7 @@ export default function Projects() {
           <EmptyState.Button
             title="Add a project"
             onClick={() => {
-              return router.push("/dashboard/projects/edit");
+              return router.push("/dashboard/projects/create");
             }}
           />
         </EmptyState.Content>

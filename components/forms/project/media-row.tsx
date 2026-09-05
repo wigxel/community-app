@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import type { ProjectFormSchema } from "./edit-projects-form";
+import type { ProjectFormValues } from "./project-form";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
@@ -165,30 +165,29 @@ export function MediaPreviewModal(props: MediaPreviewModalProps) {
 }
 
 interface MediaRowProps {
-  projectIndex: number;
   mediaIndex: number;
-  control: Control<ProjectFormSchema>;
-  register: UseFormRegister<ProjectFormSchema>;
-  watch: UseFormWatch<ProjectFormSchema>;
+  control: Control<ProjectFormValues>;
+  register: UseFormRegister<ProjectFormValues>;
+  watch: UseFormWatch<ProjectFormValues>;
   remove: (i: number) => void;
 }
 export default function MediaRow(props: MediaRowProps) {
-  const { projectIndex, mediaIndex, control, watch, remove } = props;
+  const { mediaIndex, control, watch, remove } = props;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
-  const meta = watch(`projects.${projectIndex}.media.${mediaIndex}.metadata`);
-  const storeKey = `${projectIndex}-${mediaIndex}`;
+  const meta = watch(`media.${mediaIndex}.metadata`);
+  const storeKey = `0-${mediaIndex}`;
   const previewUrl = localPreview ?? (meta?.url || null);
   const canPreview = !!previewUrl;
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     field: {
-      value: ProjectFormSchema["projects"][number]["media"][number];
+      value: ProjectFormValues["media"][number];
       onChange: (v: unknown) => void;
     },
   ) => {
@@ -243,7 +242,7 @@ export default function MediaRow(props: MediaRowProps) {
   return (
     <Controller
       control={control}
-      name={`projects.${projectIndex}.media.${mediaIndex}`}
+      name={`media.${mediaIndex}`}
       render={({ field }) => (
         <>
           <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
