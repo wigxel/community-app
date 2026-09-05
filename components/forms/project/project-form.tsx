@@ -1,7 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
-import { Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import React from "react";
@@ -9,7 +8,6 @@ import { FormProvider, useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Loader } from "~/components/layouts/loader";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardFooter } from "~/components/ui/card";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { Result } from "~/lib/result";
@@ -79,7 +77,6 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
   });
 
   const { handleSubmit, reset } = form;
-  const { isDirty } = form.formState;
 
   React.useEffect(() => {
     if (mode === "edit" && projectData) {

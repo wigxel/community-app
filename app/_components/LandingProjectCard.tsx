@@ -8,6 +8,7 @@ import { MediaThumb } from "~/app/_components/MediaThumb";
 import { HeartIcon } from "~/components/icons";
 import { ProfileAvatar } from "~/components/profile/avatar";
 import type { BasicProject, Media } from "~/types/models";
+
 type LandingProjectCardProps = { project: BasicProject };
 function LandingProjectCard(props: LandingProjectCardProps) {
   const { project } = props;

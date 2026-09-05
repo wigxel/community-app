@@ -1,5 +1,4 @@
 "use client";
-import { Text } from "@hyperbridge/ui";
 import { usePaginatedQuery } from "convex/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -7,7 +6,6 @@ import { ProjectCard } from "~/components/dashboard/projects/project-card";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
 import {
   DBHeader,
-  DBHeaderDescription,
   DBHeaderTitle,
 } from "~/components/layouts/dashboard-page-header";
 import { EmptyState } from "~/components/layouts/empty-state";

@@ -8,9 +8,7 @@ import {
   Text,
 } from "@hyperbridge/ui";
 import { useQuery } from "convex/react";
-import { HeartCrack } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { api } from "~/convex/_generated/api";

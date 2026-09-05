@@ -2,8 +2,8 @@
 
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { ConvexReactClient } from "convex/react";
-import { type ReactNode, useEffect, useRef } from "react";
 import posthog from "posthog-js";
+import { type ReactNode, useEffect, useRef } from "react";
 import { Toaster } from "sonner";
 import { env } from "~/env";
 import { authClient } from "~/lib/auth-client";

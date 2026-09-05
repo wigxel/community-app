@@ -4,8 +4,8 @@ import { Logout } from "iconsax-reactjs";
 import { type LucideProps, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
 import posthog from "posthog-js";
+import { useState } from "react";
 import {
   DirectNotificationIcon,
   Folder2,
