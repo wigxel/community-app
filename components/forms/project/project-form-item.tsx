@@ -5,7 +5,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
+import { DescriptionField } from "../fields/description-field";
 import type { ProjectFormValues } from "./project-form";
 import TimelineSelect from "./timeline-select";
 
@@ -65,29 +65,7 @@ export function ProjectFormItem() {
             )}
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="description" className="text-muted-foreground">
-              Description
-            </Label>
-            <div className="relative">
-              <Textarea
-                {...register("description")}
-                id="description"
-                placeholder="What did you build or work on?"
-                rows={3}
-                maxLength={300}
-                className="text-foreground resize-none border-white/15 bg-white/5 placeholder:text-white/30"
-              />
-              <span className="text-foreground/30 absolute right-3 bottom-2 text-[10px]">
-                {watch("description")?.length ?? 0}/300
-              </span>
-            </div>
-            {errors.description?.message && (
-              <p className="text-xs font-medium text-red-400">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
+          <DescriptionField name="description" />
         </div>
 
         {/* Timeline */}

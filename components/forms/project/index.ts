@@ -1,3 +1,4 @@
+export { DescriptionField } from "../fields/description-field";
 export { default as LinkRow } from "./link-row";
 export { LinksSection } from "./links-section";
 export {
