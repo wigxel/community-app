@@ -174,7 +174,9 @@ type CircleProgressProps = {
   className: string;
 };
 
-function CircleProgress({ progress = 0, className }: CircleProgressProps) {
+function CircleProgress(props: CircleProgressProps) {
+  const { progress = 0, className } = props;
+
   const radius = 20;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
