@@ -60,36 +60,41 @@ export default function TimelineSelect({
   value,
   onChange,
 }: TimelineSelectProps) {
-  const { month, year } = tsToMonthYear(value);
-  const [localMonth, setLocalMonth] = React.useState(month);
-  const [localYear, setLocalYear] = React.useState(year);
-  const [error, setError] = React.useState<string | null>(null);
+  const { month, year } = React.useMemo(() => tsToMonthYear(value), [value]);
 
-  React.useEffect(() => {
-    const { month: m, year: y } = tsToMonthYear(value);
-    setLocalMonth(m);
-    setLocalYear(y);
-    if (value === null) setError(null);
-  }, [value]);
+  // pending: tracks a two-part selection where month is picked but year is not yet set
+  const [pendingMonth, setPendingMonth] = React.useState<string>("");
+
+  // derive display value directly from `value` — no stale local state
+  const displayMonth = month || "";
+  const displayYear = year || "";
 
   const handleMonthChange = (nextMonth: string) => {
     const val = nextMonth === "unset" ? "" : nextMonth;
-    setLocalMonth(val);
-    if (!localYear && val) {
-      setError("Please enter a year.");
+    if (!displayYear && val) {
+      // year not set yet — hold month in pending, wait for year pick
+      setPendingMonth(val);
       onChange(null);
     } else {
-      setError(null);
-      onChange(monthYearToTs(val, localYear));
+      setPendingMonth("");
+      onChange(monthYearToTs(val, displayYear));
     }
   };
 
   const handleYearChange = (nextYear: string) => {
     const val = nextYear === "unset" ? "" : nextYear;
-    setLocalYear(val);
-    setError(null);
-    onChange(monthYearToTs(localMonth, val));
+    // if a month is pending from a prior pick, pair it with this year
+    const monthToUse = pendingMonth || displayMonth;
+    setPendingMonth("");
+    onChange(monthYearToTs(monthToUse, val));
   };
+
+  // if value is reset to null, clear pending + error
+  React.useEffect(() => {
+    if (value === null) {
+      setPendingMonth("");
+    }
+  }, [value]);
 
   return (
     <div className="flex flex-1 gap-4 *:flex-1">
@@ -100,7 +105,10 @@ export default function TimelineSelect({
         >
           {capitalize(timeline)} month
         </Label>
-        <Select value={localMonth || "unset"} onValueChange={handleMonthChange}>
+        <Select
+          value={displayMonth || "unset"}
+          onValueChange={handleMonthChange}
+        >
           <SelectTrigger id={`${timeline}_month`}>
             <SelectValue placeholder="Select Month" />
           </SelectTrigger>
@@ -113,7 +121,6 @@ export default function TimelineSelect({
             ))}
           </SelectContent>
         </Select>
-        {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
       </div>
 
       <div className="flex flex-col">
@@ -123,15 +130,15 @@ export default function TimelineSelect({
         >
           {capitalize(timeline)} year
         </Label>
-        <Select value={localYear || "unset"} onValueChange={handleYearChange}>
+        <Select value={displayYear || "unset"} onValueChange={handleYearChange}>
           <SelectTrigger id={`${timeline}_year`}>
             <SelectValue placeholder="Select Year" />
           </SelectTrigger>
           <SelectContent className="max-h-[40vh]">
             <SelectItem value="unset">Select Year</SelectItem>
-            {YEARS.map((y) => (
-              <SelectItem key={y} value={String(y)}>
-                {y}
+            {YEARS.map((year) => (
+              <SelectItem key={year} value={String(year)}>
+                {year}
               </SelectItem>
             ))}
           </SelectContent>

@@ -21,7 +21,10 @@ describe("projectSchema", () => {
   it("passes valid happy path", () => {
     const res = parse({
       ...base,
-      timeline: { start: { year: String(thisYear - 1) }, end: null },
+      timeline: {
+        start: { year: String(thisYear - 1) },
+        end: { year: String(thisYear - 1), month: "December" },
+      },
     });
     expect(res.success).toBe(true);
   });
@@ -126,8 +129,110 @@ describe("projectSchema", () => {
     expect(res.success).toBe(true);
   });
 
-  it("passes both null timeline", () => {
+  it("fails both null timeline when not ongoing", () => {
     const res = parse({ ...base, timeline: { start: null, end: null } });
-    expect(res.success).toBe(true);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(
+        res.error.issues.some((i) =>
+          i.message.includes("Start date is required"),
+        ),
+      ).toBe(true);
+      expect(
+        res.error.issues.some((i) =>
+          i.message.includes("End date is required"),
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it("fails when start is null and ongoing is false", () => {
+    const res = parse({
+      ...base,
+      timeline: { start: null, end: { year: String(thisYear - 1) } },
+    });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(res.error.issues.some((i) => i.path.includes("start"))).toBe(true);
+  });
+
+  it("fails when end is null and ongoing is false", () => {
+    const res = parse({
+      ...base,
+      timeline: { start: { year: String(thisYear - 1) }, end: null },
+    });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(res.error.issues.some((i) => i.path.includes("end"))).toBe(true);
+  });
+
+  it("fails when start is null and ongoing is true", () => {
+    const res = parse({
+      ...base,
+      ongoing: true,
+      timeline: { start: null, end: null },
+    });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(res.error.issues.some((i) => i.path.includes("start"))).toBe(true);
+  });
+
+  it("fails when media exceeds 10", () => {
+    const media = Array.from({ length: 11 }, () => ({
+      type: "photo" as const,
+      metadata: {
+        url: "https://x.com/a.jpg",
+        filename: "a.jpg",
+        mimeType: "image/jpeg",
+        size: 100,
+        width: 10,
+        height: 10,
+      },
+    }));
+    const res = parse({ ...base, media });
+    expect(res.success).toBe(false);
+    if (!res.success) expect(res.error.issues[0].message).toMatch(/Maximum 10/);
+  });
+
+  it("fails pdf media for project", () => {
+    const res = parse({
+      ...base,
+      media: [
+        {
+          type: "pdf" as const,
+          metadata: {
+            url: "https://x.com/a.pdf",
+            filename: "a.pdf",
+            mimeType: "application/pdf",
+            size: 100,
+          },
+        },
+      ],
+    });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(res.error.issues[0].message).toMatch(/Only images/);
+  });
+
+  it("fails gif mime for project", () => {
+    const res = parse({
+      ...base,
+      media: [
+        {
+          type: "photo" as const,
+          metadata: {
+            url: "https://x.com/a.gif",
+            filename: "a.gif",
+            mimeType: "image/gif",
+            size: 100,
+            width: 10,
+            height: 10,
+          },
+        },
+      ],
+    });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(res.error.issues[0].message).toMatch(/Only images/);
   });
 });

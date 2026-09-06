@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@hyperbridge/ui";
-import { FileVideoIcon, ImageIcon, Plus } from "lucide-react";
+import { FileVideoIcon, ImageIcon } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import {
   Card,
@@ -38,6 +38,8 @@ export function MediaSection() {
     append: appendMedia,
     remove: removeMedia,
   } = useFieldArray({ control, name: "media" });
+
+  const isMax = mediaFields.length >= 10;
 
   return (
     <Card>
@@ -87,15 +89,17 @@ export function MediaSection() {
         </div>
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2">
         <Button
-          variant="outline"
           type="button"
           className="w-full"
-          onClick={() => appendMedia(EMPTY_MEDIA)}
+          disabled={isMax}
+          variant={isMax ? "destructive" : "outline"}
+          onClick={() => {
+            if (!isMax) appendMedia(EMPTY_MEDIA);
+          }}
         >
-          <Plus size={12} />
-          Add media
+          {isMax ? "Maximum of 10" : "Add media"}
         </Button>
       </CardFooter>
     </Card>

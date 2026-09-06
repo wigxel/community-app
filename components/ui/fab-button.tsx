@@ -6,11 +6,12 @@ import { cn } from "~/lib/utils";
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   title: string;
+  variant?: "contour" | "default";
   asChild?: boolean;
 }
 
 const FAButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, asChild = false, ...props }, ref) => {
+  ({ className, asChild = false, variant, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
@@ -21,6 +22,10 @@ const FAButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         style={{
           cornerShape: "squircle",
+          boxShadow:
+            variant === "contour"
+              ? "0 0 0 0.5rem var(--background)"
+              : undefined,
           ...props.style,
         }}
         {...props}

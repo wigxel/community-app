@@ -16,6 +16,12 @@ const MONTHS = [
   "December",
 ] as const;
 
+const BLOCKED_MIMES = new Set([
+  "application/pdf",
+  "image/gif",
+  "image/svg+xml",
+]);
+
 export const timelineDate = z.union([
   z.null(),
   z.object({ year: z.string() }).strict(),
@@ -62,10 +68,24 @@ export const projectSchema = z
       end: timelineDate,
     }),
     ongoing: z.boolean(),
-    media: z.array(mediaSchema),
+    media: z
+      .array(mediaSchema)
+      .max(10, { message: "Maximum 10 media per project." }),
     link: z.array(projectLinkSchema),
   })
   .superRefine((val, ctx) => {
+    // media: block new pdf/gif/svg (allow read of old pdf but reject on validate)
+    for (let i = 0; i < val.media.length; i++) {
+      const m = val.media[i];
+      const mime = m.metadata.mimeType;
+      if (m.type === "pdf" || BLOCKED_MIMES.has(mime)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["media", i, "type"],
+          message: "Only images (JPEG, PNG, WebP) and videos are allowed.",
+        });
+      }
+    }
     const thisYear = new Date().getFullYear();
     const minYear = thisYear - 19;
     const checkYear = (
@@ -100,6 +120,20 @@ export const projectSchema = z
         code: "custom",
         path: ["timeline", "end"],
         message: "End date must be empty when project is ongoing.",
+      });
+    }
+    if (!val.timeline.start) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["timeline", "start"],
+        message: "Start date is required.",
+      });
+    }
+    if (!val.ongoing && !val.timeline.end) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["timeline", "end"],
+        message: "End date is required when project is not ongoing.",
       });
     }
     if (val.timeline.start && val.timeline.end) {

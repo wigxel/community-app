@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { ProjectCard } from "~/components/dashboard/projects/project-card";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
 import {
+  DBCtaButton,
   DBHeader,
   DBHeaderTitle,
 } from "~/components/layouts/dashboard-page-header";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
-import { FABPlusIcon, FAButton } from "~/components/ui/fab-button";
+import { FABPlusIcon } from "~/components/ui/fab-button";
 import { api } from "~/convex/_generated/api";
 
 export default function Projects() {
@@ -34,13 +35,12 @@ export default function Projects() {
         </DBHeader>
 
         {!isEmpty && (
-          <FAButton
+          <DBCtaButton
             title="Add a project"
-            className="size-24"
             onClick={() => router.push("/dashboard/projects/create")}
           >
             <FABPlusIcon />
-          </FAButton>
+          </DBCtaButton>
         )}
       </div>
 

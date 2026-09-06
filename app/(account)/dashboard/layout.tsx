@@ -13,7 +13,7 @@ async function DashboardLayout(props: DashboardLayoutProps) {
     <>
       <div
         id="dashboard-root"
-        className="bg-background mx-auto flex h-svh w-full max-w-[99%] flex-col gap-x-4 py-2 [--sidebar-width:0.24fr]"
+        className="bg-background mx-auto flex h-svh w-full max-w-[99%] flex-col gap-x-4 py-2 [--db-header-height:calc(var(--spacing)*12)] [--db-main-offset-top:calc(var(--spacing)*16)] [--sidebar-width:0.24fr]"
       >
         <header className="bg-background col-span-1 flex min-h-12 shrink-0 basis-12 items-center justify-between px-4 py-2">
           <div className="pl-4">
@@ -22,7 +22,7 @@ async function DashboardLayout(props: DashboardLayoutProps) {
         </header>
 
         <nav className="flex min-h-12 items-center justify-between gap-12">
-          <div className="min-h-12 flex-1">
+          <div className="min-h-(--db-header-height) flex-1">
             <DBHeaderPortal />
           </div>
           <AuthUserAvatar className="size-8" />

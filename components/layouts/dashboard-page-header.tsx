@@ -2,6 +2,8 @@
 import { motion, stagger, useInView, type Variants } from "motion/react";
 import React from "react";
 import { createPortal } from "react-dom";
+import { cn } from "~/lib/utils";
+import { FABPlusIcon, FAButton } from "../ui/fab-button";
 
 const PORTAL_ID = "dashboard-header-portal";
 
@@ -115,5 +117,22 @@ export function DBHeaderPortal(props: React.ComponentProps<"div">) {
       className="text-foreground inline-flex items-center p-2 font-medium"
       {...props}
     />
+  );
+}
+
+type DBCtaButtonProps = Omit<React.ComponentProps<typeof FAButton>, "variant">;
+
+export function DBCtaButton(props: DBCtaButtonProps) {
+  return (
+    <FAButton
+      variant="contour"
+      {...props}
+      className={cn(
+        "fixed top-(--db-main-offset-top) size-12 -translate-y-1/2 lg:end-32",
+        props.className,
+      )}
+    >
+      <FABPlusIcon />
+    </FAButton>
   );
 }

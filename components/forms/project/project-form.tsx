@@ -19,7 +19,7 @@ import { pendingFiles } from "./media-row";
 import { MediaSection } from "./media-section";
 import { ProjectFormItem } from "./project-form-item";
 
-const DEFAULT_PROJECT = {
+const EMPTY_PROJECT = {
   userId: "",
   title: "",
   description: "",
@@ -66,14 +66,14 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
     mode === "edit" && project !== undefined
       ? Result.match(project, {
           loading: () => null,
-          success: (data) => data,
           error: () => null,
+          success: (data) => data,
         })
       : null;
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
-    defaultValues: DEFAULT_PROJECT,
+    defaultValues: EMPTY_PROJECT,
   });
 
   const { handleSubmit, reset } = form;
@@ -135,12 +135,24 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
         link: projectWithUrls.link.filter((l) => l.value.trim() !== ""),
       };
 
-      if (mode === "edit" && projectId) {
-        await updateProject({
+      if (mode === "edit") {
+        if (!projectId) throw new Error("projectId is required for edit mode");
+
+        const result = await updateProject({
           project: { ...cleanedProject, _id: projectId as Id<"project"> },
         });
-      } else {
-        await createProject({ project: cleanedProject });
+        if (result._tag === "Left") {
+          toast.error(result.left.join("\n"));
+          return;
+        }
+      }
+
+      if (mode === "create") {
+        const result = await createProject({ project: cleanedProject });
+        if (result._tag === "Left") {
+          toast.error(result.left.join("\n"));
+          return;
+        }
       }
 
       if (
