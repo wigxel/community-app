@@ -118,7 +118,7 @@ export function FavouritedProjectCard(props: FavouritedProjectCardProps) {
                   className="object-cover"
                 />
               ) : (
-                <span className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-white/60">
+                <span className="text-muted-foreground flex h-full w-full items-center justify-center text-[10px] font-semibold">
                   {project.owner.firstName.charAt(0).toUpperCase()}
                 </span>
               )}

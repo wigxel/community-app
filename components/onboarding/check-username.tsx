@@ -9,11 +9,13 @@ import { api } from "~/convex/_generated/api";
 import { validateUsernameFormat } from "~/lib/username";
 
 export type UsernameStatus = "idle" | "checking" | "available" | "invalid";
+
 export type CheckUsernameProps = {
   value: string;
   onChange: (value: string) => void;
   onStatusChange: (status: UsernameStatus) => void;
 };
+
 export function CheckUsername(props: CheckUsernameProps) {
   const { value, onChange, onStatusChange } = props;
 

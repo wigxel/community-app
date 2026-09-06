@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
+import posthog from "posthog-js";
 import { PasswordInput } from "~/components/fields/password";
 import { LoadingButton } from "~/components/forms/button";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -22,8 +23,8 @@ import { toast } from "~/lib/toast";
 
 const signUpSchema = z
   .object({
-    firstName: z.string().min(2, "First name must be at least 2 characters"),
-    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    firstName: z.string().min(2, "At least 2 characters"),
+    lastName: z.string().min(2, "At least 2 characters"),
     email: z.email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
@@ -103,6 +104,12 @@ export default function SignUpForm(props: SignUpFormProps) {
       return;
     }
 
+    if (
+      process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+      process.env.NEXT_PUBLIC_POSTHOG_HOST
+    ) {
+      posthog.capture("account_registered");
+    }
     toast.success("Account created!", {
       description: "Redirecting to onboarding...",
     });

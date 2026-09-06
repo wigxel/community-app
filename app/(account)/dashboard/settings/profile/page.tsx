@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
 import { Globe, GripVertical, Link, Plus, Trash2 } from "lucide-react";
 import { Reorder, useDragControls } from "motion/react";
+import posthog from "posthog-js";
 import { useRef, useState } from "react";
 import {
   type FieldArrayWithId,
@@ -497,6 +498,19 @@ export function ProfileForm(props: ProfileFormProps) {
         skills: (values.skills || []) as Id<"skills">[],
       });
 
+      if (
+        process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+        process.env.NEXT_PUBLIC_POSTHOG_HOST
+      ) {
+        posthog.capture("profile_updated", {
+          has_cover_image: Boolean(values.coverImage),
+          has_profile_image: Boolean(values.profileImage),
+          interest_count: interests.length,
+          link_count: normalizedLinks.length,
+          skill_count: values.skills?.length ?? 0,
+          work_experience_count: values.workExperience?.length ?? 0,
+        });
+      }
       setMessage({ type: "success", text: "Profile updated successfully!" });
     } catch (error) {
       console.error("Failed to update profile:", error);
@@ -692,7 +706,7 @@ export function ProfileForm(props: ProfileFormProps) {
                     <FormLabel>Profile Image</FormLabel>
                     <FormControl>
                       <ImageUpload
-                        currentImage={field.value || null}
+                        currentImage={field.value}
                         onImageChange={field.onChange}
                       />
                     </FormControl>
@@ -834,7 +848,7 @@ export function ProfileForm(props: ProfileFormProps) {
             </CardHeader>
             <CardContent className="space-y-6">
               {workFields.length === 0 ? (
-                <p className="py-4 text-center text-sm text-white/60">
+                <p className="text-muted-foreground py-4 text-center text-sm">
                   No work experience added yet. Click "Add Experience" to get
                   started.
                 </p>

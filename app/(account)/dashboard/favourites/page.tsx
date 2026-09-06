@@ -45,7 +45,7 @@ export default function FavouritesPage() {
         <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-white/15 bg-white/5 py-20 text-center">
           <HeartCrack size={36} className="text-white/20" />
           <div>
-            <p className="text-base font-medium text-white/60">
+            <p className="text-muted-foreground text-base font-medium">
               No favourites yet
             </p>
             <p className="mt-1 text-sm text-white/30">

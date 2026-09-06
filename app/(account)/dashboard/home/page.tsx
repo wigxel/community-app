@@ -3,7 +3,6 @@
 import { usePaginatedQuery, useQuery } from "convex/react";
 import { Briefcase, Folder, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { GettingStartedWidget } from "~/components/dashboard/getting-started-widget";
 import StatCard from "~/components/dashboard/home/StatCard";
 import WorkItem from "~/components/dashboard/home/WorkItem";
 import { FullscreenLoader } from "~/components/layouts/loader";
@@ -51,8 +50,6 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <GettingStartedWidget />
-
       <Card className="border border-white/10 bg-blue-500/20 text-blue-300">
         <CardContent className="flex items-center gap-4 pt-6">
           <Avatar className="h-14 w-14">
@@ -64,7 +61,7 @@ function DashboardPage() {
 
           <div className="flex-1">
             <p className="text-lg font-semibold text-white">{fullName}</p>
-            <p className="text-sm text-white/60">{titleName}</p>
+            <p className="text-muted-foreground text-sm">{titleName}</p>
 
             <div className="mt-2">
               <Progress
@@ -120,14 +117,14 @@ function DashboardPage() {
           <CardContent className="space-y-4">
             {profile.shortBio && (
               <div>
-                <p className="mb-1 text-sm text-white/60">Bio</p>
+                <p className="text-muted-foreground mb-1 text-sm">Bio</p>
                 <p className="text-white">{profile.shortBio}</p>
               </div>
             )}
 
             {workExperience && workExperience.length > 0 ? (
               <div>
-                <p className="mb-2 text-sm text-white/60">
+                <p className="text-muted-foreground mb-2 text-sm">
                   Recent Work Experience
                 </p>
                 {workExperience.slice(0, 3).map((exp) => {
@@ -146,14 +143,14 @@ function DashboardPage() {
                 })}
               </div>
             ) : (
-              <p className="text-sm text-white/60">
+              <p className="text-muted-foreground text-sm">
                 No work experience added yet.
               </p>
             )}
 
             {profile.interests && profile.interests.length > 0 && (
               <div>
-                <p className="mb-2 text-sm text-white/60">Interests</p>
+                <p className="text-muted-foreground mb-2 text-sm">Interests</p>
                 <div className="flex flex-wrap gap-2">
                   {profile.interests.map((interest) => (
                     <span
@@ -196,7 +193,7 @@ function TopProjects() {
     <>
       {results.length > 0 && (
         <div>
-          <p className="mb-2 text-sm text-white/60">Recent Projects</p>
+          <p className="text-muted-foreground mb-2 text-sm">Recent Projects</p>
           {results.map((project) => (
             <WorkItem
               key={project.title}

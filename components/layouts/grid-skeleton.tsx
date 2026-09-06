@@ -2,14 +2,18 @@ import { range } from "effect/Array";
 import React from "react";
 import { cn } from "~/lib/utils";
 import { StandardGrid } from "./grids";
-export type StandardGridSkeletonProps = {
+
+type StandardGridSkeletonProps = {
   size?: number;
   variant?: "base" | "muted";
   className?: string;
   Component: React.ComponentType;
 };
-export function StandardGridSkeleton(props: StandardGridSkeletonProps) {
-  const { size = 12, variant, className, Component } = props;
+
+export const StandardGridSkeleton = React.memo(function StandardGridSkeleton(
+  props: StandardGridSkeletonProps,
+) {
+  const { size = 12, variant = "base", className, Component } = props;
 
   const SKELETON_KEYS = React.useMemo(() => range(1, size), [size]);
 
@@ -27,4 +31,4 @@ export function StandardGridSkeleton(props: StandardGridSkeletonProps) {
       <div className="absolute inset-0 bg-linear-to-b from-transparent to-(--in-skeleton-bg)" />
     </StandardGrid>
   );
-}
+});

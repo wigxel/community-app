@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
+import posthog from "posthog-js";
 import { PasswordInput } from "~/components/fields/password";
 import { LoadingButton } from "~/components/forms/button";
 import {
@@ -49,6 +50,12 @@ export default function SignInForm(props: SignInFormProps) {
       return;
     }
 
+    if (
+      process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+      process.env.NEXT_PUBLIC_POSTHOG_HOST
+    ) {
+      posthog.capture("signed_in");
+    }
     toast.success("Welcome back!");
     router.push(redirectTo ? (redirectTo as never) : "/dashboard");
   }

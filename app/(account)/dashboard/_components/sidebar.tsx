@@ -5,6 +5,7 @@ import { type LucideProps, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import posthog from "posthog-js";
 import {
   DirectNotificationIcon,
   Folder2,
@@ -62,7 +63,16 @@ export function Sidebar() {
   const [open, setOpen] = useState(false);
 
   async function handleSignOut() {
-    await authClient.signOut();
+    const { error } = await authClient.signOut();
+
+    if (
+      !error &&
+      process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+      process.env.NEXT_PUBLIC_POSTHOG_HOST
+    ) {
+      posthog.reset();
+    }
+
     router.push("/");
   }
 
