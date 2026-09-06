@@ -2,9 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
-import posthog from "posthog-js";
 import { PasswordInput } from "~/components/fields/password";
 import { LoadingButton } from "~/components/forms/button";
 import { Checkbox } from "~/components/ui/checkbox";

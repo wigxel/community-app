@@ -113,7 +113,7 @@ const schema = defineSchema({
     name: v.string(),
     description: v.nullable(v.string()),
     color: v.optional(v.string()),
-  }),
+  }).index("by_name", ["name"]),
   skills: defineTable({
     name: v.string(),
     description: v.nullable(v.string()),
@@ -138,7 +138,8 @@ const schema = defineSchema({
   })
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("by_title", ["title"]),
 
   project: defineTable(project_schema).index("by_userId", ["userId"]),
 
@@ -153,6 +154,37 @@ const schema = defineSchema({
     .index("by_userId", ["userId"])
     .index("by_projectId", ["projectId"])
     .index("by_userId_projectId", ["userId", "projectId"]),
+
+  leaderboardIndex: defineTable({
+    profileId: v.id("profile"),
+    titleId: v.id("titles"),
+    ranking: v.number(),
+    score: v.number(),
+    badge: v.string(),
+    stars: v.number(),
+    // Denormalized profile snapshot for fast reads
+    userId: v.optional(v.string()),
+    firstName: v.string(),
+    lastName: v.string(),
+    username: v.string(),
+    profileImage: v.nullable(v.string()),
+    shortBio: v.optional(v.nullable(v.string())),
+    location: v.optional(profile_location_schema),
+    // Denormalized resolved data
+    resolvedSkills: v.array(
+      v.object({ name: v.string(), description: v.nullable(v.string()) }),
+    ),
+    resolvedExperiences: v.array(
+      v.object({
+        position: v.string(),
+        companyName: v.string(),
+        durationYears: v.number(),
+      }),
+    ),
+    lastUpdated: v.number(),
+  })
+    .index("by_titleId_ranking", ["titleId", "ranking"])
+    .index("by_profileId_titleId", ["profileId", "titleId"]),
 });
 
 export default schema;

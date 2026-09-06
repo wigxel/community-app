@@ -2,8 +2,8 @@
 
 import { useMutation, useQuery } from "convex/react";
 import { Heart } from "lucide-react";
-import { useCallback, useOptimistic, useTransition } from "react";
 import posthog from "posthog-js";
+import { useCallback, useOptimistic, useTransition } from "react";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { cn } from "~/lib/utils";
