@@ -1,9 +1,10 @@
 "use client";
 
 import { Logout } from "iconsax-reactjs";
-import { type LucideProps, Menu, X, Trophy } from "lucide-react";
+import { type LucideProps, Menu, Trophy, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useState } from "react";
 import {
   DirectNotificationIcon,
@@ -67,7 +68,16 @@ export function Sidebar() {
   const [open, setOpen] = useState(false);
 
   async function handleSignOut() {
-    await authClient.signOut();
+    const { error } = await authClient.signOut();
+
+    if (
+      !error &&
+      process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+      process.env.NEXT_PUBLIC_POSTHOG_HOST
+    ) {
+      posthog.reset();
+    }
+
     router.push("/");
   }
 

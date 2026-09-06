@@ -3,6 +3,7 @@ type WorkItemProps = {
   company: string;
   timeline: string;
 };
+
 function WorkItem(props: WorkItemProps) {
   const { position, company, timeline } = props;
 
@@ -10,7 +11,7 @@ function WorkItem(props: WorkItemProps) {
     <div className="flex justify-between text-sm">
       <div>
         <p className="font-medium text-white">{position}</p>
-        <p className="text-white/60">{company}</p>
+        <p className="text-muted-foreground">{company}</p>
       </div>
       <p className="text-white/50">{timeline}</p>
     </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { QueryProvider } from "~/components/providers/react-query";
 import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery, isAuthenticated } from "~/lib/auth-server";
 
@@ -31,5 +32,5 @@ export default async function AccountLayout(props: AccountLayoutProps) {
     redirect("/onboarding?redirect=/dashboard");
   }
 
-  return <>{children}</>;
+  return <QueryProvider>{children}</QueryProvider>;
 }

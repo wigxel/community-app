@@ -76,7 +76,7 @@ export function ProjectCard(project: Project) {
         {/* Project Media with Preview */}
         {project.media.length > 0 && (
           <div>
-            <h4 className="mb-4 flex items-center gap-2 text-xs font-bold tracking-widest text-white/60 uppercase">
+            <h4 className="text-muted-foreground mb-4 flex items-center gap-2 text-xs font-bold tracking-widest uppercase">
               <div className="h-0.5 w-6 rounded-full bg-white/40" />
               Media Gallery
             </h4>
@@ -164,7 +164,7 @@ export function ProjectCard(project: Project) {
         {/* Project Links */}
         {project.link && project.link.length > 0 && (
           <div className="mt-6">
-            <h4 className="mb-4 flex items-center gap-2 text-xs font-bold tracking-widest text-white/60 uppercase">
+            <h4 className="text-muted-foreground mb-4 flex items-center gap-2 text-xs font-bold tracking-widest uppercase">
               <div className="h-0.5 w-6 rounded-full bg-white/40" />
               Project Links
             </h4>

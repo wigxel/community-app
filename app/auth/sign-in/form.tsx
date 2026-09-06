@@ -2,6 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
 import { PasswordInput } from "~/components/fields/password";
@@ -49,6 +50,12 @@ export default function SignInForm(props: SignInFormProps) {
       return;
     }
 
+    if (
+      process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+      process.env.NEXT_PUBLIC_POSTHOG_HOST
+    ) {
+      posthog.capture("signed_in");
+    }
     toast.success("Welcome back!");
     router.push(redirectTo ? (redirectTo as never) : "/dashboard");
   }

@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import { ArrowLeft, FolderOpen, Plus, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import React from "react";
 import { Form, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -136,11 +137,27 @@ export function EditProjects() {
 
       for (const _id of removedIds) await deleteProject({ _id });
 
+      const createdProjectCount = filteredProjects.filter(
+        (project) => !project._id,
+      ).length;
+      const updatedProjectCount = filteredProjects.length - createdProjectCount;
+
       for (const project of filteredProjects) {
         if (project._id) await updateProject({ project });
         else await createProject({ project });
       }
 
+      if (
+        process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+        process.env.NEXT_PUBLIC_POSTHOG_HOST
+      ) {
+        posthog.capture("projects_saved", {
+          created_project_count: createdProjectCount,
+          deleted_project_count: removedIds.length,
+          total_project_count: filteredProjects.length,
+          updated_project_count: updatedProjectCount,
+        });
+      }
       router.push("/dashboard/projects");
     } catch (err) {
       console.error("Save failed:", err);
