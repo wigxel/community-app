@@ -56,12 +56,12 @@ describe("ProjectFormItem", () => {
 
   it("shows two TimelineSelects when ongoing false and one when true", () => {
     const { unmount } = renderItem({ ongoing: false });
-    expect(screen.getByText("start Month")).toBeDefined();
-    expect(screen.getByText("end Month")).toBeDefined();
+    expect(screen.getByText(/start month/i)).toBeDefined();
+    expect(screen.getByText(/end month/i)).toBeDefined();
     cleanup();
     renderItem({ ongoing: true });
-    expect(screen.getByText("start Month")).toBeDefined();
-    expect(screen.queryByText("end Month")).toBeNull();
+    expect(screen.getByText(/start month/i)).toBeDefined();
+    expect(screen.queryByText(/end month/i)).toBeNull();
   });
 
   it("checking ongoing hides end and clears timeline.end", async () => {
@@ -69,13 +69,13 @@ describe("ProjectFormItem", () => {
       ongoing: false,
       timeline: { start: { year: "2022" }, end: { year: "2023" } },
     });
-    expect(screen.getByText("end Month")).toBeDefined();
+    expect(screen.getByText(/end month/i)).toBeDefined();
     const checkbox = screen.getByLabelText(
       /I am currently working/i,
     ) as HTMLInputElement;
     await user.click(checkbox);
     await waitFor(() => {
-      expect(screen.queryByText("end Month")).toBeNull();
+      expect(screen.queryByText(/end month/i)).toBeNull();
     });
   });
 
@@ -122,12 +122,53 @@ describe("ProjectFormItem", () => {
       );
     };
     const { user } = { user: userEvent.setup(), ...render(<Wrapper />) };
-    const cb = screen.getByLabelText(/I am currently working/i);
+    const cb = screen.getByLabelText(
+      /I am currently working/i,
+    ) as HTMLInputElement;
     await user.click(cb);
-    // after click, dirty should become true via shouldDirty in DescriptionField? Actually checkbox registers ongoing
     await waitFor(() => {
-      // we check that checkbox is checked at least
-      expect((cb as HTMLInputElement).checked).toBe(true);
+      expect(cb).toBeChecked();
     });
+  });
+
+  it("shows error when end year is less than start year", async () => {
+    const thisYear = new Date().getFullYear();
+    const startYear = String(thisYear);
+    const endYear = String(thisYear - 1);
+    const { user } = renderItem({
+      title: "Valid Title",
+      timeline: { start: { year: startYear }, end: { year: endYear } },
+    });
+    await user.click(screen.getByRole("button", { name: /submit/i }));
+    await waitFor(() => {
+      expect(
+        screen.getByText(/End date cannot be before start date/i),
+      ).toBeDefined();
+    });
+  });
+
+  it("restores old end month and year when toggling ongoing off", async () => {
+    const { user } = renderItem({
+      timeline: {
+        start: { year: "2022", month: "January" } as unknown as {
+          month: string;
+          year: string;
+        },
+        end: { year: "2023", month: "June" } as unknown as {
+          month: string;
+          year: string;
+        },
+      },
+      ongoing: false,
+    });
+    expect(screen.getByText(/end month/i)).toBeDefined();
+    const checkbox = screen.getByLabelText(
+      /I am currently working/i,
+    ) as HTMLInputElement;
+    await user.click(checkbox);
+    await waitFor(() => expect(screen.queryByText(/end month/i)).toBeNull());
+    await user.click(checkbox);
+    await waitFor(() => expect(screen.getByText(/end month/i)).toBeDefined());
+    expect(document.body.innerHTML).toContain("2023");
   });
 });

@@ -1,13 +1,32 @@
 "use client";
 import { Calendar, FolderOpen } from "lucide-react";
-import React, { Fragment } from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import React from "react";
+import {
+  Controller,
+  ControllerFieldState,
+  ControllerRenderProps,
+  FieldValues,
+  UseFormStateReturn,
+  useFormContext,
+} from "react-hook-form";
+import type z from "zod/v4";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import type { timelineDate } from "~/lib/validators/schema";
 import { DescriptionField } from "../fields/description-field";
 import type { ProjectFormValues } from "./project-form";
 import TimelineSelect from "./timeline-select";
+
+type TimelineDate = z.infer<typeof timelineDate>;
 
 export function ProjectFormItem() {
   const {
@@ -19,11 +38,24 @@ export function ProjectFormItem() {
   } = useFormContext<ProjectFormValues>();
 
   const title = watch("title");
-  const ongoing = watch("ongoing");
+  const isProjectOngoing = watch("ongoing");
+  const endValue = watch("timeline.end");
+  const prevEndRef = React.useRef<TimelineDate | null>(null);
+
+  // Keep prevEnd in sync while not ongoing — form is source of truth
+  React.useEffect(() => {
+    if (!isProjectOngoing && endValue !== null) {
+      prevEndRef.current = endValue;
+    }
+  }, [isProjectOngoing, endValue]);
 
   React.useEffect(() => {
-    if (ongoing) setValue("timeline.end", null);
-  }, [ongoing, setValue]);
+    if (isProjectOngoing) {
+      setValue("timeline.end", null, { shouldDirty: true });
+    } else if (prevEndRef.current) {
+      setValue("timeline.end", prevEndRef.current, { shouldDirty: true });
+    }
+  }, [isProjectOngoing, setValue]);
 
   return (
     <Card>
@@ -44,26 +76,25 @@ export function ProjectFormItem() {
       <CardContent className="flex flex-col gap-6">
         {/* Title & Description */}
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label
-              htmlFor="title"
-              className="text-muted-foreground after:ml-0.5 after:content-['*']"
-            >
-              Title
-            </Label>
-            <Input
-              {...register("title")}
-              id="title"
-              placeholder="Project name"
-              maxLength={100}
-              className="text-foreground border-white/15 bg-white/5 placeholder:text-white/30"
-            />
-            {errors.title?.message && (
-              <p className="text-xs font-medium text-red-400">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            name={"title"}
+            render={({ field }) => {
+              return (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Project name"
+                      maxLength={100}
+                      className="text-foreground border-white/15 bg-white/5 placeholder:text-white/30"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
 
           <DescriptionField name="description" />
         </div>
@@ -77,32 +108,47 @@ export function ProjectFormItem() {
 
           <div className="mb-4 grid grid-cols-1 gap-y-4">
             {(["start", "end"] as const)
-              .filter((key) => !(key === "end" && ongoing))
+              .filter((key) => !(key === "end" && isProjectOngoing))
               .map((key) => (
-                <Fragment key={key}>
-                  <Controller
-                    control={control}
-                    name={`timeline.${key}`}
-                    render={({ field }) => {
-                      return (
-                        <TimelineSelect
-                          timeline={key}
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      );
-                    }}
-                  />
-                </Fragment>
+                <Controller
+                  key={key}
+                  control={control}
+                  name={`timeline.${key}`}
+                  render={({ field }) => (
+                    <TimelineSelect
+                      timeline={key}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
               ))}
+
+            {errors.timeline?.end?.message && (
+              <p className="text-xs font-medium text-red-400">
+                {errors.timeline.end.message}
+              </p>
+            )}
+            {errors.timeline?.start?.message && (
+              <p className="text-xs font-medium text-red-400">
+                {errors.timeline.start.message}
+              </p>
+            )}
           </div>
 
           <div className="mb-3 flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="ongoing"
-              {...register("ongoing")}
-              className="accent-blue-400"
+            <Controller
+              control={control}
+              name="ongoing"
+              render={({ field }) => (
+                <Checkbox
+                  id="ongoing"
+                  checked={field.value}
+                  onCheckedChange={(checked) =>
+                    field.onChange(checked === true)
+                  }
+                />
+              )}
             />
             <Label
               htmlFor="ongoing"
@@ -111,6 +157,11 @@ export function ProjectFormItem() {
               I am currently working on this project
             </Label>
           </div>
+          {errors.ongoing?.message && (
+            <p className="text-xs font-medium text-red-400">
+              {errors.ongoing.message}
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>
