@@ -2,7 +2,10 @@
 import { usePaginatedQuery } from "convex/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ProjectCard } from "~/components/dashboard/projects/project-card";
+import {
+  PrivateProjectCard,
+  PrivateProjectCardLegacy,
+} from "~/components/dashboard/projects/project-card";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
 import {
   DBCtaButton,
@@ -11,6 +14,7 @@ import {
 } from "~/components/layouts/dashboard-page-header";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
+import { StandardGrid } from "~/components/layouts/grids";
 import { FABPlusIcon } from "~/components/ui/fab-button";
 import { api } from "~/convex/_generated/api";
 
@@ -78,9 +82,11 @@ export default function Projects() {
             />
           ) : (
             <div className="flex flex-col gap-8">
-              {results.map((project) => {
-                return <ProjectCard key={project._id} {...project} />;
-              })}
+              <StandardGrid className="mb-12">
+                {results.map((project) => {
+                  return <PrivateProjectCard key={project._id} {...project} />;
+                })}
+              </StandardGrid>
             </div>
           )}
         </EmptyState.Conceal>

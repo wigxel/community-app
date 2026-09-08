@@ -1,18 +1,36 @@
 "use client";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  IconButton,
+  Text,
+} from "@hyperbridge/ui";
+import { Slot } from "@radix-ui/react-slot";
+import { More, Trash } from "iconsax-reactjs";
+import {
   BookText,
   Calendar,
   Edit,
   ExternalLink,
+  EyeIcon,
   FileText,
   Globe,
   LinkIcon,
+  PencilIcon,
   Video,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
+import {
+  ProjectCardContent,
+  ProjectCardMedia,
+  ProjectCardMetrics,
+  ProjectCardRoot,
+} from "~/components/molecules/project-card";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -53,9 +71,10 @@ const formatTimeline = (project: Project) => {
   return null;
 };
 
-export function ProjectCard(project: Project) {
+export function PrivateProjectCardLegacy(project: Project) {
   const router = useRouter();
   const timeline = formatTimeline(project);
+
   return (
     <Card className="group rounded-2xl border border-white/10 bg-blue-500/20 text-blue-300">
       <CardHeader>
@@ -210,5 +229,71 @@ export function ProjectCard(project: Project) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function PreventPropagation({ children }: { children: React.ReactNode }) {
+  return (
+    <Slot
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => event.stopPropagation()}
+      onKeyUp={(event) => event.stopPropagation()}
+      onChange={(event) => event.stopPropagation()}
+    >
+      {children}
+    </Slot>
+  );
+}
+
+export function PrivateProjectCard(project: Project) {
+  const router = useRouter();
+  const editLink = `/dashboard/projects/edit/${project._id}`;
+
+  return (
+    <Link href={editLink} className="relative flex flex-col">
+      <ProjectCardRoot project={project}>
+        <PreventPropagation>
+          <div className="absolute inset-x-0 z-20 flex justify-between px-3 pt-1">
+            <div className="filler" />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <IconButton
+                  variant={"unset"}
+                  className="bg-brand-black-450/50 backdrop-blur-md"
+                >
+                  <More />
+                </IconButton>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => router.push(editLink)}>
+                  <PencilIcon className="text-current" /> Edit Project
+                </DropdownMenuItem>
+                <Link href={`/dashboard/projects/${project._id}`}>
+                  <DropdownMenuItem>
+                    <EyeIcon className="text-current" /> Preview
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuItem variant="destructive">
+                  <Trash /> Delete Project
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </PreventPropagation>
+
+        <ProjectCardMedia />
+        <ProjectCardContent className="justify-start">
+          <Text
+            variant={"body1"}
+            className="basis-10/12 overflow-hidden text-ellipsis whitespace-nowrap"
+          >
+            {project.title}
+          </Text>
+          <ProjectCardMetrics />
+        </ProjectCardContent>
+      </ProjectCardRoot>
+    </Link>
   );
 }

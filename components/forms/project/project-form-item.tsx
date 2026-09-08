@@ -141,7 +141,7 @@ export function TimelineFields() {
           htmlFor="ongoing"
           className="text-muted-foreground text-xs font-medium"
         >
-          I am currently working on this project
+          This is a personal project
         </Label>
       </div>
 

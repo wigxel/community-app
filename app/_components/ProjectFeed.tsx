@@ -11,7 +11,7 @@ import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { StandardGrid } from "~/components/layouts/grids";
 import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
-import LandingProjectCard from "./LandingProjectCard";
+import LandingProjectCard from "./landing-project-card";
 import { ProjectModal } from "./ProjectModal";
 
 const PAGE_SIZE = 12;

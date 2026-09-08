@@ -42,7 +42,7 @@ describe("ProjectFormItem", () => {
     expect(screen.getByLabelText(/^title/i)).toBeDefined();
     expect(screen.getByLabelText(/description/i)).toBeDefined();
     expect(screen.getByText(/timeline/i)).toBeDefined();
-    expect(screen.getByLabelText(/I am currently working/i)).toBeDefined();
+    expect(screen.getByLabelText(/This is a personal project/i)).toBeDefined();
     expect(screen.getByText(/^project$/i)).toBeDefined(); // CardTitle fallback
   });
 
@@ -71,7 +71,7 @@ describe("ProjectFormItem", () => {
     });
     expect(screen.getByText(/end month/i)).toBeDefined();
     const checkbox = screen.getByLabelText(
-      /I am currently working/i,
+      /This is a personal project/i,
     ) as HTMLInputElement;
     await user.click(checkbox);
     await waitFor(() => {
@@ -123,7 +123,7 @@ describe("ProjectFormItem", () => {
     };
     const { user } = { user: userEvent.setup(), ...render(<Wrapper />) };
     const cb = screen.getByLabelText(
-      /I am currently working/i,
+      /This is a personal project/i,
     ) as HTMLInputElement;
     await user.click(cb);
     await waitFor(() => {
@@ -163,7 +163,7 @@ describe("ProjectFormItem", () => {
     });
     expect(screen.getByText(/end month/i)).toBeDefined();
     const checkbox = screen.getByLabelText(
-      /I am currently working/i,
+      /This is a personal project/i,
     ) as HTMLInputElement;
     await user.click(checkbox);
     await waitFor(() => expect(screen.queryByText(/end month/i)).toBeNull());
