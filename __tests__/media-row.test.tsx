@@ -13,9 +13,7 @@ import type { ProjectFormValues } from "~/components/forms/project/project-form"
 
 // jsdom lacks URL.createObjectURL
 if (!globalThis.URL.createObjectURL) {
-  // @ts-expect-error mock
   globalThis.URL.createObjectURL = () => "blob:mock";
-  // @ts-expect-error mock
   globalThis.URL.revokeObjectURL = () => {};
 } else {
   const origCreate = URL.createObjectURL;
@@ -43,19 +41,21 @@ const origCreateElement = document.createElement.bind(document);
 vi.spyOn(document, "createElement").mockImplementation(
   (tagName: string, options?: unknown) => {
     if (tagName === "video") {
-      const el = origCreateElement(tagName, options) as HTMLVideoElement;
+      const el = origCreateElement(
+        tagName,
+        options as ElementCreationOptions,
+      ) as HTMLVideoElement;
       Object.defineProperties(el, {
         videoWidth: { value: 1920, writable: true },
         videoHeight: { value: 1080, writable: true },
         duration: { value: 120, writable: true },
       });
       setTimeout(() => {
-        // @ts-expect-error trigger
-        el.onloadedmetadata && el.onloadedmetadata(new Event("loadedmetadata"));
+        el.onloadedmetadata?.(new Event("loadedmetadata"));
       }, 0);
       return el;
     }
-    return origCreateElement(tagName, options as string);
+    return origCreateElement(tagName);
   },
 );
 

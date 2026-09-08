@@ -5,7 +5,7 @@ import {
   type UsePaginatedQueryReturnType,
   usePaginatedQuery,
 } from "convex/react";
-import type { Query } from "convex/server";
+
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { PrivateProjectCard } from "~/components/dashboard/projects/project-card";

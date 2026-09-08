@@ -7,6 +7,6 @@ class MockResizeObserver {
   disconnect() {}
 }
 if (typeof globalThis.ResizeObserver === "undefined") {
-  // @ts-expect-error polyfill
-  globalThis.ResizeObserver = MockResizeObserver;
+  globalThis.ResizeObserver =
+    MockResizeObserver as unknown as typeof ResizeObserver;
 }
