@@ -13,8 +13,6 @@ import { ProfileAvatar } from "~/components/profile/avatar";
 import { cn } from "~/lib/utils";
 import type { BasicProject, Media, Project } from "~/types/models";
 
-// Context
-
 interface ProjectCardContextValue {
   project: Project | BasicProject;
   likesCount: string | number; // TODO: derive from project data when schema includes likes
@@ -30,8 +28,6 @@ function useProjectCardContext() {
     );
   return ctx;
 }
-
-// MediaThumbnail (private helper)
 
 interface MediaThumbnailProps {
   variant: "video" | "image";
@@ -73,8 +69,6 @@ function MediaThumbnail({ variant, media, alt }: MediaThumbnailProps) {
   return thumbnail;
 }
 
-// Compound components
-
 interface ProjectCardRootProps extends ComponentPropsWithoutRef<"div"> {
   project: Project | BasicProject;
 }
@@ -110,7 +104,7 @@ const ProjectCardMedia = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative aspect-250/187 w-full overflow-hidden rounded-[calc(var(--project-card-media-radius)-calc(var(--project-card-media-padding)*0.5))]",
+        "aspect-post relative w-full overflow-hidden rounded-[calc(var(--project-card-media-radius)-calc(var(--project-card-media-padding)*0.5))]",
         className,
       )}
       {...props}
@@ -160,7 +154,7 @@ const ProjectCardOwner = forwardRef<HTMLDivElement, ProjectCardOwnerProps>(
         {...props}
       >
         <ProfileAvatar
-          className="size-[2.4em] rounded-full bg-blue-400!"
+          className="size-[2.4em] rounded-full"
           name={resolvedName}
         />
         <h3 className="text-foreground line-clamp-1 max-w-[15ch] truncate text-sm font-semibold">

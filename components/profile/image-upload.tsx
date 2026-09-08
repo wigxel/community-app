@@ -205,7 +205,7 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
       </div>
 
       <Dialog open={isOpen} onOpenChange={handleCancel}>
-        <DialogContent className="bg-background aspect-2/1.5 w-[70svh] max-w-[800px] gap-0 overflow-hidden p-0 [&>button]:hidden">
+        <DialogContent className="bg-background aspect-2/1.5 w-[70svh] max-w-200 gap-0 overflow-hidden p-0 [&>button]:hidden">
           <div className="flex items-center justify-between border-b px-4 py-3">
             <DialogTitle className="text-foreground text-base font-semibold">
               Edit image
