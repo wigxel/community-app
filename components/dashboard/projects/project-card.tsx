@@ -1,5 +1,12 @@
 "use client";
 import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -7,7 +14,9 @@ import {
   IconButton,
   Text,
 } from "@hyperbridge/ui";
+import { Alert } from "@hyperbridge/ui/icons";
 import { Slot } from "@radix-ui/react-slot";
+import { useMutation } from "convex/react";
 import { More, Trash } from "iconsax-reactjs";
 import {
   BookText,
@@ -24,6 +33,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import * as React from "react";
 import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
 import {
   ProjectCardContent,
@@ -31,7 +41,6 @@ import {
   ProjectCardMetrics,
   ProjectCardRoot,
 } from "~/components/molecules/project-card";
-import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -39,6 +48,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { api } from "~/convex/_generated/api";
+import { toast } from "~/lib/toast";
 import type { Project, TimelineDate } from "~/types/models";
 
 const getLinkIcon = (tag: string) => {
@@ -248,54 +259,135 @@ function PreventPropagation({ children }: { children: React.ReactNode }) {
 export function PrivateProjectCard(project: Project) {
   const router = useRouter();
   const editLink = `/dashboard/projects/edit/${project._id}`;
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
 
   return (
-    <Link href={editLink} className="relative flex flex-col">
-      <ProjectCardRoot project={project}>
-        <PreventPropagation>
-          <div className="absolute inset-x-0 z-20 flex justify-between px-3 pt-1">
-            <div className="filler" />
+    <>
+      <Link href={editLink} className="relative flex flex-col">
+        <ProjectCardRoot project={project}>
+          <PreventPropagation>
+            <div className="absolute inset-x-0 z-20 flex justify-between px-3 pt-1">
+              <div className="filler" />
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <IconButton
-                  variant={"unset"}
-                  className="bg-brand-black-450/50 backdrop-blur-md"
-                >
-                  <More />
-                </IconButton>
-              </DropdownMenuTrigger>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <IconButton
+                    variant={"unset"}
+                    className="bg-brand-black-450/50 backdrop-blur-md"
+                  >
+                    <More />
+                  </IconButton>
+                </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end">
-                <Link href={`/projects/${project._id}`} target="_blank">
-                  <DropdownMenuItem>
-                    <EyeIcon className="text-muted-foreground" />
-                    Preview project
+                <DropdownMenuContent align="end">
+                  <Link href={`/projects/${project._id}`} target="_blank">
+                    <DropdownMenuItem>
+                      <EyeIcon className="text-muted-foreground" />
+                      Preview project
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem onClick={() => router.push(editLink)}>
+                    <PencilIcon className="text-muted-foreground" />
+                    Edit project
                   </DropdownMenuItem>
-                </Link>
-                <DropdownMenuItem onClick={() => router.push(editLink)}>
-                  <PencilIcon className="text-muted-foreground" />
-                  Edit project
-                </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive">
-                  <Trash /> Delete project
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </PreventPropagation>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => {
+                      setTimeout(() => {
+                        setDeleteDialogOpen(true);
+                      }, 16);
+                    }}
+                  >
+                    <Trash /> Delete project
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </PreventPropagation>
 
-        <ProjectCardMedia />
-        <ProjectCardContent className="justify-start">
-          <Text
-            variant={"body1"}
-            className="basis-10/12 overflow-hidden text-ellipsis whitespace-nowrap"
+          <ProjectCardMedia />
+          <ProjectCardContent className="justify-start">
+            <Text
+              variant={"body1"}
+              className="basis-10/12 overflow-hidden text-ellipsis whitespace-nowrap"
+            >
+              {project.title}
+            </Text>
+            <ProjectCardMetrics />
+          </ProjectCardContent>
+        </ProjectCardRoot>
+      </Link>
+
+      <DeleteProjectDialog
+        project={project}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+      />
+    </>
+  );
+}
+
+function DeleteProjectDialog({
+  project,
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  project: Project;
+}) {
+  const deleteProject = useMutation(api.project.deleteProject);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="glass-effect w-full max-w-md gap-8 text-[1rem]"
+        onInteractOutside={(evt) => evt.preventDefault()}
+      >
+        <DialogDescription asChild>
+          <div className="flex flex-col gap-2.5">
+            <span className="bg-brand-danger-500/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full">
+              <Alert
+                width="1.25rem"
+                height="1.25rem"
+                className="text-brand-danger-500 shrink-0"
+              />
+            </span>
+            <div className="flex flex-col gap-2">
+              <DialogTitle className="text-h7 text-brand-white-500 font-medium">
+                Delete "{project.title}"?
+              </DialogTitle>
+              <p className="text-body-2 text-brand-black-100 font-medium">
+                Are you sure you want to delete this project? This action cannot
+                be undone.
+              </p>
+            </div>
+          </div>
+        </DialogDescription>
+
+        <DialogFooter className="gap-[1.2rem]">
+          <DialogTrigger asChild>
+            <Button variant="secondary" className="flex-1">
+              Cancel
+            </Button>
+          </DialogTrigger>
+          <Button
+            variant="destructive"
+            className="flex-1"
+            onClick={async () => {
+              try {
+                await deleteProject({ _id: project._id });
+                toast.success("Project deleted successfully");
+                onOpenChange(false);
+              } catch {
+                toast.error("Failed to delete project");
+              }
+            }}
           >
-            {project.title}
-          </Text>
-          <ProjectCardMetrics />
-        </ProjectCardContent>
-      </ProjectCardRoot>
-    </Link>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
