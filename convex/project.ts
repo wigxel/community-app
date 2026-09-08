@@ -7,8 +7,9 @@ import { v } from "convex/values";
 import { Either } from "effect";
 import { Result, type ResultShape } from "../lib/result";
 import type { BasicProject, Project } from "../types/models";
+import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
-import { mutation } from "./_generated/server";
+import { internalMutation, mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 import { project_schema } from "./schema";
 
@@ -137,9 +138,14 @@ export const createProject = mutation({
       if (result._tag === "Left") return result;
     }
 
-    await ctx.db.insert("project", {
+    const projectId = await ctx.db.insert("project", {
       ...args.project,
       userId: authUser._id,
+    });
+
+    // Schedule blurhash generation for photos
+    await ctx.scheduler.runAfter(0, internal.blurhash.generateForProject, {
+      projectId,
     });
 
     return Result.ok(undefined);
@@ -197,6 +203,11 @@ export const updateProject = mutation({
 
     await ctx.db.patch(existingProject._id, projectData);
 
+    // Schedule blurhash generation for photos
+    await ctx.scheduler.runAfter(0, internal.blurhash.generateForProject, {
+      projectId: existingProject._id,
+    });
+
     return Result.ok(undefined);
   },
 });
@@ -216,6 +227,33 @@ export const deleteProject = mutation({
       throw new Error("Unauthorized action");
 
     await ctx.db.delete(existingProject._id);
+  },
+});
+
+export const updateProjectMedia = internalMutation({
+  args: {
+    projectId: v.id("project"),
+    media: v.array(
+      v.object({
+        type: v.union(v.literal("photo"), v.literal("pdf"), v.literal("video")),
+        metadata: v.object({
+          url: v.string(),
+          title: v.optional(v.string()),
+          filename: v.string(),
+          mimeType: v.string(),
+          size: v.number(),
+          duration: v.optional(v.number()),
+          width: v.optional(v.number()),
+          height: v.optional(v.number()),
+          storageId: v.optional(v.string()),
+          blurhash: v.optional(v.string()),
+          blurDataURL: v.optional(v.string()),
+        }),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.projectId, { media: args.media });
   },
 });
 

@@ -17,7 +17,9 @@ export default async function OnboardingPage(props: OnboardingPageProps) {
     redirect("/auth?redirect=/onboarding");
   }
 
-  const profile = await fetchAuthQuery(api.profiles.getForCurrentUser);
+  const profile = await fetchAuthQuery(api.profiles.getForCurrentUser).catch(
+    () => null,
+  );
 
   if (profile) {
     redirect(params.redirect ?? "/dashboard");

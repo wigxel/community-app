@@ -39,6 +39,8 @@ const project_media_schema = v.object({
     width: v.optional(v.number()),
     height: v.optional(v.number()),
     storageId: v.optional(v.string()),
+    blurhash: v.optional(v.string()),
+    blurDataURL: v.optional(v.string()),
   }),
 });
 
