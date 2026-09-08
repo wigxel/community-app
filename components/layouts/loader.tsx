@@ -101,10 +101,25 @@ export function Loader(props: LoaderProps) {
 
 export function LoaderSimple(props: LoaderProps) {
   const { size = 24, mode = "show" } = props;
-
-  const [count, setCount] = React.useState(0);
   const box_size = 3 * size;
   const initial = { height: box_size, width: box_size };
+
+  return (
+    <motion.span
+      initial={initial}
+      animate={
+        mode === "hide" ? { opacity: 0, animationDuration: 2000 } : initial
+      }
+      className="relative inline-flex items-center justify-center rounded-full text-lime-400"
+    >
+      <InlineLoader strokeWidth={1} size={size} />
+    </motion.span>
+  );
+}
+
+export function InlineLoader(props: LoaderProps & { strokeWidth?: number }) {
+  const { size = 24, strokeWidth = 1 } = props;
+  const [count, setCount] = React.useState(0);
 
   React.useEffect(() => {
     const id = setInterval(() => {
@@ -120,21 +135,13 @@ export function LoaderSimple(props: LoaderProps) {
   }, []);
 
   return (
-    <motion.span
-      initial={initial}
-      animate={
-        mode === "hide" ? { opacity: 0, animationDuration: 2000 } : initial
-      }
-      className="relative inline-flex items-center justify-center rounded-full"
-    >
-      <MorphIcon
-        strokeWidth={1}
-        className="text-lime-400"
-        size={size}
-        icon={icons[count]}
-        dur={400}
-      />
-    </motion.span>
+    <MorphIcon
+      strokeWidth={strokeWidth}
+      className="text-current"
+      size={size}
+      icon={icons[count]}
+      dur={400}
+    />
   );
 }
 

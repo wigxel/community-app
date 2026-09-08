@@ -1,11 +1,14 @@
 "use client";
-import { usePaginatedQuery } from "convex/react";
+import { Button } from "@hyperbridge/ui";
+import {
+  type PaginatedQueryReference,
+  type UsePaginatedQueryReturnType,
+  usePaginatedQuery,
+} from "convex/react";
+import type { Query } from "convex/server";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import {
-  PrivateProjectCard,
-  PrivateProjectCardLegacy,
-} from "~/components/dashboard/projects/project-card";
+import { PrivateProjectCard } from "~/components/dashboard/projects/project-card";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
 import {
   DBCtaButton,
@@ -15,20 +18,22 @@ import {
 import { EmptyState } from "~/components/layouts/empty-state";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { StandardGrid } from "~/components/layouts/grids";
+import { InlineLoader } from "~/components/layouts/loader";
 import { FABPlusIcon } from "~/components/ui/fab-button";
 import { api } from "~/convex/_generated/api";
+
+const PAGE_LIMIT = 50;
 
 export default function Projects() {
   const router = useRouter();
 
-  const { results, status } = usePaginatedQuery(
+  const paginated = usePaginatedQuery(
     api.project.listProject,
     {},
-    { initialNumItems: 50 },
+    { initialNumItems: PAGE_LIMIT },
   );
-
+  const { results, status } = paginated;
   const isInitialLoading = status === "LoadingFirstPage";
-
   const isEmpty = !isInitialLoading && results.length === 0;
 
   return (
@@ -87,10 +92,39 @@ export default function Projects() {
                   return <PrivateProjectCard key={project._id} {...project} />;
                 })}
               </StandardGrid>
+              <ConvexPagination perPage={PAGE_LIMIT} control={paginated} />
             </div>
           )}
         </EmptyState.Conceal>
       </EmptyState>
+    </div>
+  );
+}
+
+function ConvexPagination({
+  perPage: chunk,
+  control,
+}: {
+  perPage: number;
+  control: UsePaginatedQueryReturnType<PaginatedQueryReference>;
+}) {
+  if (control.status === "Exhausted") return null;
+
+  const isLoadingMore = control.status === "LoadingMore";
+  const isFirstLoading = control.status === "LoadingFirstPage";
+
+  return (
+    <div className="pagination">
+      <Button
+        variant="outline"
+        disabled={
+          control.status !== "CanLoadMore" || isFirstLoading || isLoadingMore
+        }
+        onClick={() => control.loadMore(chunk)}
+      >
+        <span>Load more</span>
+        {isLoadingMore ? <InlineLoader size={24} /> : null}
+      </Button>
     </div>
   );
 }

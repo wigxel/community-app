@@ -267,16 +267,18 @@ export function PrivateProjectCard(project: Project) {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => router.push(editLink)}>
-                  <PencilIcon className="text-current" /> Edit Project
-                </DropdownMenuItem>
-                <Link href={`/dashboard/projects/${project._id}`}>
+                <Link href={`/projects/${project._id}`} target="_blank">
                   <DropdownMenuItem>
-                    <EyeIcon className="text-current" /> Preview
+                    <EyeIcon className="text-muted-foreground" />
+                    Preview project
                   </DropdownMenuItem>
                 </Link>
+                <DropdownMenuItem onClick={() => router.push(editLink)}>
+                  <PencilIcon className="text-muted-foreground" />
+                  Edit project
+                </DropdownMenuItem>
                 <DropdownMenuItem variant="destructive">
-                  <Trash /> Delete Project
+                  <Trash /> Delete project
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

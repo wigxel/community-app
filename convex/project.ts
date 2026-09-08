@@ -69,6 +69,7 @@ export const listProject = query({
     const result = await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", authUser._id))
+      .order("desc")
       .paginate(args.paginationOpts);
 
     return { ...result, page: result.page.map(toProject) };
