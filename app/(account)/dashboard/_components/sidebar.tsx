@@ -1,7 +1,7 @@
 "use client";
 
 import { Logout } from "iconsax-reactjs";
-import { type LucideProps, Menu, X } from "lucide-react";
+import { type LucideProps, Menu, Trophy, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import posthog from "posthog-js";
@@ -34,6 +34,11 @@ const navigation = [
     name: "Projects",
     href: "/dashboard/projects",
     icon: IconHoc(Folder2),
+  },
+  {
+    name: "Leaderboard",
+    href: "/dashboard/leaderboard",
+    icon: IconHoc(Trophy),
   },
   {
     name: "Saves",

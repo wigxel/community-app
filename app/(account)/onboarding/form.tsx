@@ -59,7 +59,7 @@ export default function OnboardingForm(props: OnboardingFormProps) {
   const titles = useQuery(api.titles.listTitles) ?? [];
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [step, setStep] = useState(4);
+  const [step, setStep] = useState(1);
 
   const form = useForm<OnboardingValues>({
     resolver: zodResolver(onboardingSchema),
