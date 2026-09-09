@@ -55,11 +55,9 @@ export type TimelineSelectProps = {
   onChange: (val: TimelineDate) => void;
 };
 
-export default function TimelineSelect({
-  timeline,
-  value,
-  onChange,
-}: TimelineSelectProps) {
+export default function TimelineSelect(props: TimelineSelectProps) {
+  const { timeline, value, onChange } = props;
+
   const { month, year } = React.useMemo(() => tsToMonthYear(value), [value]);
 
   // pending: tracks a two-part selection where month is picked but year is not yet set

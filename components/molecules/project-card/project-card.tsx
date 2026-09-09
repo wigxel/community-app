@@ -35,7 +35,9 @@ interface MediaThumbnailProps {
   alt: string;
 }
 
-function MediaThumbnail({ variant, media, alt }: MediaThumbnailProps) {
+function MediaThumbnail(props: MediaThumbnailProps) {
+  const { variant, media, alt } = props;
+
   const isVideo = variant === "video";
   const videoRef = useRef<HTMLVideoElement>(null);
 

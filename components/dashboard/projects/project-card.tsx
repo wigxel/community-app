@@ -243,7 +243,11 @@ export function PrivateProjectCardLegacy(project: Project) {
   );
 }
 
-function PreventPropagation({ children }: { children: React.ReactNode }) {
+type PreventPropagationProps = { children: React.ReactNode };
+
+function PreventPropagation(props: PreventPropagationProps) {
+  const { children } = props;
+
   return (
     <Slot
       onClick={(event) => event.stopPropagation()}
@@ -327,15 +331,15 @@ export function PrivateProjectCard(project: Project) {
   );
 }
 
-function DeleteProjectDialog({
-  project,
-  open,
-  onOpenChange,
-}: {
+type DeleteProjectDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   project: Project;
-}) {
+};
+
+function DeleteProjectDialog(props: DeleteProjectDialogProps) {
+  const { project, open, onOpenChange } = props;
+
   const deleteProject = useMutation(api.project.deleteProject);
 
   return (

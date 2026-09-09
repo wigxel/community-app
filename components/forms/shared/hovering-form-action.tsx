@@ -3,11 +3,13 @@ import { motion } from "motion/react";
 import router from "next/router";
 import { useFormState } from "react-hook-form";
 
-export function HoveringFormActions({
-  mode = "create",
-}: {
+export type HoveringFormActionsProps = {
   mode?: "create" | "edit";
-}) {
+};
+
+export function HoveringFormActions(props: HoveringFormActionsProps) {
+  const { mode = "create" } = props;
+
   const { isSubmitting, isDirty } = useFormState();
 
   return (

@@ -15,12 +15,14 @@ type DescriptionFieldProps = {
   maxLength?: number;
 };
 
-export function DescriptionField({
-  name,
-  label = "Description",
-  placeholder = "What did you build or work on?",
-  maxLength = 300,
-}: DescriptionFieldProps) {
+export function DescriptionField(props: DescriptionFieldProps) {
+  const {
+    name,
+    label = "Description",
+    placeholder = "What did you build or work on?",
+    maxLength = 300,
+  } = props;
+
   return (
     <FormField
       name={name}

@@ -7,7 +7,9 @@ import { FABPlusIcon, FAButton } from "../ui/fab-button";
 
 const PORTAL_ID = "dashboard-header-portal";
 
-export function DBHeader(props: { children: React.ReactNode }) {
+export type DBHeaderProps = { children: React.ReactNode };
+
+export function DBHeader(props: DBHeaderProps) {
   return <div className="pt-4">{props.children}</div>;
 }
 
@@ -29,9 +31,9 @@ const items: Variants = {
   hidden: { y: "50%" },
 };
 
-export function DBHeaderTitle(
-  props: React.ComponentProps<"h1"> & { text: string },
-) {
+export type DBHeaderTitleProps = React.ComponentProps<"h1"> & { text: string };
+
+export function DBHeaderTitle(props: DBHeaderTitleProps) {
   const { text, ...restProps } = props;
   const attempt = React.useRef(0);
   const headingRef = React.useRef<HTMLHeadingElement>(null);
@@ -77,7 +79,11 @@ export function DBHeaderTitle(
   );
 }
 
-function AnimateWords({ text, animate }: { text: string; animate: boolean }) {
+type AnimateWordsProps = { text: string; animate: boolean };
+
+function AnimateWords(props: AnimateWordsProps) {
+  const { text, animate } = props;
+
   const words = React.useMemo(
     () => text.split(" ").map((word, index) => [word, index]),
     [text],
