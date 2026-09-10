@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { api } from "~/convex/_generated/api";
+import { fetchAuthQuery } from "~/lib/auth-server";
 import OnboardingForm from "./form";
 
 export type OnboardingPageProps = {
@@ -7,6 +10,14 @@ export type OnboardingPageProps = {
 export default async function OnboardingPage(props: OnboardingPageProps) {
   const { searchParams } = props;
   const params = await searchParams;
+
+  const profile = await fetchAuthQuery(api.profiles.getForCurrentUser).catch(
+    () => null,
+  );
+
+  if (profile) {
+    redirect("/dashboard");
+  }
 
   return (
     <div className="bg-background flex min-h-screen items-center justify-center px-4 py-8">
