@@ -17,12 +17,6 @@ export default async function OnboardingPage(props: OnboardingPageProps) {
     redirect("/auth?redirect=/onboarding");
   }
 
-  const profile = await fetchAuthQuery(api.profiles.getForCurrentUser);
-
-  if (profile) {
-    redirect(params.redirect ?? "/dashboard");
-  }
-
   return (
     <div className="bg-background flex min-h-screen items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl">
