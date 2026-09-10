@@ -18,6 +18,7 @@ import type * as http from "../http.js";
 import type * as leaderboard from "../leaderboard.js";
 import type * as profiles from "../profiles.js";
 import type * as project from "../project.js";
+import type * as seed from "../seed.js";
 import type * as skills from "../skills.js";
 import type * as titles from "../titles.js";
 import type * as workExperience from "../workExperience.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   leaderboard: typeof leaderboard;
   profiles: typeof profiles;
   project: typeof project;
+  seed: typeof seed;
   skills: typeof skills;
   titles: typeof titles;
   workExperience: typeof workExperience;
