@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { internalMutation } from "./_generated/server";
+import { api, internal } from "./_generated/api";
+import { internalMutation, mutation } from "./_generated/server";
 
 const DEFAULT_SKILLS = [
   // Programming Languages
@@ -222,7 +223,7 @@ const DEFAULT_TITLES = [
  * Seed the skills table with default skills.
  * Defaults to dryRun — pass { dryRun: false } to actually insert.
  */
-export const seedSkills = internalMutation({
+export const seedSkills = mutation({
   args: { dryRun: v.optional(v.boolean()) },
   async handler(ctx, { dryRun = true }) {
     const existing = await ctx.db.query("skills").collect();
@@ -261,7 +262,7 @@ export const seedSkills = internalMutation({
  * Seed the titles table with default titles.
  * Defaults to dryRun — pass { dryRun: false } to actually insert.
  */
-export const seedTitles = internalMutation({
+export const seedTitles = mutation({
   args: { dryRun: v.optional(v.boolean()) },
   async handler(ctx, { dryRun = true }) {
     const existing = await ctx.db.query("titles").collect();
@@ -301,11 +302,12 @@ export const seedTitles = internalMutation({
  * Seed all tables (skills + titles).
  * Defaults to dryRun — pass { dryRun: false } to actually insert.
  */
-export const seedAll = internalMutation({
+export const seedSome = mutation({
   args: { dryRun: v.optional(v.boolean()) },
   async handler(ctx, { dryRun = true }) {
-    const skills = await ctx.runMutation(seedSkills, { dryRun });
-    const titles = await ctx.runMutation(seedTitles, { dryRun });
+    const skills: any = await ctx.runMutation(api.seeds.seedSkills, { dryRun });
+    const titles: any = await ctx.runMutation(api.seeds.seedTitles, { dryRun });
+
     return { skills, titles };
   },
 });
