@@ -235,4 +235,110 @@ describe("projectSchema", () => {
     if (!res.success)
       expect(res.error.issues[0].message).toMatch(/Only images/);
   });
+  it("passes with 3 links", () => {
+    const res = parse({
+      ...base,
+      ongoing: true,
+      timeline: {
+        start: { year: String(thisYear - 1) },
+        end: null,
+      },
+      link: [
+        { tag: "github", value: "https://github.com/a" },
+        { tag: "figma", value: "https://figma.com/b" },
+        { tag: "other", value: "https://example.com" },
+      ],
+    });
+    expect(res.success).toBe(true);
+  });
+
+  it("fails with 4 links", () => {
+    const res = parse({
+      ...base,
+      ongoing: true,
+      timeline: {
+        start: { year: String(thisYear - 1) },
+        end: null,
+      },
+      link: [
+        { tag: "github", value: "https://github.com/a" },
+        { tag: "figma", value: "https://figma.com/b" },
+        { tag: "behance", value: "https://behance.net/c" },
+        { tag: "other", value: "https://example.com" },
+      ],
+    });
+    expect(res.success).toBe(false);
+    if (!res.success) expect(res.error.issues[0].message).toMatch(/Max of 3/);
+  });
+
+  it("fails with duplicate github links", () => {
+    const res = parse({
+      ...base,
+      ongoing: true,
+      timeline: {
+        start: { year: String(thisYear - 1) },
+        end: null,
+      },
+      link: [
+        { tag: "github", value: "https://github.com/a" },
+        { tag: "github", value: "https://github.com/b" },
+      ],
+    });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(res.error.issues[0].message).toMatch(/Duplicate link types/);
+  });
+
+  it("allows multiple other links", () => {
+    const res = parse({
+      ...base,
+      ongoing: true,
+      timeline: {
+        start: { year: String(thisYear - 1) },
+        end: null,
+      },
+      link: [
+        { tag: "other", value: "https://one.com" },
+        { tag: "other", value: "https://two.com" },
+        { tag: "other", value: "https://three.com" },
+      ],
+    });
+    expect(res.success).toBe(true);
+  });
+
+  it("allows unique non-other with multiple other", () => {
+    const res = parse({
+      ...base,
+      ongoing: true,
+      timeline: {
+        start: { year: String(thisYear - 1) },
+        end: null,
+      },
+      link: [
+        { tag: "github", value: "https://github.com/a" },
+        { tag: "other", value: "https://one.com" },
+        { tag: "other", value: "https://two.com" },
+      ],
+    });
+    expect(res.success).toBe(true);
+  });
+
+  it("fails duplicate non-other even with other present", () => {
+    const res = parse({
+      ...base,
+      ongoing: true,
+      timeline: {
+        start: { year: String(thisYear - 1) },
+        end: null,
+      },
+      link: [
+        { tag: "github", value: "https://github.com/a" },
+        { tag: "github", value: "https://github.com/b" },
+        { tag: "other", value: "https://one.com" },
+      ],
+    });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(res.error.issues[0].message).toMatch(/Duplicate link types/);
+  });
 });
