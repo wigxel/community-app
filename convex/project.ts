@@ -113,6 +113,9 @@ export const createProject = mutation({
     const authUser = await authComponent.getAuthUser(ctx);
     if (!authUser) throw new Error("Not authenticated");
 
+    if (args.project.link.length > 3)
+      throw new Error("Max of 3 links per project");
+
     const { ongoing, timeline } = args.project;
     const { start, end } = timeline;
 
@@ -175,6 +178,9 @@ export const updateProject = mutation({
 
     if (existingProject.userId !== authUser._id)
       throw new Error("Unauthorized action");
+
+    if (projectData.link.length > 3)
+      throw new Error("Max of 3 links per project");
 
     const { ongoing, timeline } = projectData;
     const { start, end } = timeline;

@@ -31,6 +31,8 @@ export function LinksSection() {
     remove: removeLink,
   } = useFieldArray({ control, name: "link" });
 
+  const isMax = linkFields.length >= 3;
+
   return (
     <Card>
       <CardHeader>
@@ -82,11 +84,14 @@ export function LinksSection() {
       <CardFooter>
         <Button
           type="button"
-          variant="outline"
           className="w-full"
-          onClick={() => appendLink(EMPTY_LINK)}
+          disabled={isMax}
+          variant={isMax ? "destructive" : "outline"}
+          onClick={() => {
+            if (!isMax) appendLink(EMPTY_LINK);
+          }}
         >
-          Add link
+          {isMax ? "Maximum of 3" : "Add link"}
         </Button>
       </CardFooter>
     </Card>
