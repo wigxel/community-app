@@ -1,3 +1,11 @@
+"use client";
+
+// @ts-expect-error No declaration file yet
+import { Type } from "@wigxel/react-components/lib/typography";
+import { ArrowRight } from "lucide-react";
+import { Balancer } from "react-wrap-balancer";
+import { Container } from "~/components/layouts/container";
+import { Button } from "~/components/ui/button";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "~/convex/_generated/api";
 import PublicProjectsCatalog from "../_components/ProjectFeed";

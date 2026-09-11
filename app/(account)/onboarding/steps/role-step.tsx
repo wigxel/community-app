@@ -37,9 +37,6 @@ export function RoleStep(props: RoleStepProps) {
     <div className="space-y-5">
       <div>
         <h2 className="mb-1 text-xl font-semibold">Your Role</h2>
-        <p className="text-muted-foreground text-sm">
-          What best describes you? (optional)
-        </p>
       </div>
 
       <FormField
@@ -47,7 +44,7 @@ export function RoleStep(props: RoleStepProps) {
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Select Role</FormLabel>
+            <FormLabel>What role best describes you?</FormLabel>
             <Select value={field.value} onValueChange={field.onChange}>
               <FormControl>
                 <SelectTrigger>

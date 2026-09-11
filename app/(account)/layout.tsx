@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { QueryProvider } from "~/components/providers/react-query";
-import { api } from "~/convex/_generated/api";
-import { fetchAuthQuery, isAuthenticated } from "~/lib/auth-server";
+import { isAuthenticated } from "~/lib/auth-server";
 
 export const metadata: Metadata = {
   title: {
@@ -10,9 +9,11 @@ export const metadata: Metadata = {
     template: "%s | Reveer",
   },
 };
-export type AccountLayoutProps = {
+
+type AccountLayoutProps = {
   children: React.ReactNode;
 };
+
 export default async function AccountLayout(props: AccountLayoutProps) {
   const { children } = props;
 
@@ -20,18 +21,6 @@ export default async function AccountLayout(props: AccountLayoutProps) {
 
   if (!authenticated) {
     redirect("/auth?redirect=/dashboard");
-  }
-
-  try {
-    const profile = await fetchAuthQuery(api.profiles.getForCurrentUser).catch(
-      () => null,
-    );
-    if (!profile) {
-      redirect("/onboarding?redirect=/dashboard");
-    }
-  } catch (error) {
-    console.error("Error fetching profile:", error);
-    redirect("/onboarding?redirect=/dashboard");
   }
 
   return <QueryProvider>{children}</QueryProvider>;

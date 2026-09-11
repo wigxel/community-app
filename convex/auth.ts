@@ -14,7 +14,11 @@ export const authComponent = createClient<DataModel>(components.betterAuth);
 
 export const createAuth = (ctx: GenericCtx<DataModel>) => {
   return betterAuth({
-    baseURL: siteUrl,
+    baseURL: {
+      allowedHosts: ["*joseph-owonwos-projects.vercel.app", "*.inspace.ng"],
+      protocol: "https",
+      fallback: siteUrl,
+    },
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
