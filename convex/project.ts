@@ -116,6 +116,12 @@ export const createProject = mutation({
     if (args.project.link.length > 3)
       throw new Error("Max of 3 links per project");
 
+    if (
+      new Set(args.project.link.map((l) => l.tag)).size !==
+      args.project.link.length
+    )
+      throw new Error("Duplicate link types are not allowed");
+
     const { ongoing, timeline } = args.project;
     const { start, end } = timeline;
 
@@ -181,6 +187,12 @@ export const updateProject = mutation({
 
     if (projectData.link.length > 3)
       throw new Error("Max of 3 links per project");
+
+    if (
+      new Set(projectData.link.map((l) => l.tag)).size !==
+      projectData.link.length
+    )
+      throw new Error("Duplicate link types are not allowed");
 
     const { ongoing, timeline } = projectData;
     const { start, end } = timeline;

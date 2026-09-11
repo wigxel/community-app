@@ -73,7 +73,11 @@ export const projectSchema = z
       .max(10, { message: "Maximum 10 media per project." }),
     link: z
       .array(projectLinkSchema)
-      .max(3, { message: "Max of 3 links per project" }),
+      .max(3, { message: "Max of 3 links per project" })
+      .refine(
+        (links) => new Set(links.map((l) => l.tag)).size === links.length,
+        { message: "Duplicate link types are not allowed" },
+      ),
   })
   .superRefine((val, ctx) => {
     // media: block new pdf/gif/svg (allow read of old pdf but reject on validate)
