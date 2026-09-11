@@ -1,16 +1,46 @@
 "use client";
 import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  IconButton,
+  Text,
+} from "@hyperbridge/ui";
+import { Alert } from "@hyperbridge/ui/icons";
+import { Slot } from "@radix-ui/react-slot";
+import { useMutation } from "convex/react";
+import { More, Trash } from "iconsax-reactjs";
+import {
   BookText,
   Calendar,
+  Edit,
   ExternalLink,
+  EyeIcon,
   FileText,
   Globe,
   LinkIcon,
+  PencilIcon,
   Video,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
+import {
+  ProjectCardContent,
+  ProjectCardMedia,
+  ProjectCardMetrics,
+  ProjectCardRoot,
+} from "~/components/molecules/project-card";
 import {
   Card,
   CardContent,
@@ -18,6 +48,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { api } from "~/convex/_generated/api";
+import { toast } from "~/lib/toast";
 import type { Project, TimelineDate } from "~/types/models";
 
 const getLinkIcon = (tag: string) => {
@@ -50,19 +82,33 @@ const formatTimeline = (project: Project) => {
   return null;
 };
 
-export function ProjectCard(project: Project) {
+export function PrivateProjectCardLegacy(project: Project) {
+  const router = useRouter();
   const timeline = formatTimeline(project);
+
   return (
     <Card className="group rounded-2xl border border-white/10 bg-blue-500/20 text-blue-300">
       <CardHeader>
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <CardTitle className="text-2xl text-white">{project.title}</CardTitle>
-          {timeline && (
-            <div className="flex items-center gap-2.5 rounded-full border border-amber-400/30 bg-linear-to-r from-amber-500/15 to-orange-500/15 px-4 py-2 text-sm font-medium text-amber-200/90 shadow-lg">
-              <Calendar size={16} className="text-amber-300" />
-              <span>{timeline}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {timeline && (
+              <div className="flex items-center gap-2.5 rounded-full border border-amber-400/30 bg-linear-to-r from-amber-500/15 to-orange-500/15 px-4 py-2 text-sm font-medium text-amber-200/90 shadow-lg">
+                <Calendar size={16} className="text-amber-300" />
+                <span>{timeline}</span>
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 text-white/50 hover:bg-white/10 hover:text-white"
+              onClick={() =>
+                router.push(`/dashboard/projects/edit/${project._id}`)
+              }
+            >
+              <Edit size={16} />
+            </Button>
+          </div>
         </div>
 
         {project.description && (
@@ -194,5 +240,158 @@ export function ProjectCard(project: Project) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+type PreventPropagationProps = { children: React.ReactNode };
+
+function PreventPropagation(props: PreventPropagationProps) {
+  const { children } = props;
+
+  return (
+    <Slot
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => event.stopPropagation()}
+      onKeyUp={(event) => event.stopPropagation()}
+      onChange={(event) => event.stopPropagation()}
+    >
+      {children}
+    </Slot>
+  );
+}
+
+export function PrivateProjectCard(project: Project) {
+  const router = useRouter();
+  const editLink = `/dashboard/projects/edit/${project._id}`;
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+
+  return (
+    <>
+      <Link href={editLink} className="relative flex flex-col">
+        <ProjectCardRoot project={project}>
+          <PreventPropagation>
+            <div className="absolute inset-x-0 z-20 flex justify-between px-3 pt-1">
+              <div className="filler" />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <IconButton
+                    variant={"unset"}
+                    className="bg-brand-black-450/50 backdrop-blur-md"
+                  >
+                    <More />
+                  </IconButton>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end">
+                  <Link href={`/projects/${project._id}`} target="_blank">
+                    <DropdownMenuItem>
+                      <EyeIcon className="text-muted-foreground" />
+                      Preview project
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem onClick={() => router.push(editLink)}>
+                    <PencilIcon className="text-muted-foreground" />
+                    Edit project
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => {
+                      setTimeout(() => {
+                        setDeleteDialogOpen(true);
+                      }, 16);
+                    }}
+                  >
+                    <Trash /> Delete project
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </PreventPropagation>
+
+          <ProjectCardMedia />
+          <ProjectCardContent className="justify-start">
+            <Text
+              variant={"body1"}
+              className="basis-10/12 overflow-hidden text-ellipsis whitespace-nowrap"
+            >
+              {project.title}
+            </Text>
+            <ProjectCardMetrics />
+          </ProjectCardContent>
+        </ProjectCardRoot>
+      </Link>
+
+      <DeleteProjectDialog
+        project={project}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+      />
+    </>
+  );
+}
+
+type DeleteProjectDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  project: Project;
+};
+
+function DeleteProjectDialog(props: DeleteProjectDialogProps) {
+  const { project, open, onOpenChange } = props;
+
+  const deleteProject = useMutation(api.project.deleteProject);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="glass-effect w-full max-w-md gap-8 text-[1rem]"
+        onInteractOutside={(evt) => evt.preventDefault()}
+      >
+        <DialogDescription asChild>
+          <div className="flex flex-col gap-2.5">
+            <span className="bg-brand-danger-500/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full">
+              <Alert
+                width="1.25rem"
+                height="1.25rem"
+                className="text-brand-danger-500 shrink-0"
+              />
+            </span>
+            <div className="flex flex-col gap-2">
+              <DialogTitle className="text-h7 text-brand-white-500 font-medium">
+                Delete "{project.title}"?
+              </DialogTitle>
+              <p className="text-body-2 text-brand-black-100 font-medium">
+                Are you sure you want to delete this project? This action cannot
+                be undone.
+              </p>
+            </div>
+          </div>
+        </DialogDescription>
+
+        <DialogFooter className="gap-[1.2rem]">
+          <DialogTrigger asChild>
+            <Button variant="secondary" className="flex-1">
+              Cancel
+            </Button>
+          </DialogTrigger>
+          <Button
+            variant="destructive"
+            className="flex-1"
+            onClick={async () => {
+              try {
+                await deleteProject({ _id: project._id });
+                toast.success("Project deleted successfully");
+                onOpenChange(false);
+              } catch {
+                toast.error("Failed to delete project");
+              }
+            }}
+          >
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

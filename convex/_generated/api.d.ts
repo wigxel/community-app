@@ -10,6 +10,7 @@
 
 import type * as ai from "../ai.js";
 import type * as auth from "../auth.js";
+import type * as blurhash from "../blurhash.js";
 import type * as crons from "../crons.js";
 import type * as email from "../email.js";
 import type * as favourites from "../favourites.js";
@@ -31,6 +32,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   auth: typeof auth;
+  blurhash: typeof blurhash;
   crons: typeof crons;
   email: typeof email;
   favourites: typeof favourites;

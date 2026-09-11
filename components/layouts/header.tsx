@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import NavAuth from "~/app/_components/NavAuth";
 import { cn } from "~/lib/utils";
 import { Container } from "./container";
+
 type NavItemProps = {
   href: string;
   children: React.ReactNode;

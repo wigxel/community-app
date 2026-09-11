@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import type { ProjectFormSchema } from "./edit-projects-form";
+import type { ProjectFormValues } from "./project-form";
 
 const LINK_TAGS = [
   { value: "github", label: "GitHub" },
@@ -28,19 +28,19 @@ const normalizeUrl = (val: string) => {
 };
 
 interface LinkRowProps {
-  projectIndex: number;
   linkIndex: number;
-  control: Control<ProjectFormSchema>;
+  control: Control<ProjectFormValues>;
   remove: (i: number) => void;
   error: string | undefined;
 }
+
 export default function LinkRow(props: LinkRowProps) {
-  const { projectIndex, linkIndex, control, remove, error } = props;
+  const { linkIndex, control, remove, error } = props;
 
   return (
     <Controller
       control={control}
-      name={`projects.${projectIndex}.link.${linkIndex}`}
+      name={`link.${linkIndex}`}
       render={({ field }) => (
         <div>
           <div className="flex items-center gap-2">

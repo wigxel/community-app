@@ -6,7 +6,9 @@ import type { Doc } from "~/convex/_generated/dataModel";
 import { cn } from "~/lib/utils";
 
 type Project = Doc<"project">;
+
 export type MediaItem = Project["media"][number];
+
 export type MediaThumbProps = {
   item: MediaItem | null;
   alt: string;
@@ -14,6 +16,7 @@ export type MediaThumbProps = {
   videoRef?: React.RefObject<HTMLVideoElement | null>;
   fill?: boolean;
 };
+
 /**
  * Shared media renderer — handles photo / video / pdf / empty states.
  * Used by the landing feed card, the dashboard favourites card, and the
@@ -26,6 +29,7 @@ export function MediaThumb(props: MediaThumbProps) {
   const mimeType = item?.metadata?.mimeType ?? "";
   const isVideo = mimeType.startsWith("video/");
   const isPdf = mimeType === "application/pdf";
+  const blurDataURL = item?.metadata?.blurDataURL;
 
   if (!url) {
     return (
@@ -57,7 +61,7 @@ export function MediaThumb(props: MediaThumbProps) {
       <video
         ref={videoRef}
         src={url}
-        className={cn("aspect-post", className)}
+        className={cn("aspect-post w-full", className)}
         muted
         playsInline
         loop
@@ -72,9 +76,11 @@ export function MediaThumb(props: MediaThumbProps) {
         src={url}
         alt={alt}
         fill
-        className={cn(className, "aspect-post")}
+        className={cn(className, "aspect-post bg-background")}
         loading="lazy"
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        placeholder={blurDataURL ? "blur" : "empty"}
+        blurDataURL={blurDataURL}
       />
     );
   }
@@ -85,8 +91,10 @@ export function MediaThumb(props: MediaThumbProps) {
       alt={alt}
       width={item?.metadata?.width ?? 800}
       height={item?.metadata?.height ?? 450}
-      className={cn(className, "aspect-post")}
+      className={cn(className, "aspect-post bg-background w-full")}
       loading="lazy"
+      placeholder={blurDataURL ? "blur" : "empty"}
+      blurDataURL={blurDataURL}
     />
   );
 }

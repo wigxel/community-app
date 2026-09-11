@@ -23,7 +23,9 @@ export default async function AccountLayout(props: AccountLayoutProps) {
   }
 
   try {
-    const profile = await fetchAuthQuery(api.profiles.getForCurrentUser);
+    const profile = await fetchAuthQuery(api.profiles.getForCurrentUser).catch(
+      () => null,
+    );
     if (!profile) {
       redirect("/onboarding?redirect=/dashboard");
     }
