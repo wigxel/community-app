@@ -36,6 +36,7 @@ async function DashboardLayout(props: DashboardLayoutProps) {
           <div data-scroll-section className="px-6 py-4">
             {children}
           </div>
+          <div className="pt-32" />
         </ScrollArea>
       </div>
 

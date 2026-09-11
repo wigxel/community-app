@@ -1,4 +1,9 @@
 import { ProjectForm } from "~/components/forms/project";
+import {
+  DBHeader,
+  DBHeaderDescription,
+  DBHeaderTitle,
+} from "~/components/layouts/dashboard-page-header";
 
 export default async function EditProjectPage({
   params,
@@ -9,12 +14,11 @@ export default async function EditProjectPage({
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-semibold">Edit Project</h1>
-        <p className="mt-1 text-base text-white/50">
-          Update your project details
-        </p>
-      </div>
+      <DBHeader>
+        <DBHeaderTitle text={"Edit Project"} />
+        <DBHeaderDescription>Update your project details</DBHeaderDescription>
+      </DBHeader>
+
       <ProjectForm mode="edit" projectId={projectId} />
     </div>
   );

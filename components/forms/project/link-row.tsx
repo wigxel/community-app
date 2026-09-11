@@ -1,7 +1,8 @@
 "use client";
-import { Link as LinkIcon, X } from "lucide-react";
-import { type Control, Controller } from "react-hook-form";
-import { Button } from "~/components/ui/button";
+import { IconButton } from "@hyperbridge/ui";
+import { GlobeIcon, MinusIcon } from "lucide-react";
+import { type Control, Controller, useFormContext } from "react-hook-form";
+import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
 import { Input } from "~/components/ui/input";
 import {
   Select,
@@ -13,12 +14,41 @@ import {
 import type { ProjectFormValues } from "./project-form";
 
 const LINK_TAGS = [
-  { value: "github", label: "GitHub" },
-  { value: "live", label: "Live Demo" },
-  { value: "figma", label: "Figma" },
-  { value: "behance", label: "Behance" },
-  { value: "docs", label: "Docs" },
-  { value: "other", label: "Other" },
+  {
+    prefix: "github.com/",
+    value: "github",
+    label: "GitHub",
+    icon: <Github size={"1em"} />,
+    placeholder: "username",
+  },
+  {
+    prefix: "linkedin.com/",
+    value: "linkedin",
+    label: "LinkedIn",
+    icon: <LinkedIn size={"1em"} />,
+    placeholder: "username",
+  },
+  {
+    prefix: "figma.com/",
+    value: "figma",
+    label: "Figma",
+    icon: <Figma size={"1em"} />,
+    placeholder: "project-id",
+  },
+  {
+    prefix: "behance.com/",
+    value: "behance",
+    label: "Behance",
+    icon: <Behance size={"1em"} />,
+    placeholder: "project-id",
+  },
+  {
+    prefix: "https://",
+    value: "other",
+    label: "Other",
+    icon: <GlobeIcon size={"1em"} />,
+    placeholder: "www.somewhere.com",
+  },
 ] as const;
 
 const normalizeUrl = (val: string) => {
@@ -36,37 +66,47 @@ interface LinkRowProps {
 
 export default function LinkRow(props: LinkRowProps) {
   const { linkIndex, control, remove, error } = props;
+  const { watch } = useFormContext();
 
   return (
     <Controller
       control={control}
       name={`link.${linkIndex}`}
-      render={({ field }) => (
-        <div>
-          <div className="flex items-center gap-2">
-            <Select
-              value={field.value?.tag ?? "github"}
-              onValueChange={(val) =>
-                field.onChange({ ...field.value, tag: val })
-              }
-            >
-              <SelectTrigger className="w-32 shrink-0 border-white/15 bg-white/5 text-sm text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-white/15 bg-slate-900 text-white">
-                {LINK_TAGS.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      render={({ field }) => {
+        const tag = watch(field.name)?.tag;
+        const match = LINK_TAGS.find((linkType) => linkType.value === tag);
 
-            <div className="relative flex flex-1 items-center">
-              <LinkIcon
-                size={13}
-                className="absolute left-3 shrink-0 text-white/30"
-              />
+        return (
+          <div>
+            <div className="focus-within:bg-card hover:bg-card relative flex grow basis-3/5 items-center rounded-xl px-2 py-2">
+              <Select
+                value={field.value?.tag ?? "other"}
+                onValueChange={(val) =>
+                  field.onChange({ ...field.value, tag: val })
+                }
+              >
+                <SelectTrigger className="w-20 grow-0! border-none shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {LINK_TAGS.map((linkType) => (
+                    <SelectItem key={linkType.value} value={linkType.value}>
+                      <span className="inline-flex items-center gap-2">
+                        {linkType.icon}
+                        {/*<span>{linkType.prefix}</span>*/}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {match ? (
+                <span className="text-foreground shrink-0 px-2 text-sm whitespace-nowrap">
+                  {match?.prefix}
+                </span>
+              ) : null}
+
               <Input
                 value={field.value?.value ?? ""}
                 onChange={(e) =>
@@ -75,26 +115,25 @@ export default function LinkRow(props: LinkRowProps) {
                     value: normalizeUrl(e.target.value),
                   })
                 }
-                placeholder="https://..."
-                className="border-white/15 bg-white/5 pl-8 text-sm text-white placeholder:text-white/30"
+                placeholder={match?.placeholder}
+                className="text-foreground bg-muted placeholder:text-muted-foreground w-full text-sm"
               />
-            </div>
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0 text-white/30 hover:bg-red-400/10 hover:text-red-400"
-              onClick={() => remove(linkIndex)}
-            >
-              <X size={13} />
-            </Button>
+              <IconButton
+                type="button"
+                variant="destructive"
+                className="ms-2 shrink-0"
+                onClick={() => remove(linkIndex)}
+              >
+                <MinusIcon />
+              </IconButton>
+            </div>
+            {error && (
+              <p className="ml-34 text-xs font-medium text-red-400">{error}</p>
+            )}
           </div>
-          {error && (
-            <p className="ml-34 text-xs font-medium text-red-400">{error}</p>
-          )}
-        </div>
-      )}
+        );
+      }}
     />
   );
 }

@@ -55,7 +55,6 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
   const isLoading = mode === "edit" && project === undefined;
   const isError =
     mode === "edit" &&
-    project !== undefined &&
     Result.match(project, {
       loading: () => false,
       success: () => false,
@@ -63,7 +62,7 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
     });
 
   const projectData =
-    mode === "edit" && project !== undefined
+    mode === "edit"
       ? Result.match(project, {
           loading: () => null,
           error: () => null,
@@ -73,14 +72,21 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
-    defaultValues: EMPTY_PROJECT,
+    defaultValues: EMPTY_PROJECT ?? projectData,
   });
 
   const { handleSubmit, reset } = form;
 
   React.useEffect(() => {
     if (mode === "edit" && projectData) {
-      reset(projectData);
+      const id = setTimeout(() => {
+        reset(projectData, {
+          keepDirty: false,
+          keepDefaultValues: false,
+        });
+      }, 16);
+
+      return () => clearTimeout(id);
     }
   }, [mode, projectData, reset]);
 
@@ -224,7 +230,16 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
           <p className="text-xs text-white/50">{uploadProgress}</p>
         )}
 
-        <HoveringFormActions mode={mode} />
+        <HoveringFormActions
+          mode={mode}
+          onCancel={() => {
+            if (window.history.length > 1) {
+              return router.back();
+            }
+
+            return router.push("/dashboard/projects");
+          }}
+        />
       </form>
     </FormProvider>
   );

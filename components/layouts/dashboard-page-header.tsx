@@ -66,7 +66,6 @@ export function DBHeaderTitle(
       >
         {text}
       </h1>
-
       {mounted
         ? createPortal(
             <AnimateWords animate={!isInView} text={text} />,
