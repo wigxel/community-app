@@ -75,7 +75,10 @@ export const projectSchema = z
       .array(projectLinkSchema)
       .max(3, { message: "Max of 3 links per project" })
       .refine(
-        (links) => new Set(links.map((l) => l.tag)).size === links.length,
+        (links) => {
+          const nonOther = links.filter((l) => l.tag !== "other");
+          return new Set(nonOther.map((l) => l.tag)).size === nonOther.length;
+        },
         { message: "Duplicate link types are not allowed" },
       ),
   })

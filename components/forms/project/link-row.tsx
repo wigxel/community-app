@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { cn } from "~/lib/utils";
 import type { ProjectFormValues } from "./project-form";
 
 const LINK_TAGS = [
@@ -57,6 +58,27 @@ const normalizeUrl = (val: string) => {
   return val;
 };
 
+const MATCHABLE_HOSTS = [
+  "github.com",
+  "linkedin.com",
+  "figma.com",
+  "behance.net",
+];
+
+export function extractLinkValue(url: string): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    const isMatch = MATCHABLE_HOSTS.some(
+      (host) => parsed.hostname === host || parsed.hostname === `www.${host}`,
+    );
+    if (!isMatch) return null;
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 interface LinkRowProps {
   linkIndex: number;
   control: Control<ProjectFormValues>;
@@ -77,60 +99,71 @@ export default function LinkRow(props: LinkRowProps) {
         const match = LINK_TAGS.find((linkType) => linkType.value === tag);
 
         return (
-          <div>
-            <div className="focus-within:bg-card hover:bg-card relative flex grow basis-3/5 items-center rounded-xl px-2 py-2">
-              <Select
-                value={field.value?.tag ?? "other"}
-                onValueChange={(val) =>
-                  field.onChange({ ...field.value, tag: val })
-                }
-              >
-                <SelectTrigger className="w-20 grow-0! border-none shadow-none">
-                  <SelectValue />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {LINK_TAGS.map((linkType) => (
-                    <SelectItem key={linkType.value} value={linkType.value}>
-                      <span className="inline-flex items-center gap-2">
-                        {linkType.icon}
-                        {/*<span>{linkType.prefix}</span>*/}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {match ? (
-                <span className="text-foreground shrink-0 px-2 text-sm whitespace-nowrap">
-                  {match?.prefix}
-                </span>
-              ) : null}
-
-              <Input
-                value={field.value?.value ?? ""}
-                onChange={(e) =>
-                  field.onChange({
-                    ...field.value,
-                    value: normalizeUrl(e.target.value),
-                  })
-                }
-                placeholder={match?.placeholder}
-                className="text-foreground bg-muted placeholder:text-muted-foreground w-full text-sm"
-              />
-
-              <IconButton
-                type="button"
-                variant="destructive"
-                className="ms-2 shrink-0"
-                onClick={() => remove(linkIndex)}
-              >
-                <MinusIcon />
-              </IconButton>
-            </div>
-            {error && (
-              <p className="ml-34 text-xs font-medium text-red-400">{error}</p>
+          <div
+            title={error}
+            className={cn(
+              "focus-within:bg-card hover:bg-card relative flex grow basis-3/5 items-center rounded-xl px-2 py-2",
+              {
+                "border-destructive border": error,
+              },
             )}
+          >
+            <Select
+              value={field.value?.tag ?? "other"}
+              onValueChange={(val) =>
+                field.onChange({ ...field.value, tag: val })
+              }
+            >
+              <SelectTrigger className="w-20 grow-0! border-none shadow-none">
+                <SelectValue />
+              </SelectTrigger>
+
+              <SelectContent>
+                {LINK_TAGS.map((linkType) => (
+                  <SelectItem key={linkType.value} value={linkType.value}>
+                    <span className="inline-flex items-center gap-2">
+                      {linkType.icon}
+                      {/*<span>{linkType.prefix}</span>*/}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {match ? (
+              <span className="text-foreground shrink-0 px-2 text-sm whitespace-nowrap">
+                {match?.prefix}
+              </span>
+            ) : null}
+
+            <Input
+              value={field.value?.value ?? ""}
+              onChange={(e) =>
+                field.onChange({
+                  ...field.value,
+                  value: normalizeUrl(e.target.value),
+                })
+              }
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData("text");
+                const value = extractLinkValue(pasted);
+                if (value) {
+                  e.preventDefault();
+                  field.onChange({ ...field.value, value });
+                }
+              }}
+              placeholder={match?.placeholder}
+              className="text-foreground bg-muted placeholder:text-muted-foreground w-full text-sm"
+            />
+
+            <IconButton
+              type="button"
+              variant="destructive"
+              className="ms-2 shrink-0"
+              onClick={() => remove(linkIndex)}
+            >
+              <MinusIcon />
+            </IconButton>
           </div>
         );
       }}
