@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { api, internal } from "./_generated/api";
-import { internalMutation, mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { internalMutation } from "./_generated/server";
 
 const DEFAULT_SKILLS = [
   // Programming Languages
@@ -222,18 +222,20 @@ const DEFAULT_TITLES = [
 /**
  * Seed the skills table with default skills.
  * Defaults to dryRun — pass { dryRun: false } to actually insert.
+ * Use { force: true } to re-seed even if already run.
  */
-export const seedSkills = mutation({
-  args: { dryRun: v.optional(v.boolean()) },
-  async handler(ctx, { dryRun = true }) {
-    const existing = await ctx.db.query("skills").collect();
-    const existingNames = new Set(existing.map((s) => s.name));
-
-    const wouldInsert = DEFAULT_SKILLS.filter(
-      (s) => !existingNames.has(s.name),
-    );
-
+export const seedSkills = internalMutation({
+  args: {
+    dryRun: v.optional(v.boolean()),
+    force: v.optional(v.boolean()),
+  },
+  async handler(ctx, { dryRun = true, force = false }) {
     if (dryRun) {
+      const existing = await ctx.db.query("skills").collect();
+      const existingNames = new Set(existing.map((s) => s.name));
+      const wouldInsert = DEFAULT_SKILLS.filter(
+        (s) => !existingNames.has(s.name),
+      );
       return {
         inserted: 0,
         skipped: DEFAULT_SKILLS.length - wouldInsert.length,
@@ -241,6 +243,22 @@ export const seedSkills = mutation({
         wouldInsert: wouldInsert.map((s) => s.name),
       };
     }
+
+    if (!force) {
+      const alreadyRan = await ctx.db
+        .query("migrations")
+        .withIndex("by_name", (q) => q.eq("name", "seed:skills"))
+        .first();
+      if (alreadyRan) {
+        return { inserted: 0, skipped: 0, dryRun: false, alreadyRan: true };
+      }
+    }
+
+    const existing = await ctx.db.query("skills").collect();
+    const existingNames = new Set(existing.map((s) => s.name));
+    const wouldInsert = DEFAULT_SKILLS.filter(
+      (s) => !existingNames.has(s.name),
+    );
 
     let inserted = 0;
     for (const skill of wouldInsert) {
@@ -250,6 +268,14 @@ export const seedSkills = mutation({
       });
       inserted++;
     }
+
+    await ctx.db.insert("migrations", {
+      name: "seed:skills",
+      type: "seed",
+      status: "success",
+      executedAt: Date.now(),
+    });
+
     return {
       inserted,
       skipped: DEFAULT_SKILLS.length - inserted,
@@ -261,18 +287,20 @@ export const seedSkills = mutation({
 /**
  * Seed the titles table with default titles.
  * Defaults to dryRun — pass { dryRun: false } to actually insert.
+ * Use { force: true } to re-seed even if already run.
  */
-export const seedTitles = mutation({
-  args: { dryRun: v.optional(v.boolean()) },
-  async handler(ctx, { dryRun = true }) {
-    const existing = await ctx.db.query("titles").collect();
-    const existingNames = new Set(existing.map((t) => t.name));
-
-    const wouldInsert = DEFAULT_TITLES.filter(
-      (t) => !existingNames.has(t.name),
-    );
-
+export const seedTitles = internalMutation({
+  args: {
+    dryRun: v.optional(v.boolean()),
+    force: v.optional(v.boolean()),
+  },
+  async handler(ctx, { dryRun = true, force = false }) {
     if (dryRun) {
+      const existing = await ctx.db.query("titles").collect();
+      const existingNames = new Set(existing.map((t) => t.name));
+      const wouldInsert = DEFAULT_TITLES.filter(
+        (t) => !existingNames.has(t.name),
+      );
       return {
         inserted: 0,
         skipped: DEFAULT_TITLES.length - wouldInsert.length,
@@ -280,6 +308,22 @@ export const seedTitles = mutation({
         wouldInsert: wouldInsert.map((t) => t.name),
       };
     }
+
+    if (!force) {
+      const alreadyRan = await ctx.db
+        .query("migrations")
+        .withIndex("by_name", (q) => q.eq("name", "seed:titles"))
+        .first();
+      if (alreadyRan) {
+        return { inserted: 0, skipped: 0, dryRun: false, alreadyRan: true };
+      }
+    }
+
+    const existing = await ctx.db.query("titles").collect();
+    const existingNames = new Set(existing.map((t) => t.name));
+    const wouldInsert = DEFAULT_TITLES.filter(
+      (t) => !existingNames.has(t.name),
+    );
 
     let inserted = 0;
     for (const title of wouldInsert) {
@@ -290,6 +334,14 @@ export const seedTitles = mutation({
       });
       inserted++;
     }
+
+    await ctx.db.insert("migrations", {
+      name: "seed:titles",
+      type: "seed",
+      status: "success",
+      executedAt: Date.now(),
+    });
+
     return {
       inserted,
       skipped: DEFAULT_TITLES.length - inserted,
@@ -301,12 +353,22 @@ export const seedTitles = mutation({
 /**
  * Seed all tables (skills + titles).
  * Defaults to dryRun — pass { dryRun: false } to actually insert.
+ * Use { force: true } to re-seed even if already run.
  */
-export const seedSome = mutation({
-  args: { dryRun: v.optional(v.boolean()) },
-  async handler(ctx, { dryRun = true }) {
-    const skills: any = await ctx.runMutation(api.seeds.seedSkills, { dryRun });
-    const titles: any = await ctx.runMutation(api.seeds.seedTitles, { dryRun });
+export const seedSome = internalMutation({
+  args: {
+    dryRun: v.optional(v.boolean()),
+    force: v.optional(v.boolean()),
+  },
+  async handler(ctx, { dryRun = true, force = false }) {
+    const skills: any = await ctx.runMutation(internal.seeds.seedSkills, {
+      dryRun,
+      force,
+    });
+    const titles: any = await ctx.runMutation(internal.seeds.seedTitles, {
+      dryRun,
+      force,
+    });
 
     return { skills, titles };
   },
