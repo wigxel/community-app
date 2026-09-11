@@ -1,41 +1,55 @@
 "use client";
-import { Text } from "@hyperbridge/ui";
-import { usePaginatedQuery } from "convex/react";
+import { Button } from "@hyperbridge/ui";
+import {
+  type PaginatedQueryReference,
+  type UsePaginatedQueryReturnType,
+  usePaginatedQuery,
+} from "convex/react";
+
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ProjectCard } from "~/components/dashboard/projects/project-card";
+import { PrivateProjectCard } from "~/components/dashboard/projects/project-card";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
+import {
+  DBCtaButton,
+  DBHeader,
+  DBHeaderTitle,
+} from "~/components/layouts/dashboard-page-header";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
-import { FABPlusIcon, FAButton } from "~/components/ui/fab-button";
+import { StandardGrid } from "~/components/layouts/grids";
+import { InlineLoader } from "~/components/layouts/loader";
+import { FABPlusIcon } from "~/components/ui/fab-button";
 import { api } from "~/convex/_generated/api";
+
+const PAGE_LIMIT = 50;
 
 export default function Projects() {
   const router = useRouter();
 
-  const { results, status } = usePaginatedQuery(
+  const paginated = usePaginatedQuery(
     api.project.listProject,
     {},
-    { initialNumItems: 50 },
+    { initialNumItems: PAGE_LIMIT },
   );
-
+  const { results, status } = paginated;
   const isInitialLoading = status === "LoadingFirstPage";
-
   const isEmpty = !isInitialLoading && results.length === 0;
 
   return (
     <div>
       <div className="mb-8 flex items-center justify-between gap-5">
-        <Text variant={"h4"}>Projects</Text>
+        <DBHeader>
+          <DBHeaderTitle text="Projects" />
+        </DBHeader>
 
         {!isEmpty && (
-          <FAButton
+          <DBCtaButton
             title="Add a project"
-            className="size-24"
-            onClick={() => router.push("/dashboard/projects/edit")}
+            onClick={() => router.push("/dashboard/projects/create")}
           >
             <FABPlusIcon />
-          </FAButton>
+          </DBCtaButton>
         )}
       </div>
 
@@ -58,7 +72,7 @@ export default function Projects() {
           <EmptyState.Button
             title="Add a project"
             onClick={() => {
-              return router.push("/dashboard/projects/edit");
+              return router.push("/dashboard/projects/create");
             }}
           />
         </EmptyState.Content>
@@ -73,13 +87,45 @@ export default function Projects() {
             />
           ) : (
             <div className="flex flex-col gap-8">
-              {results.map((project) => {
-                return <ProjectCard key={project._id} {...project} />;
-              })}
+              <StandardGrid className="mb-12">
+                {results.map((project) => {
+                  return <PrivateProjectCard key={project._id} {...project} />;
+                })}
+              </StandardGrid>
+              <ConvexPagination perPage={PAGE_LIMIT} control={paginated} />
             </div>
           )}
         </EmptyState.Conceal>
       </EmptyState>
+    </div>
+  );
+}
+
+type ConvexPaginationProps = {
+  perPage: number;
+  control: UsePaginatedQueryReturnType<PaginatedQueryReference>;
+};
+
+function ConvexPagination(props: ConvexPaginationProps) {
+  const { perPage: chunk, control } = props;
+
+  if (control.status === "Exhausted") return null;
+
+  const isLoadingMore = control.status === "LoadingMore";
+  const isFirstLoading = control.status === "LoadingFirstPage";
+
+  return (
+    <div className="pagination">
+      <Button
+        variant="outline"
+        disabled={
+          control.status !== "CanLoadMore" || isFirstLoading || isLoadingMore
+        }
+        onClick={() => control.loadMore(chunk)}
+      >
+        <span>Load more</span>
+        {isLoadingMore ? <InlineLoader size={24} /> : null}
+      </Button>
     </div>
   );
 }

@@ -11,13 +11,15 @@ function StatCard(props: StatCardProps) {
   const { icon, label, value } = props;
 
   return (
-    <Card className="border border-white/10 bg-blue-500/20 text-blue-300">
-      <CardContent className="flex items-center gap-3 pt-6">
-        {icon}
-        <div>
-          <p className="text-muted-foreground text-sm">{label}</p>
-          <p className="text-xl font-semibold text-white">{value}</p>
-        </div>
+    <Card>
+      <CardContent className="flex items-start gap-3 pt-6">
+        <p className="text-muted-foreground flex flex-col gap-2 text-sm">
+          {icon}
+          {label}
+        </p>
+        <p className="text-foreground flex-1 text-end text-4xl font-normal">
+          {String(value).padStart(2, "0")}
+        </p>
       </CardContent>
     </Card>
   );

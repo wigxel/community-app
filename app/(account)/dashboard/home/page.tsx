@@ -1,15 +1,16 @@
 "use client";
 
+import { Button } from "@hyperbridge/ui";
 import { usePaginatedQuery, useQuery } from "convex/react";
+import { Mobile } from "iconsax-reactjs";
 import { Briefcase, Folder, Sparkles } from "lucide-react";
 import Link from "next/link";
 import StatCard from "~/components/dashboard/home/StatCard";
 import WorkItem from "~/components/dashboard/home/WorkItem";
 import { FullscreenLoader } from "~/components/layouts/loader";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
+import { AuthUserAvatar } from "~/components/profile/auth-user-avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Progress } from "~/components/ui/progress";
+import { SegmentProgressBar } from "~/components/ui/segmented-gradient-progress";
 import { api } from "~/convex/_generated/api";
 import { ProjectImpl } from "~/lib/factories/project";
 import type { Project } from "~/types/models";
@@ -26,7 +27,6 @@ function DashboardPage() {
   }
 
   const fullName = `${profile.firstName} ${profile.lastName}`;
-  const initial = profile.firstName.charAt(0).toUpperCase();
   const titleName = profile.title?.name || "No title set";
 
   // Calculate profile completion
@@ -41,6 +41,7 @@ function DashboardPage() {
     profile.phoneNumbers.length > 0,
     profile?.projects && profile.projects.length > 0,
   ];
+
   const completedFields = fields.filter(Boolean).length;
   const completionPercentage = Math.round(
     (completedFields / fields.length) * 100,
@@ -50,75 +51,76 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="border border-white/10 bg-blue-500/20 text-blue-300">
+      <Card className="text-brand-primary border border-white/10">
         <CardContent className="flex items-center gap-4 pt-6">
-          <Avatar className="h-14 w-14">
-            <AvatarImage src={profile.profileImage || undefined} />
-            <AvatarFallback className="bg-blue-500/20 text-blue-300">
-              {initial}
-            </AvatarFallback>
-          </Avatar>
+          <AuthUserAvatar className="size-14" />
 
-          <div className="flex-1">
-            <p className="text-lg font-semibold text-white">{fullName}</p>
-            <p className="text-muted-foreground text-sm">{titleName}</p>
+          <div className="flex flex-1 flex-col gap-4">
+            <div className="flex items-end gap-2 leading-none">
+              <p className="text-foreground text-lg leading-none font-semibold">
+                {fullName}
+              </p>
+              <p className="text-muted-foreground text-sm leading-none">
+                {titleName}
+              </p>
+            </div>
 
-            <div className="mt-2">
-              <Progress
-                value={completionPercentage}
-                className="h-2 bg-blue-500/30 text-blue-300"
+            <div>
+              <SegmentProgressBar
+                progressValue={completionPercentage}
+                className="text-brand-primary h-4"
               />
-              <p className="mt-1 text-xs text-white/50">
+              <p className="text-foreground/50 mt-1 text-xs">
                 Profile {completionPercentage}% complete
               </p>
             </div>
           </div>
 
           <Link href={`/profile/${profile.username}`}>
-            <Button
-              size="sm"
-              className="cursor-pointer bg-blue-500/20 text-blue-300 hover:bg-blue-500/30"
-            >
-              View profile
-            </Button>
+            <Button size="sm">View profile</Button>
           </Link>
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard
-          icon={<Briefcase className="h-5 w-5 text-blue-300" />}
+          icon={<Briefcase className="text-brand-primary h-5 w-5" />}
           label="Work Experience"
           value={(workExperience?.length || 0).toString()}
         />
         <StatCard
-          icon={<Folder className="h-5 w-5 text-blue-300" />}
+          icon={<Folder className="text-brand-primary h-5 w-5" />}
           label="Projects"
           value={projectCount.toString()}
         />
         <StatCard
-          icon={<Sparkles className="h-5 w-5 text-blue-300" />}
+          icon={<Sparkles className="text-brand-primary h-5 w-5" />}
           label="Interests"
           value={(profile.interests?.length || 0).toString()}
         />
         <StatCard
+          icon={<Mobile className="text-brand-primary h-5 w-5" />}
           label="Phone Numbers"
           value={profile.phoneNumbers.length.toString()}
         />
       </div>
 
       <div>
-        <Card className="border border-white/10 bg-blue-500/20 text-blue-300">
-          <CardHeader>
-            <CardTitle className="text-base text-white">
-              Work Experience & Interests
-            </CardTitle>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Work Experience & Interests</CardTitle>
+            <Link href={"/dashboard/settings/profile"}>
+              <Button size="sm" variant="default">
+                Edit profile
+              </Button>
+            </Link>
           </CardHeader>
+
           <CardContent className="space-y-4">
             {profile.shortBio && (
               <div>
                 <p className="text-muted-foreground mb-1 text-sm">Bio</p>
-                <p className="text-white">{profile.shortBio}</p>
+                <p className="text-foreground">{profile.shortBio}</p>
               </div>
             )}
 
@@ -155,7 +157,7 @@ function DashboardPage() {
                   {profile.interests.map((interest) => (
                     <span
                       key={interest}
-                      className="rounded-full border border-blue-400/30 bg-blue-500/20 px-3 py-1 text-sm text-blue-300"
+                      className="text-brand-primary rounded-full border border-blue-400/30 px-3 py-1 text-sm"
                     >
                       {interest}
                     </span>
@@ -165,16 +167,6 @@ function DashboardPage() {
             )}
 
             <TopProjects />
-
-            <Link href={"/dashboard/settings/profile"}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="cursor-pointer text-blue-300 hover:bg-blue-500/20"
-              >
-                Edit profile →
-              </Button>
-            </Link>
           </CardContent>
         </Card>
       </div>

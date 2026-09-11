@@ -3,55 +3,33 @@
 // @ts-expect-error No declaration file yet
 import { Type } from "@wigxel/react-components/lib/typography";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { Balancer } from "react-wrap-balancer";
 import { Container } from "~/components/layouts/container";
 import { Button } from "~/components/ui/button";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "~/convex/_generated/api";
 import PublicProjectsCatalog from "../_components/ProjectFeed";
+import { LandingHero } from "./_components/landing-page-hero";
 
-export default function Home() {
+export const revalidate = 30;
+
+const SSR_PAGE_SIZE = 12;
+
+export default async function Home() {
+  const initialData = await fetchQuery(api.project.listAll, {
+    paginationOpts: { numItems: SSR_PAGE_SIZE, cursor: null },
+  }).catch(() => null);
+
   return (
     <div className="container mx-auto">
       {/* Hero section */}
-      <Container
-        level="max"
-        className="flex min-h-[40svh] items-start gap-8 py-32"
-      >
-        <div className="flex-1 lg:pl-12">
-          <div className="flex flex-1 flex-col gap-4 py-12">
-            <h1 className="text-6xl font-bold tracking-tighter text-balance">
-              <Balancer>
-                Show your best works <br /> in a{" "}
-                <span className="text-accent-foreground">
-                  <Type
-                    values={["professional", "best", "creative"]}
-                    speed={100}
-                  />
-                </span>{" "}
-                way
-              </Balancer>
-            </h1>
-
-            <p className="text-muted-foreground max-w-md text-base text-balance">
-              Browse real design and development work from local talents. We
-              make it easy to find the right locals for the jobs
-            </p>
-
-            <div className="mt-8 flex">
-              <Link href={"/auth/sign-in"}>
-                <Button size="lg">
-                  Get Started <ArrowRight />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="aspect-video flex-1 rounded-lg bg-gray-800"></div>
-      </Container>
+      <LandingHero />
 
       {/* Project Catalog */}
-      <PublicProjectsCatalog />
+      <PublicProjectsCatalog
+        initialProjects={initialData?.page}
+        ssrError={!initialData}
+      />
     </div>
   );
 }

@@ -96,7 +96,7 @@ export function GettingStartedWidget() {
           className={absolutePosition}
         >
           <Card className={boxClassName}>
-            <CardHeader>
+            <CardHeader className="px-6">
               <div className="flex items-start justify-between">
                 <CardTitle className="flex items-center justify-between gap-2">
                   <Text variant="p" className="text-foreground font-medium!">
@@ -116,7 +116,7 @@ export function GettingStartedWidget() {
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 bg-transparent pt-0">
               <div className="space-y-2">
                 {steps.map((step) => {
                   return (

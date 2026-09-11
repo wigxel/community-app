@@ -1,0 +1,144 @@
+"use client";
+import { motion, stagger, useInView, type Variants } from "motion/react";
+import React from "react";
+import { createPortal } from "react-dom";
+import { cn } from "~/lib/utils";
+import { FABPlusIcon, FAButton } from "../ui/fab-button";
+
+const PORTAL_ID = "dashboard-header-portal";
+
+export type DBHeaderProps = { children: React.ReactNode };
+
+export function DBHeader(props: DBHeaderProps) {
+  return <div className="pt-4">{props.children}</div>;
+}
+
+const parent: Variants = {
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { delayChildren: stagger(0.1) },
+  },
+  hidden: {
+    y: 0,
+    opacity: 0,
+    transition: { delayChildren: stagger(0.1, { from: "last" }) },
+  },
+};
+
+const items: Variants = {
+  show: { y: "0%" },
+  hidden: { y: "50%" },
+};
+
+export type DBHeaderTitleProps = React.ComponentProps<"h1"> & { text: string };
+
+export function DBHeaderTitle(props: DBHeaderTitleProps) {
+  const { text, ...restProps } = props;
+  const attempt = React.useRef(0);
+  const headingRef = React.useRef<HTMLHeadingElement>(null);
+  const [mounted, setMounted] = React.useState<HTMLElement>();
+
+  const isInView = useInView(headingRef);
+
+  React.useEffect(() => {
+    const id = setInterval(() => {
+      attempt.current++;
+
+      const rootEl = document.querySelector(
+        `#${PORTAL_ID}`,
+      ) as HTMLElement | null;
+
+      if (attempt.current > 5) return clearInterval(id);
+      if (rootEl == null) return;
+
+      setMounted(rootEl);
+      clearInterval(id);
+    }, 16);
+
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <>
+      <h1
+        ref={headingRef}
+        className="text-4xl leading-none font-semibold"
+        {...restProps}
+      >
+        {text}
+      </h1>
+
+      {mounted
+        ? createPortal(
+            <AnimateWords animate={!isInView} text={text} />,
+            mounted,
+          )
+        : null}
+    </>
+  );
+}
+
+type AnimateWordsProps = { text: string; animate: boolean };
+
+function AnimateWords(props: AnimateWordsProps) {
+  const { text, animate } = props;
+
+  const words = React.useMemo(
+    () => text.split(" ").map((word, index) => [word, index]),
+    [text],
+  );
+
+  return (
+    <motion.div
+      variants={parent}
+      animate={animate ? "show" : "hidden"}
+      initial="hidden"
+      className="flex"
+    >
+      {words.map(([word, index]) => {
+        return (
+          <motion.div key={index} variants={items}>
+            {word}&nbsp;
+          </motion.div>
+        );
+      })}
+    </motion.div>
+  );
+}
+
+export function DBHeaderDescription(props: React.ComponentProps<"p">) {
+  return (
+    <p
+      className="text-muted-foreground mt-4 text-base leading-none"
+      {...props}
+    />
+  );
+}
+
+export function DBHeaderPortal(props: React.ComponentProps<"div">) {
+  return (
+    <div
+      id={PORTAL_ID}
+      className="text-foreground inline-flex items-center p-2 font-medium"
+      {...props}
+    />
+  );
+}
+
+type DBCtaButtonProps = Omit<React.ComponentProps<typeof FAButton>, "variant">;
+
+export function DBCtaButton(props: DBCtaButtonProps) {
+  return (
+    <FAButton
+      variant="contour"
+      {...props}
+      className={cn(
+        "fixed top-(--db-main-offset-top) size-12 -translate-y-1/2 lg:end-32",
+        props.className,
+      )}
+    >
+      <FABPlusIcon />
+    </FAButton>
+  );
+}

@@ -54,3 +54,13 @@ export const ProjectImpl = {
     return start ?? "--";
   },
 };
+
+export const ACCEPTED_PROJECT_MEDIA_TYPES = {
+  "image/jpeg": "photo",
+  "image/png": "photo",
+  "image/webp": "photo",
+  "video/mp4": "video",
+  "video/webm": "video",
+  "video/ogg": "video",
+  "video/quicktime": "video",
+} as const satisfies Record<string, "photo" | "video">;

@@ -2,5 +2,9 @@
   "$schema": "node_modules/convex/schemas/convex.schema.json",
   "aiFiles": {
     "enabled": true
+  },
+  "node": {
+    "nodeVersion": "22",
+    "externalPackages": ["sharp"]
   }
 }
