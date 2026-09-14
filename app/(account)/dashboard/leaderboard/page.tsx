@@ -12,45 +12,6 @@ import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { api } from "~/convex/_generated/api";
 
-export default function LeaderboardPage() {
-  const [activeTab, setActiveTab] = useState("engineers");
-
-  return (
-    <div className="container mx-auto max-w-6xl py-8">
-      <div className="flex flex-col items-start justify-between gap-8 md:flex-row">
-        {/* Left Side - Leaderboard */}
-        <div className="w-full space-y-6 md:w-2/3">
-          <div className="flex items-center gap-3">
-            <Trophy className="h-8 w-8 text-yellow-400" />
-            <h1 className="text-3xl font-bold">Community Leaderboard</h1>
-          </div>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="engineers">Software Engineers</TabsTrigger>
-              <TabsTrigger value="designers">UI/UX Designers</TabsTrigger>
-            </TabsList>
-            <TabsContent value="engineers" className="mt-6">
-              <LeaderboardList titleName="Software Engineer" />
-            </TabsContent>
-            <TabsContent value="designers" className="mt-6">
-              <LeaderboardList titleName="UI Designer" />
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Right Side - AI Recruiter Chatbot */}
-        <div className="w-full md:w-1/3">
-          <AiRecruiterChatbot
-            titleName={
-              activeTab === "engineers" ? "Software Engineer" : "UI Designer"
-            }
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
 type LeaderboardListProps = { titleName: string };
 function LeaderboardList(props: LeaderboardListProps) {
   const { titleName } = props;
@@ -175,6 +136,7 @@ function LeaderboardList(props: LeaderboardListProps) {
     </div>
   );
 }
+
 type AiRecruiterChatbotProps = { titleName: string };
 function AiRecruiterChatbot(props: AiRecruiterChatbotProps) {
   const { titleName } = props;
@@ -315,4 +277,44 @@ function getBadgeColor(badge: string) {
     default:
       return "bg-gray-500/20 text-gray-400 border-gray-500/50";
   }
+}
+
+export default function LeaderboardPage() {
+  const [activeTab, setActiveTab] = useState("engineers");
+
+  return (
+    <div className="container mx-auto max-w-6xl py-8">
+      <div className="flex flex-col items-start justify-between gap-8 md:flex-row">
+        {/* Left Side - Leaderboard */}
+        <div className="w-full space-y-6 md:w-2/3">
+          <div className="flex items-center gap-3">
+            <Trophy className="h-8 w-8 text-yellow-400" />
+            <h1 className="text-3xl font-bold">Community Leaderboard</h1>
+          </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="engineers">Software Engineers</TabsTrigger>
+              <TabsTrigger value="designers">UI/UX Designers</TabsTrigger>
+            </TabsList>
+            <TabsContent value="engineers" className="mt-6">
+              <LeaderboardList titleName="Software Engineer" />
+            </TabsContent>
+            <TabsContent value="designers" className="mt-6">
+              <LeaderboardList titleName="UI Designer" />
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Right Side - AI Recruiter Chatbot */}
+        <div className="w-full md:w-1/3">
+          <AiRecruiterChatbot
+            titleName={
+              activeTab === "engineers" ? "Software Engineer" : "UI Designer"
+            }
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
