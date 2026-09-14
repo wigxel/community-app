@@ -1,7 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
-import { Globe, GripVertical, Link, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { Reorder, useDragControls } from "motion/react";
 import posthog from "posthog-js";
 import { useRef, useState } from "react";
@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Github, LinkedIn } from "~/components/icons";
+import { ProjectLinkIcon } from "~/components/atoms";
 import { CoverImageUpload } from "~/components/profile/cover-image-upload";
 import { ImageUpload } from "~/components/profile/image-upload";
 import { SkillsSelect } from "~/components/profile/skills-select";
@@ -46,12 +46,6 @@ import { Result } from "~/lib/result";
 
 const LINK_TYPES = [
   {
-    tag: "linkedin",
-    title: "LinkedIn",
-    prefix: "linkedin.com/in/",
-    placeholder: "username",
-  },
-  {
     tag: "github",
     title: "GitHub",
     prefix: "github.com/",
@@ -67,15 +61,6 @@ const LINK_TYPES = [
 
 type LinkTag = (typeof LINK_TYPES)[number]["tag"];
 
-const getLinkIcon = (tag: string) => {
-  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    linkedin: LinkedIn,
-    github: Github,
-    portfolio: Globe,
-  };
-  return iconMap[tag.toLowerCase()] ?? Link;
-};
-
 const usernameOnlyRegex = /^(?!.*(http|https|www\.|\/)).+$/i;
 
 const normalizeLinkForEdit = (link: {
@@ -85,17 +70,6 @@ const normalizeLinkForEdit = (link: {
 }): { tag: LinkTag; title: string; value: string } => {
   const normalizedTag: LinkTag =
     link.tag === "website" ? "portfolio" : (link.tag as LinkTag);
-
-  if (normalizedTag === "linkedin") {
-    const match = link.value.match(
-      /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([^/?#]+)/i,
-    );
-    return {
-      ...link,
-      tag: normalizedTag,
-      value: match ? match[1] : link.value,
-    };
-  }
 
   if (normalizedTag === "github") {
     const match = link.value.match(
@@ -126,7 +100,6 @@ function DraggableLinkItem(props: DraggableLinkItemProps) {
   const { field, index, form, removeLink, constraintsRef } = props;
 
   const dragControls = useDragControls();
-  const Icon = getLinkIcon(field.tag);
   const typeConfig =
     LINK_TYPES.find((t) => t.tag === field.tag) ?? LINK_TYPES[0];
 
@@ -150,7 +123,10 @@ function DraggableLinkItem(props: DraggableLinkItemProps) {
         </div>
 
         <div className="bg-muted mt-6.25 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border">
-          <Icon className="text-muted-foreground h-4 w-4" />
+          <ProjectLinkIcon
+            tag={field.tag}
+            className="text-muted-foreground h-4 w-4"
+          />
         </div>
 
         <FormField
@@ -226,7 +202,7 @@ const _projectSchema = z.object({
 
 const linkSchema = z
   .object({
-    tag: z.enum(["linkedin", "github", "portfolio"]),
+    tag: z.enum(["github", "portfolio"]),
 
     title: z.string().min(1),
 
@@ -235,10 +211,7 @@ const linkSchema = z
     }),
   })
   .superRefine((data, ctx) => {
-    if (
-      (data.tag === "github" || data.tag === "linkedin") &&
-      !usernameOnlyRegex.test(data.value)
-    ) {
+    if (data.tag === "github" && !usernameOnlyRegex.test(data.value)) {
       ctx.addIssue({
         code: "custom",
         path: ["value"],
@@ -756,11 +729,13 @@ export function ProfileForm(props: ProfileFormProps) {
                     </SelectTrigger>
                     <SelectContent align="end">
                       {availableLinkTypes.map((type) => {
-                        const Icon = getLinkIcon(type.tag);
                         return (
                           <SelectItem key={type.tag} value={type.tag}>
                             <span className="flex items-center gap-2">
-                              <Icon className="h-4 w-4" />
+                              <ProjectLinkIcon
+                                tag={type.tag}
+                                className="h-4 w-4"
+                              />
                               {type.title}
                             </span>
                           </SelectItem>
