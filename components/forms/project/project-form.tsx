@@ -15,6 +15,7 @@ import { toast } from "~/lib/toast";
 import { projectSchema as projectFormSchema } from "~/lib/validators/schema";
 import { HoveringFormActions } from "../shared/hovering-form-action";
 import { LinksSection } from "./links-section";
+import { buildLinkUrl, stripToPath } from "./link-row";
 import { pendingFiles } from "./media-row";
 import { MediaSection } from "./media-section";
 import { ProjectFormItem } from "./project-form-item";
@@ -80,10 +81,19 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
   React.useEffect(() => {
     if (mode === "edit" && projectData) {
       const id = setTimeout(() => {
-        reset(projectData, {
-          keepDirty: false,
-          keepDefaultValues: false,
-        });
+        reset(
+          {
+            ...projectData,
+            link: projectData.link.map((l) => ({
+              ...l,
+              value: stripToPath(l.value, l.tag),
+            })),
+          },
+          {
+            keepDirty: false,
+            keepDefaultValues: false,
+          },
+        );
       }, 16);
 
       return () => clearTimeout(id);
@@ -138,7 +148,9 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
       const cleanedProject = {
         ...projectWithUrls,
         media: projectWithUrls.media.filter((m) => m.metadata.url !== ""),
-        link: projectWithUrls.link.filter((l) => l.value.trim() !== ""),
+        link: projectWithUrls.link
+          .filter((l) => l.value.trim() !== "")
+          .map((l) => ({ ...l, value: buildLinkUrl(l.tag, l.value) })),
       };
 
       if (mode === "edit") {

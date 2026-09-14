@@ -1,8 +1,8 @@
 "use client";
 import { IconButton } from "@hyperbridge/ui";
 import { GlobeIcon, MinusIcon } from "lucide-react";
-import { type Control, Controller, useFormContext } from "react-hook-form";
-import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
+import { type Control, Controller } from "react-hook-form";
+import { Behance, Figma, Github } from "~/components/icons";
 import { Input } from "~/components/ui/input";
 import {
   Select,
@@ -20,13 +20,6 @@ const LINK_TAGS = [
     value: "github",
     label: "GitHub",
     icon: <Github size={"1em"} />,
-    placeholder: "username",
-  },
-  {
-    prefix: "linkedin.com/",
-    value: "linkedin",
-    label: "LinkedIn",
-    icon: <LinkedIn size={"1em"} />,
     placeholder: "username",
   },
   {
@@ -58,12 +51,46 @@ const normalizeUrl = (val: string) => {
   return val;
 };
 
-const MATCHABLE_HOSTS = [
-  "github.com",
-  "linkedin.com",
-  "figma.com",
-  "behance.net",
-];
+const MATCHABLE_HOSTS = ["github.com", "figma.com", "behance.net"];
+
+const HOST_TAG_MAP: Record<string, "github" | "figma" | "behance"> = {
+  "github.com": "github",
+  "figma.com": "figma",
+  "behance.net": "behance",
+};
+
+export function detectTagFromUrl(
+  url: string,
+): "github" | "figma" | "behance" | null {
+  try {
+    const { hostname } = new URL(url);
+    const bare = hostname.replace(/^www\./, "");
+    return HOST_TAG_MAP[bare] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function stripToPath(url: string, tag: string): string {
+  if (tag === "other" || !url.startsWith("http")) return url;
+  try {
+    const { pathname, search, hash } = new URL(url);
+    const path = pathname.replace(/^\//, "");
+    return path + search + hash;
+  } catch {
+    return url;
+  }
+}
+
+export function buildLinkUrl(tag: string, value: string): string {
+  if (tag === "other" || value.startsWith("http")) return value;
+  const prefixMap: Record<string, string> = {
+    github: "https://github.com/",
+    figma: "https://figma.com/",
+    behance: "https://behance.net/",
+  };
+  return (prefixMap[tag] ?? "") + value;
+}
 
 export function extractLinkValue(url: string): string | null {
   if (!url) return null;
@@ -88,14 +115,13 @@ interface LinkRowProps {
 
 export default function LinkRow(props: LinkRowProps) {
   const { linkIndex, control, remove, error } = props;
-  const { watch } = useFormContext();
 
   return (
     <Controller
       control={control}
       name={`link.${linkIndex}`}
       render={({ field }) => {
-        const tag = watch(field.name)?.tag;
+        const tag = field.value?.tag ?? "other";
         const match = LINK_TAGS.find((linkType) => linkType.value === tag);
 
         return (
@@ -123,7 +149,7 @@ export default function LinkRow(props: LinkRowProps) {
                   <SelectItem key={linkType.value} value={linkType.value}>
                     <span className="inline-flex items-center gap-2">
                       {linkType.icon}
-                      {/*<span>{linkType.prefix}</span>*/}
+                      <span className="sr-only">{linkType.label}</span>
                     </span>
                   </SelectItem>
                 ))}
@@ -138,22 +164,27 @@ export default function LinkRow(props: LinkRowProps) {
 
             <Input
               value={field.value?.value ?? ""}
-              onChange={(e) =>
-                field.onChange({
-                  ...field.value,
-                  value: normalizeUrl(e.target.value),
-                })
-              }
-              onPaste={(e) => {
-                const pasted = e.clipboardData.getData("text");
-                const value = extractLinkValue(pasted);
-                if (value) {
-                  e.preventDefault();
-                  field.onChange({ ...field.value, value });
-                }
-              }}
               placeholder={match?.placeholder}
               className="text-foreground bg-muted placeholder:text-muted-foreground w-full text-sm"
+              onChange={(e) => {
+                return field.onChange({
+                  ...field.value,
+                  value: normalizeUrl(e.target.value),
+                });
+              }}
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData("text");
+                const fullUrl = extractLinkValue(pasted);
+                if (fullUrl) {
+                  e.preventDefault();
+                  const detectedTag = detectTagFromUrl(fullUrl);
+                  const nextTag = detectedTag ?? field.value?.tag ?? "other";
+                  field.onChange({
+                    tag: nextTag,
+                    value: stripToPath(fullUrl, nextTag),
+                  });
+                }
+              }}
             />
 
             <IconButton

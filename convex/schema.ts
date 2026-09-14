@@ -47,10 +47,8 @@ const project_media_schema = v.object({
 const project_link_schema = v.object({
   tag: v.union(
     v.literal("github"),
-    v.literal("live"),
     v.literal("figma"),
     v.literal("behance"),
-    v.literal("docs"),
     v.literal("other"),
   ),
   value: v.string(),

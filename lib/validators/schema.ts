@@ -46,10 +46,28 @@ export const mediaSchema = z.object({
   }),
 });
 
-export const projectLinkSchema = z.object({
-  tag: z.enum(["github", "live", "figma", "behance", "docs", "other"]),
-  value: z.url({ message: "Please enter a  a valid URL." }),
-});
+export const projectLinkSchema = z.discriminatedUnion("tag", [
+  z.object({
+    tag: z.literal("github"),
+    value: z.string().min(1, { message: "Please provide link to repository." }),
+  }),
+  z.object({
+    tag: z.literal("figma"),
+    value: z
+      .string()
+      .min(1, { message: "Please provide link to Figma document." }),
+  }),
+  z.object({
+    tag: z.literal("behance"),
+    value: z
+      .string()
+      .min(1, { message: "Please provide link to Behance project." }),
+  }),
+  z.object({
+    tag: z.literal("other"),
+    value: z.url({ message: "Please enter a valid URL." }),
+  }),
+]);
 
 export const projectSchema = z
   .object({

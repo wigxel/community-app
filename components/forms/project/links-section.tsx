@@ -2,6 +2,7 @@
 import { Button } from "@hyperbridge/ui";
 import { Link2, LinkIcon } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { AlertBox } from "~/components/molecules/alert-box";
 import {
   Card,
   CardContent,
@@ -15,7 +16,7 @@ import LinkRow from "./link-row";
 import type { ProjectFormValues } from "./project-form";
 
 const EMPTY_LINK: ProjectLink = {
-  tag: "github",
+  tag: "other",
   value: "",
 };
 
@@ -53,6 +54,10 @@ export function LinksSection() {
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3">
+        {errors.link?.message && (
+          <AlertBox severity={"error"} heading={errors.link.message} />
+        )}
+
         {linkFields.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/3 py-8 text-center">
             <Link2 size={24} className="text-foreground/20" />
@@ -72,12 +77,6 @@ export function LinksSection() {
               />
             ))}
           </div>
-        )}
-
-        {errors.link?.message && (
-          <p className="text-xs font-medium text-red-400">
-            {errors.link.message}
-          </p>
         )}
       </CardContent>
 
