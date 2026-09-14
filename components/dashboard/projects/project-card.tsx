@@ -21,6 +21,7 @@ import { More, Trash } from "iconsax-reactjs";
 import {
   Calendar,
   ExternalLink,
+  EyeIcon,
   FileText,
   PencilIcon,
   Video,

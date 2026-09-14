@@ -163,6 +163,7 @@ export default function LinkRow(props: LinkRowProps) {
             ) : null}
 
             <Input
+              aria-label={`Link ${linkIndex + 1} value`}
               value={field.value?.value ?? ""}
               placeholder={match?.placeholder}
               className="text-foreground bg-muted placeholder:text-muted-foreground w-full text-sm"
