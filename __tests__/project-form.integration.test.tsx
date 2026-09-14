@@ -1,5 +1,6 @@
 import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import React from "react";
 
 // --- Mocks (vi.hoisted runs before imports) ---
 
@@ -20,6 +21,24 @@ vi.mock("~/lib/toast", () => ({ toast }));
 vi.mock("posthog-js", () => ({
   default: { capture: vi.fn() },
 }));
+vi.mock("~/components/forms/project/media-section", () => ({
+  MediaSection: () => <div data-testid="media-section" />,
+}));
+vi.mock("motion/react", () => ({
+  motion: new Proxy(
+    {},
+    {
+      get: (_, tag: string) =>
+        React.forwardRef(
+          (
+            props: React.PropsWithChildren<Record<string, unknown>>,
+            ref: React.Ref<unknown>,
+          ) => React.createElement(tag, { ...props, ref }),
+        ),
+    },
+  ),
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 vi.mock("convex/react", () => ({
   useQuery: (...args: unknown[]) => mockUseQuery(...args),
@@ -34,6 +53,7 @@ vi.mock("next/navigation", () => ({
 
 import { ProjectForm } from "~/components/forms/project/project-form";
 import { Result } from "~/lib/result";
+import type { ProjectLink } from "~/types/models";
 
 // --- Mock data ---
 
@@ -60,11 +80,14 @@ const MOCK_PROJECT = {
 
 // --- Helpers ---
 
-function setupConvexMocks(project = MOCK_PROJECT) {
+function setupConvexMocks(
+  project: Record<string, unknown> = MOCK_PROJECT,
+) {
   mockUseQuery.mockReset();
   mockUseMutation.mockReset();
   mockUseQuery.mockReturnValue(Result.ok(project));
-  mockUseMutation.mockReturnValue(vi.fn());
+  const noop = vi.fn().mockResolvedValue({ _tag: "Right", right: {} });
+  mockUseMutation.mockReturnValue(noop);
 }
 
 function renderForm() {
@@ -205,6 +228,7 @@ describe("ProjectForm integration", () => {
       ...MOCK_PROJECT,
       link: [{ tag: "other" as const, value: "" }],
     };
+
     setupConvexMocks(projectWithOther);
 
     const updateProject = setupUpdateProjectMock();

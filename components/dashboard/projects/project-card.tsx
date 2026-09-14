@@ -20,6 +20,7 @@ import { useMutation } from "convex/react";
 import { More, Trash } from "iconsax-reactjs";
 import {
   Calendar,
+  Edit,
   ExternalLink,
   EyeIcon,
   FileText,
@@ -30,6 +31,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { ProjectLinkIcon } from "~/components/atoms";
 import {
   ProjectCardContent,
   ProjectCardMedia,

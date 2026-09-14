@@ -8,6 +8,7 @@ import LinkRow, {
   stripToPath,
 } from "~/components/forms/project/link-row";
 import type { ProjectFormValues } from "~/components/forms/project/project-form";
+import type { ProjectLink } from "~/types/models";
 
 const DEFAULT_PROJECT: ProjectFormValues = {
   userId: "",
@@ -19,7 +20,7 @@ const DEFAULT_PROJECT: ProjectFormValues = {
   link: [],
 };
 
-function renderLinkRow(initialTag: string = "other") {
+function renderLinkRow(initialTag: ProjectLink["tag"] = "other") {
   const formRef = {
     current: null as ReturnType<typeof useForm<ProjectFormValues>> | null,
   };
@@ -48,7 +49,7 @@ function renderLinkRow(initialTag: string = "other") {
   return { form: formRef, ...result };
 }
 
-function pasteInto(input: HTMLElement, text: string) {
+function pasteInto(input: HTMLInputElement, text: string) {
   fireEvent.paste(input, {
     clipboardData: {
       getData: () => text,
@@ -208,7 +209,7 @@ describe("buildLinkUrl", () => {
 describe("LinkRow paste interaction", () => {
   it("stores path-only GitHub URL on paste", () => {
     renderLinkRow();
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     pasteInto(input, "https://github.com/user/repo");
     expect(input.value).toBe("user/repo");
     expect(screen.getByRole("combobox")).toHaveTextContent("GitHub");
@@ -216,7 +217,7 @@ describe("LinkRow paste interaction", () => {
 
   it("stores path-only Figma URL on paste", () => {
     renderLinkRow();
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     pasteInto(input, "https://figma.com/file/abc123");
     expect(input.value).toBe("file/abc123");
     expect(screen.getByRole("combobox")).toHaveTextContent("Figma");
@@ -224,7 +225,7 @@ describe("LinkRow paste interaction", () => {
 
   it("stores path-only Behance URL on paste", () => {
     renderLinkRow();
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     pasteInto(input, "https://behance.net/gallery/123");
     expect(input.value).toBe("gallery/123");
     expect(screen.getByRole("combobox")).toHaveTextContent("Behance");
@@ -232,7 +233,7 @@ describe("LinkRow paste interaction", () => {
 
   it("does not call preventDefault for non-matching URL", () => {
     renderLinkRow();
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     const preventDefault = vi.fn();
     fireEvent.paste(input, {
       clipboardData: {
@@ -246,7 +247,7 @@ describe("LinkRow paste interaction", () => {
 
   it("does not call preventDefault for plain text", () => {
     renderLinkRow();
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     const preventDefault = vi.fn();
     fireEvent.paste(input, {
       clipboardData: {
@@ -262,7 +263,7 @@ describe("LinkRow paste interaction", () => {
 describe("LinkRow auto-switch interaction", () => {
   it("auto-switches other → github on paste", () => {
     const { form } = renderLinkRow("other");
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     pasteInto(input, "https://github.com/user/repo");
     expect(form.current?.getValues("link.0.tag")).toBe("github");
     expect(input.value).toBe("user/repo");
@@ -271,7 +272,7 @@ describe("LinkRow auto-switch interaction", () => {
 
   it("auto-switches other → figma on paste", () => {
     const { form } = renderLinkRow("other");
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     pasteInto(input, "https://figma.com/file/abc123");
     expect(form.current?.getValues("link.0.tag")).toBe("figma");
     expect(input.value).toBe("file/abc123");
@@ -280,7 +281,7 @@ describe("LinkRow auto-switch interaction", () => {
 
   it("auto-switches other → behance on paste", () => {
     const { form } = renderLinkRow("other");
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     pasteInto(input, "https://behance.net/gallery/123");
     expect(form.current?.getValues("link.0.tag")).toBe("behance");
     expect(input.value).toBe("gallery/123");
@@ -289,7 +290,7 @@ describe("LinkRow auto-switch interaction", () => {
 
   it("keeps same tag when URL already matches", () => {
     const { form } = renderLinkRow("github");
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     pasteInto(input, "https://github.com/other/repo");
     expect(form.current?.getValues("link.0.tag")).toBe("github");
     expect(input.value).toBe("other/repo");
@@ -298,7 +299,7 @@ describe("LinkRow auto-switch interaction", () => {
 
   it("does not auto-switch for unrecognized URL", () => {
     const { form } = renderLinkRow("other");
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
     pasteInto(input, "https://example.com/page");
     expect(form.current?.getValues("link.0.tag")).toBe("other");
     expect(screen.getByRole("combobox")).toHaveTextContent("Other");
