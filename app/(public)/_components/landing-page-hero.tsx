@@ -4,6 +4,7 @@ import { Button } from "@hyperbridge/ui";
 // @ts-expect-error No declaration file yet
 import { Type } from "@wigxel/react-components/lib/typography";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { Balancer } from "react-wrap-balancer";
 import { Container } from "~/components/layouts/container";
 
@@ -34,9 +35,11 @@ export function LandingHero() {
           </p>
 
           <div className="mt-8 flex">
-            <Button size="lg">
-              Get Started <ArrowRight />
-            </Button>
+            <Link href="/auth/sign-in">
+              <Button size="lg">
+                Get Started <ArrowRight />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

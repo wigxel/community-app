@@ -20,9 +20,7 @@ import { useMutation } from "convex/react";
 import { More, Trash } from "iconsax-reactjs";
 import {
   Calendar,
-  Edit,
   ExternalLink,
-  EyeIcon,
   FileText,
   PencilIcon,
   Video,
@@ -31,7 +29,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { ProjectLinkIcon } from "~/components/atoms";
 import {
   ProjectCardContent,
   ProjectCardMedia,
@@ -223,7 +220,11 @@ export function PrivateProjectCardLegacy(project: Project) {
   );
 }
 
-function PreventPropagation({ children }: { children: React.ReactNode }) {
+type PreventPropagationProps = { children: React.ReactNode };
+
+function PreventPropagation(props: PreventPropagationProps) {
+  const { children } = props;
+
   return (
     <Slot
       onClick={(event) => event.stopPropagation()}
@@ -307,15 +308,15 @@ export function PrivateProjectCard(project: Project) {
   );
 }
 
-function DeleteProjectDialog({
-  project,
-  open,
-  onOpenChange,
-}: {
+type DeleteProjectDialogProps = {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
   project: Project;
-}) {
+  onOpenChange: (open: boolean) => void;
+};
+
+function DeleteProjectDialog(props: DeleteProjectDialogProps) {
+  const { project, open, onOpenChange } = props;
+
   const deleteProject = useMutation(api.project.deleteProject);
 
   return (

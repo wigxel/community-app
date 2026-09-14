@@ -18,11 +18,9 @@ interface MediaPreviewModalProps {
   title?: string;
 }
 
-export function MediaPreviewModal({
-  type,
-  url,
-  title,
-}: MediaPreviewModalProps) {
+export function MediaPreviewModal(props: MediaPreviewModalProps) {
+  const { type, url, title } = props;
+
   return (
     <Dialog>
       <DialogTrigger asChild>

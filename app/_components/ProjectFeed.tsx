@@ -41,11 +41,13 @@ function ScrollTrigger(props: ScrollTriggerProps) {
   return <div ref={ref} aria-hidden="true" />;
 }
 
-function CatalogGrid({
-  initialProjects = [],
-}: {
+type CatalogGridProps = {
   initialProjects?: BasicProject[];
-}) {
+};
+
+function CatalogGrid(props: CatalogGridProps) {
+  const { initialProjects = [] } = props;
+
   const { results, status, loadMore } = usePaginatedQuery(
     api.project.listAll,
     {},

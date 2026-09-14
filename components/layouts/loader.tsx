@@ -117,7 +117,9 @@ export function LoaderSimple(props: LoaderProps) {
   );
 }
 
-export function InlineLoader(props: LoaderProps & { strokeWidth?: number }) {
+export type InlineLoaderProps = LoaderProps & { strokeWidth?: number };
+
+export function InlineLoader(props: InlineLoaderProps) {
   const { size = 24, strokeWidth = 1 } = props;
   const [count, setCount] = React.useState(0);
 

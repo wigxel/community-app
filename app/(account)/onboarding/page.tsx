@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { api } from "~/convex/_generated/api";
-import { fetchAuthQuery, isAuthenticated } from "~/lib/auth-server";
+import { fetchAuthQuery } from "~/lib/auth-server";
 import OnboardingForm from "./form";
 
 export type OnboardingPageProps = {
@@ -9,20 +9,14 @@ export type OnboardingPageProps = {
 
 export default async function OnboardingPage(props: OnboardingPageProps) {
   const { searchParams } = props;
-
   const params = await searchParams;
-  const isAuth = await isAuthenticated();
-
-  if (!isAuth) {
-    redirect("/auth?redirect=/onboarding");
-  }
 
   const profile = await fetchAuthQuery(api.profiles.getForCurrentUser).catch(
     () => null,
   );
 
   if (profile) {
-    redirect(params.redirect ?? "/dashboard");
+    redirect("/dashboard");
   }
 
   return (

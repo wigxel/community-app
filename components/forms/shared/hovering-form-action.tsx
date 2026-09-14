@@ -7,13 +7,13 @@ const boxVariant = {
   visible: { y: "0%" },
 };
 
-export function HoveringFormActions({
-  mode = "create",
-  onCancel,
-}: {
+type HoveringFormActions = {
   mode?: "create" | "edit";
   onCancel: VoidFunction;
-}) {
+};
+
+export function HoveringFormActions(props: HoveringFormActions) {
+  const { mode = "create", onCancel } = props;
   const { isSubmitting, isDirty } = useFormState();
 
   return (

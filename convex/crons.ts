@@ -11,4 +11,9 @@ crons.cron(
   {},
 );
 
+// Seed defaults (skills + titles) hourly — skips if already run
+crons.cron("seed defaults", "0 * * * *", internal.seeds.seedSome, {
+  dryRun: false,
+});
+
 export default crons;

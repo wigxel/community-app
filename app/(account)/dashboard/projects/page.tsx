@@ -101,13 +101,14 @@ export default function Projects() {
   );
 }
 
-function ConvexPagination({
-  perPage: chunk,
-  control,
-}: {
+type ConvexPaginationProps = {
   perPage: number;
   control: UsePaginatedQueryReturnType<PaginatedQueryReference>;
-}) {
+};
+
+function ConvexPagination(props: ConvexPaginationProps) {
+  const { perPage: chunk, control } = props;
+
   if (control.status === "Exhausted") return null;
 
   const isLoadingMore = control.status === "LoadingMore";
