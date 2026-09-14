@@ -187,6 +187,13 @@ const schema = defineSchema({
   })
     .index("by_titleId_ranking", ["titleId", "ranking"])
     .index("by_profileId_titleId", ["profileId", "titleId"]),
+
+  migrations: defineTable({
+    name: v.string(),
+    type: v.string(),
+    status: v.union(v.literal("success"), v.literal("failed")),
+    executedAt: v.number(),
+  }).index("by_name", ["name"]),
 });
 
 export default schema;
