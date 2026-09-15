@@ -46,10 +46,28 @@ export const mediaSchema = z.object({
   }),
 });
 
-export const projectLinkSchema = z.object({
-  tag: z.enum(["github", "live", "figma", "behance", "docs", "other"]),
-  value: z.url({ message: "Please enter a  a valid URL." }),
-});
+export const projectLinkSchema = z.discriminatedUnion("tag", [
+  z.object({
+    tag: z.literal("github"),
+    value: z.string().min(1, { message: "Please provide link to repository." }),
+  }),
+  z.object({
+    tag: z.literal("figma"),
+    value: z
+      .string()
+      .min(1, { message: "Please provide link to Figma document." }),
+  }),
+  z.object({
+    tag: z.literal("behance"),
+    value: z
+      .string()
+      .min(1, { message: "Please provide link to Behance project." }),
+  }),
+  z.object({
+    tag: z.literal("other"),
+    value: z.url({ message: "Please enter a valid URL." }),
+  }),
+]);
 
 export const projectSchema = z
   .object({
@@ -71,7 +89,16 @@ export const projectSchema = z
     media: z
       .array(mediaSchema)
       .max(10, { message: "Maximum 10 media per project." }),
-    link: z.array(projectLinkSchema),
+    link: z
+      .array(projectLinkSchema)
+      .max(3, { message: "Max of 3 links per project" })
+      .refine(
+        (links) => {
+          const nonOther = links.filter((l) => l.tag !== "other");
+          return new Set(nonOther.map((l) => l.tag)).size === nonOther.length;
+        },
+        { message: "Duplicate link types are not allowed" },
+      ),
   })
   .superRefine((val, ctx) => {
     // media: block new pdf/gif/svg (allow read of old pdf but reject on validate)

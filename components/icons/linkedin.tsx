@@ -1,7 +1,7 @@
 import type { SVGProps } from "react";
 
 interface LinkedInProps extends SVGProps<SVGSVGElement> {
-  size?: number;
+  size?: number | string;
 }
 export default function LinkedIn(props: LinkedInProps) {
   const { size = 24, className = "", ...restProps } = props;

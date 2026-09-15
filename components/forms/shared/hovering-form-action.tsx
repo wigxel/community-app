@@ -1,20 +1,26 @@
 import { Button } from "@hyperbridge/ui";
 import { motion } from "motion/react";
-import router from "next/router";
 import { useFormState } from "react-hook-form";
 
-export type HoveringFormActionsProps = {
-  mode?: "create" | "edit";
+const boxVariant = {
+  hidden: { y: "200%" },
+  visible: { y: "0%" },
 };
 
-export function HoveringFormActions(props: HoveringFormActionsProps) {
-  const { mode = "create" } = props;
+type HoveringFormActions = {
+  mode?: "create" | "edit";
+  onCancel: VoidFunction;
+};
 
+export function HoveringFormActions(props: HoveringFormActions) {
+  const { mode = "create", onCancel } = props;
   const { isSubmitting, isDirty } = useFormState();
 
   return (
     <motion.div
-      animate={isDirty ? { y: "0%" } : { y: "200%" }}
+      variants={boxVariant}
+      initial="hidden"
+      animate={isDirty ? "visible" : "hidden"}
       className="bg-foreground/10 border-brand-primary/20 fixed start-1/2 bottom-5 flex -translate-x-1/2 items-center gap-1.5 rounded-3xl border border-r-white/10 border-b-white/20 p-2 shadow backdrop-blur-xs"
     >
       <Button
@@ -34,7 +40,7 @@ export function HoveringFormActions(props: HoveringFormActionsProps) {
       <Button
         type="button"
         variant="destructive"
-        onClick={() => router.back()}
+        onClick={onCancel}
         disabled={isSubmitting}
       >
         Cancel
