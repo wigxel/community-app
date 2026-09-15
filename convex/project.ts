@@ -1,4 +1,5 @@
 import {
+  type GenericQueryCtx,
   type PaginationResult,
   paginationOptsValidator,
   queryGeneric as query,
@@ -7,8 +8,8 @@ import { v } from "convex/values";
 import { Either } from "effect";
 import { Result, type ResultShape } from "../lib/result";
 import type { BasicProject, Project } from "../types/models";
-import { internal } from "./_generated/api";
-import type { Doc, Id } from "./_generated/dataModel";
+import { api, internal } from "./_generated/api";
+import type { DataModel, Doc, Id } from "./_generated/dataModel";
 import { internalMutation, mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 import { project_schema } from "./schema";
@@ -97,11 +98,13 @@ export const getProject = query({
       .filter((q) => q.eq(q.field("_id"), args.id))
       .first();
 
-    if (doc === null) {
+    if (doc == null) {
       return Result.error("Not found");
     }
 
-    return Result.ok(toProject(doc));
+    return await enrichProject(ctx, doc).then((enriched) =>
+      Result.ok(toProject(enriched)),
+    );
   },
 });
 
@@ -274,17 +277,36 @@ export const listAll = query({
     return {
       ...records,
       page: await Promise.all(
-        records.page.map(async (project) => {
-          const profile: Doc<"profile"> = await ctx.db.get(project.userId);
-
-          return {
-            ...project,
-            username: profile?.username ?? "@anonymous",
-            ownerName:
-              `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
-          };
-        }),
+        records.page.map((project) => enrichProject(ctx, project)),
       ),
     };
   },
 });
+
+async function enrichProject(
+  ctx: GenericQueryCtx<DataModel>,
+  project: Doc<"project">,
+): Promise<BasicProject> {
+  const DEFAULT_USERNAME = "@anonymous";
+
+  if (!project?.userId) {
+    // @ts-expect-error @todo: fix typing later
+    return { ...project, username: DEFAULT_USERNAME, ownerName: null };
+  }
+
+  const profile = await ctx.runQuery(api.profiles.getProfileByAuthId, {
+    userId: project.userId,
+  });
+
+  if (!profile) {
+    // @ts-expect-error @todo: fix typing later
+    return { ...project, username: DEFAULT_USERNAME, ownerName: null };
+  }
+
+  // @ts-expect-error @todo: fix typing later
+  return {
+    ...project,
+    username: profile?.username ?? DEFAULT_USERNAME,
+    ownerName: `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
+  };
+}
