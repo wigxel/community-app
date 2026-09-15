@@ -5,12 +5,12 @@ import Link from "next/link";
 import { Container } from "~/components/layouts/container";
 import { ProfileAvatar } from "~/components/profile/avatar";
 import { ProjectImpl } from "~/lib/factories/project";
-import type { Project } from "~/types/models";
+import type { FullProject } from "~/types/models";
 import { FavouriteButton } from "./FavouriteButton";
 import { MediaThumb } from "./MediaThumb";
 import { SaveButton } from "./save-button";
 
-type ProjectDetailsProps = { project: Project };
+type ProjectDetailsProps = { project: FullProject };
 
 export function ProjectDetails(props: ProjectDetailsProps) {
   const { project } = props;
