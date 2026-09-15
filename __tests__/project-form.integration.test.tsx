@@ -80,9 +80,7 @@ const MOCK_PROJECT = {
 
 // --- Helpers ---
 
-function setupConvexMocks(
-  project: Record<string, unknown> = MOCK_PROJECT,
-) {
+function setupConvexMocks(project: Record<string, unknown> = MOCK_PROJECT) {
   mockUseQuery.mockReset();
   mockUseMutation.mockReset();
   mockUseQuery.mockReturnValue(Result.ok(project));

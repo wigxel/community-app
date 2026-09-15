@@ -6,6 +6,8 @@ import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
 import type { Project } from "~/types/models";
 
+export const revalidate = 30;
+
 type PageProps = {
   params: Promise<{ projectId: string }>;
 };

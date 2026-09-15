@@ -19,6 +19,7 @@ interface FavouriteButtonProps {
   variant?: "overlay" | "card" | "inline";
   className?: string;
 }
+
 export function FavouriteButton(props: FavouriteButtonProps) {
   const { projectId, variant = "card", className } = props;
 
