@@ -8,7 +8,7 @@ import { FullscreenLoader } from "~/components/layouts/loader";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
-import type { Project } from "~/types/models";
+import type { FullProject } from "~/types/models";
 import { ProjectDetails } from "./project-details";
 
 const EMPTY_VALUE = "unset";
@@ -71,7 +71,7 @@ export function ProjectModal() {
             return <FullscreenLoader />;
           },
           success: (project) => {
-            return <ProjectDetails project={project as Project} />;
+            return <ProjectDetails project={project as FullProject} />;
           },
           error: () => {
             return (

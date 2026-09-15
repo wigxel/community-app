@@ -4,7 +4,9 @@ import { ProjectDetails } from "~/app/_components/project-details";
 import { Container } from "~/components/layouts/container";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
-import type { Project } from "~/types/models";
+import type { FullProject, Project } from "~/types/models";
+
+export const revalidate = 30;
 
 type PageProps = {
   params: Promise<{ projectId: string }>;
@@ -24,7 +26,7 @@ export default async function ProjectsPage({ params }: PageProps) {
     success: (project) => {
       return (
         <Container level={"max"}>
-          <ProjectDetails project={project as Project} />
+          <ProjectDetails project={project as FullProject} />
         </Container>
       );
     },

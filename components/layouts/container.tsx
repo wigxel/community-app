@@ -3,6 +3,7 @@ import { cn } from "~/lib/utils";
 const levels = {
   max: "container",
   inner: "container lg:w-[80svw]",
+  article: "container lg:w-[60ch]",
 };
 export type ContainerProps = React.ComponentProps<"div"> & {
   level?: keyof typeof levels;
