@@ -3,13 +3,12 @@
 import { Text } from "@hyperbridge/ui";
 import { usePaginatedQuery } from "convex/react";
 import { Loader } from "lucide-react";
-import React, { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
-import { SearchIcon } from "~/components/icons";
 import { Container } from "~/components/layouts/container";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { StandardGrid } from "~/components/layouts/grids";
-import { Button } from "~/components/ui/button";
+import { SearchBox } from "~/components/organism/searchbox";
 import { api } from "~/convex/_generated/api";
 import type { BasicProject } from "~/types/models";
 import LandingProjectCard from "./landing-project-card";
@@ -84,49 +83,6 @@ function CatalogGrid(props: CatalogGridProps) {
       {/* Scroll trigger */}
       {canLoadMore && <ScrollTrigger onVisible={() => loadMore(PAGE_SIZE)} />}
     </>
-  );
-}
-
-// @todo: Integrate search function. url should be the source of truth
-function SearchBox() {
-  const [searchTerm, setSearchTerm] = React.useState("");
-
-  return (
-    <div className="flex flex-col gap-2">
-      <label className="bg-muted/50 focus-within:bg-muted flex items-center gap-4 rounded-xl py-[0.4rem] ps-4 pe-[0.4em]">
-        <SearchIcon className="text-muted-foreground size-4.5" />
-        <div className="relative flex-1 self-stretch">
-          <input
-            type="text"
-            className="absolute inset-0 text-base outline-none"
-            placeholder="What you looking for?"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <Button size="lg" className="rounded-xl">
-          Search
-        </Button>
-      </label>
-
-      <div className="text-foreground mb-4 inline-flex items-center gap-2 px-[1.8em] text-xs">
-        {/* @todo: Integrate this */}
-        <span className="inline-block">Popular &nbsp;&nbsp;—&nbsp;&nbsp;</span>
-        <span className="inline-flex gap-2">
-          {["Web3", "E-commerce", "Blog", "Fintech"].map((tag) => {
-            return (
-              <span
-                key={tag}
-                className="hover:text-accent-foreground hover:bg-muted inline-block cursor-pointer rounded-sm p-1"
-              >
-                {tag}
-              </span>
-            );
-          })}
-        </span>
-      </div>
-    </div>
   );
 }
 
