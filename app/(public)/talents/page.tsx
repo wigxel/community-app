@@ -10,7 +10,7 @@ import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeArray } from "~/lib/data.helpers";
 import { ProfileImpl } from "~/lib/factories/profile";
 import { cn } from "~/lib/utils";
-import type { Profile } from "~/types/models";
+import type { TalentProfile } from "~/types/models";
 import { searchParamsCache } from "./search-params";
 
 export const metadata: Metadata = {
@@ -123,12 +123,16 @@ const levelBadge = (level: string) => {
   }
 };
 
-function TalentListCard({ profile }: { profile: Profile }) {
+function TalentListCard({ profile }: { profile: TalentProfile }) {
   const title = profile.title;
-  const joined = "Joined 3+ years";
-  const locationName = "Port harcourt, Nigeria";
-  const experience = "4+ years of experience";
-  const seniority = "senior";
+  const joined = ProfileImpl.joinedYearsAgo(profile);
+  const locationName = profile.location
+    ? [profile.location.city, profile.location.country]
+        .filter((e) => e.trim())
+        .join(", ")
+    : "Nigeria";
+  const experience = ProfileImpl.yearsOfExperience(profile) ?? "No experience";
+  const seniority = profile.seniority ?? "none";
 
   return (
     <div className="group bg-muted border-foreground/5 corner-sharp flex aspect-3/2 flex-col justify-between gap-8 rounded-2xl border px-6 py-8">
@@ -145,7 +149,7 @@ function TalentListCard({ profile }: { profile: Profile }) {
           {seniority === "none" ? null : (
             <Badge
               variant={"outline"}
-              className={cn("font-medium", levelBadge("senior"))}
+              className={cn("font-medium", levelBadge(seniority))}
             >
               {seniority}
             </Badge>

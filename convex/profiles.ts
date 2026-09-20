@@ -1,8 +1,9 @@
 import { queryGeneric as query } from "convex/server";
 import { ConvexError, v } from "convex/values";
+import { ProfileImpl } from "../lib/factories/profile";
 import { Result } from "../lib/result";
 import { validateUsernameFormat } from "../lib/username";
-import type { Profile } from "../types/models";
+import type { Profile, TalentProfile } from "../types/models";
 import type { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
@@ -36,12 +37,27 @@ export const listProfile = query({
     }
 
     const enrichedUsers = await Promise.all(
-      filteredUsers.map(async (user) => {
+      filteredUsers.map(async (user): Promise<TalentProfile> => {
         const title = user.title ? await ctx.db.get(user.title) : null;
+
+        const workExps = user.userId
+          ? await ctx.db
+              .query("workExperience")
+              .withIndex("by_userId", (q) => q.eq("userId", user.userId!))
+              .collect()
+          : [];
+
+        const totalYearsOfExperience =
+          ProfileImpl.computeTotalYearsOfExperience(
+            workExps.map((exp) => ({ timeline: exp.timeline })),
+          );
 
         return {
           ...user,
           title,
+          totalYearsOfExperience,
+          // @todo: Implement seniority feature — derive from leaderboard score or user input
+          seniority: "none",
         };
       }),
     );

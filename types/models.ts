@@ -112,6 +112,20 @@ export type FavouritedProject = Project & {
   } | null;
 };
 
+export type SeniorityLevel =
+  | "none"
+  | "junior"
+  | "mid-level"
+  | "senior"
+  | "principal";
+
+export interface TalentProfile extends Omit<Profile, "title"> {
+  _creationTime: number;
+  title: Title | null;
+  totalYearsOfExperience: number;
+  seniority: SeniorityLevel;
+}
+
 export interface WorkExperience {
   logo?: string;
   companyName: string;
