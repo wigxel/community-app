@@ -46,7 +46,7 @@ export async function getTitles() {
 
 export default async function Catalog({ searchParams }: PageProps) {
   const { q, role } = searchParamsCache.parse(await searchParams);
-  const { titles, getTitleId } = await getTitles();
+  const { getTitleId } = await getTitles();
 
   const titleId = getTitleId(role);
 
@@ -73,7 +73,7 @@ export default async function Catalog({ searchParams }: PageProps) {
             placeholder={"What you looking for?"}
           />
 
-          <RoleFilter titles={titles} />
+          {/*<RoleFiltersDropdown />*/}
         </div>
 
         {/* Profile List or Empty State */}
@@ -104,6 +104,12 @@ export default async function Catalog({ searchParams }: PageProps) {
   );
 }
 
+async function RoleFiltersDropdown() {
+  const titles = await fetchAuthQuery(api.titles.listTitles, {});
+
+  return <RoleFilter titles={titles} />;
+}
+
 const levelBadge = (level: string) => {
   switch (level) {
     case "junior":
@@ -131,7 +137,7 @@ function TalentListCard({ profile }: { profile: Profile }) {
           <div className="flex gap-6">
             <ProfileAvatar
               name={ProfileImpl.initials(profile)}
-              src={profile.profileImage}
+              src={profile.profileImage ?? undefined}
               verified={true}
             />
           </div>
