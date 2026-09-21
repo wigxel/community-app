@@ -13,13 +13,15 @@ type SearchInputProps = {
   className?: string;
 };
 
-export function SearchInput({
-  value,
-  onChange,
-  onSearch,
-  placeholder = "What you looking for?",
-  className,
-}: SearchInputProps) {
+export function SearchInput(props: SearchInputProps) {
+  const {
+    value,
+    onChange,
+    onSearch,
+    placeholder = "What you looking for?",
+    className,
+  } = props;
+
   return (
     <label
       className={cn(
@@ -57,11 +59,9 @@ type QueryBasedSearchInputProps = {
   className?: string;
 };
 
-export function QueryBasedSearchInput({
-  config,
-  placeholder = "What you looking for?",
-  className,
-}: QueryBasedSearchInputProps) {
+export function QueryBasedSearchInput(props: QueryBasedSearchInputProps) {
+  const { config, placeholder = "What you looking for?", className } = props;
+
   const { queryKey, throttleMs = 500 } = config;
   const [search, setSearch] = useQueryState(queryKey, {
     defaultValue: "",

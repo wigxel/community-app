@@ -12,12 +12,14 @@ type SearchBoxProps = {
 
 const DEFAULT_TAGS = ["Web3", "E-commerce", "Blog", "Fintech"];
 
-export function SearchBox({
-  config,
-  popularTags = DEFAULT_TAGS,
-  onSearch,
-  placeholder = "What you looking for?",
-}: SearchBoxProps) {
+export function SearchBox(props: SearchBoxProps) {
+  const {
+    config,
+    popularTags = DEFAULT_TAGS,
+    onSearch,
+    placeholder = "What you looking for?",
+  } = props;
+
   const { queryKey, throttleMs = 500 } = config;
   const [search, setSearch] = useQueryState(queryKey, {
     defaultValue: "",
