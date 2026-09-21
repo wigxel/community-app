@@ -43,7 +43,7 @@ export const listProfile = query({
         const workExps = user.userId
           ? await ctx.db
               .query("workExperience")
-              .withIndex("by_userId", (q) => q.eq("userId", user.userId!))
+              .withIndex("by_userId", (q) => q.eq("userId", user.userId))
               .collect()
           : [];
 

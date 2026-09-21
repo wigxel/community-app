@@ -104,7 +104,7 @@ export default async function Catalog({ searchParams }: PageProps) {
   );
 }
 
-async function RoleFiltersDropdown() {
+async function _RoleFiltersDropdown() {
   const titles = await fetchAuthQuery(api.titles.listTitles, {});
 
   return <RoleFilter titles={titles} />;

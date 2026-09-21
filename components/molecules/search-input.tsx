@@ -33,7 +33,7 @@ export function QueryBasedSearchInput(props: {
   placeholder: string;
   className?: string;
 }) {
-  const { config, placeholder, className } = props;
+  const { placeholder, className } = props;
   const [searchTerm, setSearchTerm] = React.useState("");
 
   return (

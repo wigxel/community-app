@@ -4,7 +4,7 @@ import { SearchInput } from "../molecules/search-input";
 
 // @todo: Integrate search function. url should be the source of truth
 export function SearchBox() {
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [_searchTerm, _setSearchTerm] = React.useState("");
 
   return (
     <div className="flex flex-col gap-2">
