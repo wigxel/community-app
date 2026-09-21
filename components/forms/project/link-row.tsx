@@ -20,7 +20,7 @@ const LINK_TAGS = [
     value: "github",
     label: "GitHub",
     icon: <Github size={"1em"} />,
-    placeholder: "username",
+    placeholder: "username/project",
   },
   {
     prefix: "figma.com/",
