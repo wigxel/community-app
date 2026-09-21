@@ -3,13 +3,14 @@
 import { Text } from "@hyperbridge/ui";
 import { usePaginatedQuery } from "convex/react";
 import { Loader } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-card-skeleton";
 import { Container } from "~/components/layouts/container";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { StandardGrid } from "~/components/layouts/grids";
 import { SearchBox } from "~/components/organism/searchbox";
 import { api } from "~/convex/_generated/api";
+import { projectSearchConfig } from "~/lib/search-config";
 import type { BasicProject } from "~/types/models";
 import LandingProjectCard from "./landing-project-card";
 import { ProjectModal } from "./ProjectModal";
@@ -114,7 +115,9 @@ export default function PublicProjectsCatalog({
   if (ssrError) {
     return (
       <Container level="max" className="flex flex-col gap-[3.2rem]">
-        <SearchBox />
+        <Suspense>
+          <SearchBox config={projectSearchConfig} onSearch={() => {}} />
+        </Suspense>
         <SsrErrorState />
       </Container>
     );
@@ -124,7 +127,9 @@ export default function PublicProjectsCatalog({
 
   return (
     <Container level="max" className="flex flex-col gap-[3.2rem]">
-      <SearchBox />
+      <Suspense>
+        <SearchBox config={projectSearchConfig} onSearch={() => {}} />
+      </Suspense>
 
       {/* Grid */}
       {hasInitialData ? (

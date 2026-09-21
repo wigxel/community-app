@@ -1,6 +1,7 @@
 import { Briefcase, MapPinIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { RoleFilter } from "~/components/catalog/role-filter";
 import { QueryBasedSearchInput } from "~/components/molecules/search-input";
 import { ProfileAvatar } from "~/components/profile/avatar";
@@ -9,6 +10,7 @@ import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeArray } from "~/lib/data.helpers";
 import { ProfileImpl } from "~/lib/factories/profile";
+import { talentSearchConfig } from "~/lib/search-config";
 import { cn } from "~/lib/utils";
 import type { TalentProfile } from "~/types/models";
 import { searchParamsCache } from "./search-params";
@@ -16,10 +18,6 @@ import { searchParamsCache } from "./search-params";
 export const metadata: Metadata = {
   title: "Talents",
   description: "Find the right talent for your project",
-};
-
-type PageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function getTitles() {
@@ -44,7 +42,7 @@ export async function getTitles() {
   };
 }
 
-export default async function Catalog({ searchParams }: PageProps) {
+async function TalentsCatalog({ searchParams }: PageProps) {
   const { q, role } = searchParamsCache.parse(await searchParams);
   const { getTitleId } = await getTitles();
 
@@ -69,8 +67,8 @@ export default async function Catalog({ searchParams }: PageProps) {
         <div className="mb-10 flex flex-col gap-4 lg:flex-row">
           <QueryBasedSearchInput
             className="w-full"
-            config={{ key: "query" }}
-            placeholder={"What you looking for?"}
+            config={talentSearchConfig}
+            placeholder="What you looking for?"
           />
 
           {/*<RoleFiltersDropdown />*/}
@@ -123,7 +121,9 @@ const levelBadge = (level: string) => {
   }
 };
 
-function TalentListCard({ profile }: { profile: TalentProfile }) {
+type Props = { profile: TalentProfile };
+
+function TalentListCard({ profile }: Props) {
   const title = profile.title;
   const joined = ProfileImpl.joinedYearsAgo(profile);
   const locationName = profile.location
@@ -180,5 +180,17 @@ function TalentListCard({ profile }: { profile: TalentProfile }) {
         <div className="text-muted-foreground text-xs">{joined}</div>
       </div>
     </div>
+  );
+}
+
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default function PublicTalentsPage({ searchParams }: PageProps) {
+  return (
+    <Suspense>
+      <TalentsCatalog searchParams={searchParams} />
+    </Suspense>
   );
 }
