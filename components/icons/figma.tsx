@@ -1,7 +1,7 @@
 import type { SVGProps } from "react";
 
 interface FigmaProps extends SVGProps<SVGSVGElement> {
-  size?: number;
+  size?: number | string;
 }
 export default function Figma(props: FigmaProps) {
   const { size = 24, className = "", ...restProps } = props;

@@ -1,16 +1,8 @@
-import {
-  BookText,
-  Briefcase,
-  Globe,
-  Link,
-  Mail,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import { Briefcase, Mail, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
+import { ProjectLinkIcon } from "~/components/atoms";
 import ReturnButton from "~/components/profile/return-button";
 import { ShareButton } from "~/components/profile/share-button";
 import { api } from "~/convex/_generated/api";
@@ -19,22 +11,6 @@ import { safeArray, safeObj } from "~/lib/data.helpers";
 import type { Profile } from "~/types/models";
 import Projects from "./_components/project";
 import { WorkExperienceSection } from "./_components/WorkExperience";
-
-// Helper function to get the appropriate icon for each link type
-const getLinkIcon = (tag: string) => {
-  const iconMap: Record<
-    string,
-    React.ComponentType<{ size?: number; className?: string }>
-  > = {
-    linkedin: LinkedIn,
-    github: Github,
-    portfolio: Globe,
-    docs: BookText,
-    figma: Figma,
-    behance: Behance,
-  };
-  return iconMap[tag.toLowerCase()] || Link;
-};
 
 export async function generateMetadata({
   params,
@@ -285,8 +261,6 @@ export default async function ProfileCard(props: ProfileCardProps) {
 
               <div className="grid grid-cols-1">
                 {profile_links.map((link) => {
-                  const Icon = getLinkIcon(link.tag);
-
                   return (
                     <a
                       key={link.tag}
@@ -297,7 +271,11 @@ export default async function ProfileCard(props: ProfileCardProps) {
                     >
                       <div className="flex items-start gap-4">
                         <div className="rounded-2xl bg-linear-to-br from-violet-500/20 to-fuchsia-500/20 p-3 shadow-lg transition-all group-hover:scale-110 group-hover:from-violet-500/30 group-hover:to-fuchsia-500/30">
-                          <Icon size={22} className="text-violet-300" />
+                          <ProjectLinkIcon
+                            tag={link.tag}
+                            size={22}
+                            className="text-violet-300"
+                          />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">

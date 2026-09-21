@@ -3,19 +3,21 @@
 import { useQuery } from "convex/react";
 import React, { useState } from "react";
 import { useEvent } from "react-use-event-hook";
+import { Drawer } from "vaul";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { FullscreenLoader } from "~/components/layouts/loader";
-import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
 import type { Project } from "~/types/models";
-import { ProjectDetails } from "./project-details";
+import { ProjectDetailsPopup } from "./project-details-popup";
 
 const EMPTY_VALUE = "unset";
+const snapPoints = ["148px", "355px", 1];
 
 export function ProjectModal() {
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = React.useState<string | null>(null);
+  const [snap, setSnap] = useState<number | string | null>(snapPoints[0]);
 
   const project_res = useQuery(api.project.getProject, { id: projectId });
 
@@ -28,10 +30,10 @@ export function ProjectModal() {
     if (matchingId == null) return;
 
     if (projectId === matchingId) {
-      return setOpen(false);
+      return setSnap(snapPoints[2]);
     }
 
-    setOpen(true);
+    setSnap(snapPoints[0]);
     setProjectId(matchingId);
   });
 
@@ -46,10 +48,14 @@ export function ProjectModal() {
   }, [handleHashChange]);
 
   return (
-    <Dialog
-      open={open}
+    <Drawer.Root
+      snapPoints={snapPoints}
+      activeSnapPoint={snap}
+      setActiveSnapPoint={setSnap}
       onOpenChange={(isOpenState) => {
-        setOpen(isOpenState);
+        if (isOpenState === true) return;
+
+        setSnap(snapPoints[0]);
         setProjectId(null);
 
         setTimeout(() => {
@@ -57,37 +63,42 @@ export function ProjectModal() {
         }, 16);
       }}
     >
-      <DialogContent className="aspect-4/6 max-h-[90svh] w-full max-w-2xl gap-0 overflow-hidden p-0">
-        <DialogTitle className="sr-only">
-          {Result.match(project_res, {
-            loading: () => "Loading...",
-            success: (project) => project?.title,
-            error: () => "Not found",
-          })}
-        </DialogTitle>
+      <Drawer.Portal>
+        <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+        <Drawer.Content className="bg-muted">
+          <Drawer.Handle />
 
-        {Result.match(project_res, {
-          loading: () => {
-            return <FullscreenLoader />;
-          },
-          success: (project) => {
-            return <ProjectDetails project={project as Project} />;
-          },
-          error: () => {
-            return (
-              <EmptyState isEmpty={true}>
-                <EmptyState.Content>
-                  <EmptyState.Title>Not project found</EmptyState.Title>
-                  <EmptyState.Description>
-                    The project you're looking for doesn't exist or has been
-                    removed
-                  </EmptyState.Description>
-                </EmptyState.Content>
-              </EmptyState>
-            );
-          },
-        })}
-      </DialogContent>
-    </Dialog>
+          <Drawer.Title className="sr-only">
+            {Result.match(project_res, {
+              loading: () => "Loading...",
+              success: (project) => project?.title,
+              error: () => "Not found",
+            })}
+          </Drawer.Title>
+
+          {Result.match(project_res, {
+            loading: () => {
+              return <FullscreenLoader />;
+            },
+            success: (project) => {
+              return <ProjectDetailsPopup project={project as Project} />;
+            },
+            error: () => {
+              return (
+                <EmptyState isEmpty={true}>
+                  <EmptyState.Content>
+                    <EmptyState.Title>Not project found</EmptyState.Title>
+                    <EmptyState.Description>
+                      The project you're looking for doesn't exist or has been
+                      removed
+                    </EmptyState.Description>
+                  </EmptyState.Content>
+                </EmptyState>
+              );
+            },
+          })}
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer.Root>
   );
 }

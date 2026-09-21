@@ -1,7 +1,7 @@
 import type { SVGProps } from "react";
 
 interface BehanceProps extends SVGProps<SVGSVGElement> {
-  size?: number;
+  size?: number | string;
 }
 export default function Behance(props: BehanceProps) {
   const { size = 24, className = "", ...restProps } = props;

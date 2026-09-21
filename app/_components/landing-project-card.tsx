@@ -1,5 +1,6 @@
 "use client";
 
+import { useFeatureFlagEnabled } from "@posthog/react";
 import { useMediaQuery } from "hooks-ts";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,18 +17,21 @@ type LandingProjectCardProps = { project: BasicProject };
 
 function LandingProjectCard(props: LandingProjectCardProps) {
   const { project } = props;
+  const canQuickPreview = useFeatureFlagEnabled("project_quick_preview");
 
   const pathname = usePathname();
   const isMobile = useMediaQuery(
     "(max-width: 600px) or (orientation: portrait)",
   );
 
+  const isQuickPreview = canQuickPreview && !isMobile;
+
   const handleNavigation = (
     event:
       | React.KeyboardEvent<HTMLAnchorElement>
       | React.MouseEvent<HTMLAnchorElement>,
   ) => {
-    if (isMobile) return;
+    if (!isQuickPreview) return;
 
     event.preventDefault();
     event.stopPropagation();
@@ -38,9 +42,9 @@ function LandingProjectCard(props: LandingProjectCardProps) {
   return (
     <Link
       href={
-        isMobile
-          ? `/projects/${project._id}`
-          : { pathname, hash: `#preview:${project._id}` }
+        isQuickPreview
+          ? { pathname, hash: `#preview:${project._id}` }
+          : `/projects/${project._id}`
       }
       scroll={false}
       onClick={handleNavigation}

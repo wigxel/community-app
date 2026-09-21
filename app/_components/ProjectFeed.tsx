@@ -67,8 +67,6 @@ function CatalogGrid(props: CatalogGridProps) {
 
   return (
     <>
-      <ProjectModal />
-
       <StandardGrid className="mb-12">
         {projects.map((project) => (
           <LandingProjectCard key={project._id} project={project} />
@@ -83,6 +81,8 @@ function CatalogGrid(props: CatalogGridProps) {
 
       {/* Scroll trigger */}
       {canLoadMore && <ScrollTrigger onVisible={() => loadMore(PAGE_SIZE)} />}
+
+      <ProjectModal />
     </>
   );
 }
