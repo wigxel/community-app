@@ -8,8 +8,8 @@ import { EmptyState } from "~/components/layouts/empty-state";
 import { FullscreenLoader } from "~/components/layouts/loader";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
-import type { Project } from "~/types/models";
-import { ProjectDetailsPopup } from "./project-details-popup";
+import type { FullProject } from "~/types/models";
+import { ProjectDetails } from "./project-details";
 
 const EMPTY_VALUE = "unset";
 const snapPoints = ["148px", "355px", 1];
@@ -97,8 +97,30 @@ export function ProjectModal() {
               );
             },
           })}
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+        </DialogTitle>
+
+        {Result.match(project_res, {
+          loading: () => {
+            return <FullscreenLoader />;
+          },
+          success: (project) => {
+            return <ProjectDetails project={project as FullProject} />;
+          },
+          error: () => {
+            return (
+              <EmptyState isEmpty={true}>
+                <EmptyState.Content>
+                  <EmptyState.Title>Not project found</EmptyState.Title>
+                  <EmptyState.Description>
+                    The project you're looking for doesn't exist or has been
+                    removed
+                  </EmptyState.Description>
+                </EmptyState.Content>
+              </EmptyState>
+            );
+          },
+        })}
+      </DialogContent>
+    </Dialog>
   );
 }

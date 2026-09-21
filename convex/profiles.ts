@@ -83,6 +83,22 @@ export const getProfileByUsername = query({
   },
 });
 
+export const getProfileByAuthId = query({
+  args: { userId: v.string() },
+  async handler(ctx, args) {
+    const user = await ctx.db
+      .query("profile")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId.toLowerCase()))
+      .unique();
+
+    if (!user) return null;
+
+    const title = user.title ? await ctx.db.get(user.title) : null;
+
+    return { ...user, title };
+  },
+});
+
 export const checkUsernameAvailability = query({
   args: { username: v.string() },
   async handler(ctx, args) {
