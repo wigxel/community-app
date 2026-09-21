@@ -1,21 +1,23 @@
-import { Briefcase } from "lucide-react";
+import { Briefcase, MapPinIcon } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { RoleFilter } from "~/components/catalog/role-filter";
-import { SearchInput } from "~/components/catalog/search-input";
+import { QueryBasedSearchInput } from "~/components/molecules/search-input";
+import { ProfileAvatar } from "~/components/profile/avatar";
+import { Badge } from "~/components/ui/badge";
 import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeArray } from "~/lib/data.helpers";
+import { ProfileImpl } from "~/lib/factories/profile";
+import { talentSearchConfig } from "~/lib/search-config";
+import { cn } from "~/lib/utils";
+import type { TalentProfile } from "~/types/models";
 import { searchParamsCache } from "./search-params";
 
 export const metadata: Metadata = {
-  title: "Profile Catalog",
-  description: "Browse the profile catalog",
-};
-
-type PageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  title: "Talents",
+  description: "Find the right talent for your project",
 };
 
 export async function getTitles() {
@@ -40,9 +42,9 @@ export async function getTitles() {
   };
 }
 
-export default async function Catalog({ searchParams }: PageProps) {
+async function TalentsCatalog({ searchParams }: PageProps) {
   const { q, role } = searchParamsCache.parse(await searchParams);
-  const { titles, getTitleId } = await getTitles();
+  const { getTitleId } = await getTitles();
 
   const titleId = getTitleId(role);
 
@@ -55,24 +57,26 @@ export default async function Catalog({ searchParams }: PageProps) {
   return (
     <div className="px-5 py-8 md:px-8">
       <div className="container mx-auto">
-        <div className="mb-10 flex flex-col justify-between gap-4 *:w-full lg:flex-row lg:items-center">
-          <div>
-            <h1 className="mb-2 w-fit text-[clamp(14px,7vw,36px)] font-bold text-white">
-              Profile Catalog
-            </h1>
-            <p className="w-fit text-white/70">
-              Browse our talented professionals
-            </p>
-          </div>
-          <div className="flex flex-col gap-4 lg:flex-row">
-            <SearchInput />
-            <RoleFilter titles={titles} />
-          </div>
+        <hgroup className="mb-12 flex flex-col">
+          <h1 className="text-foreground w-fit text-[clamp(14px,7vw,36px)] font-bold">
+            Top talents
+          </h1>
+          <p className="text-muted-foreground w-fit">Browse our top talents</p>
+        </hgroup>
+
+        <div className="mb-10 flex flex-col gap-4 lg:flex-row">
+          <QueryBasedSearchInput
+            className="w-full"
+            config={talentSearchConfig}
+            placeholder="What you looking for?"
+          />
+
+          {/*<RoleFiltersDropdown />*/}
         </div>
 
         {/* Profile List or Empty State */}
         {safeProfiles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-white/70">
+          <div className="text-muted-foreground flex flex-col items-center justify-center py-20">
             <p className="mb-4 text-2xl font-semibold">No profiles found.</p>
             <p className="text-lg">
               {q
@@ -83,53 +87,110 @@ export default async function Catalog({ searchParams }: PageProps) {
         ) : (
           <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {safeProfiles.map((profile, idx) => {
-              const title = profile.title;
               const key = `profile-card-${idx}`;
 
               return (
-                <div key={key} className="group">
-                  <Link href={`/profile/${profile.username}`}>
-                    <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-slate-50/10 to-slate-50/5 text-white shadow-xl transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-white/20 group-hover:shadow-2xl group-hover:shadow-white/5 hover:from-slate-50/15 hover:to-slate-50/10">
-                      <div className="mx-auto my-3 overflow-hidden rounded-full border-2 border-white/20 shadow-lg ring-4 ring-white/5 transition-all duration-300 group-hover:border-white/30 group-hover:ring-white/10">
-                        {profile.profileImage?.startsWith("data:") ? (
-                          <Image
-                            src={profile.profileImage}
-                            alt={profile.firstName}
-                            width={120}
-                            height={120}
-                            unoptimized
-                            className="h-[120px] w-[120px] object-cover object-center"
-                          />
-                        ) : (
-                          <Image
-                            src={profile.profileImage || "/file.svg"}
-                            alt={profile.firstName}
-                            width={120}
-                            height={120}
-                            className="object-cover object-center"
-                          />
-                        )}
-                      </div>
-                      <div className="mt-auto flex flex-col items-center gap-2 rounded-t-[50px] border-t border-white/10 bg-linear-to-t from-white/20 to-white/10 px-2 py-6 transition-all duration-300 group-hover:from-white/25 group-hover:to-white/15 md:px-4">
-                        <p className="w-fit max-w-[80%] truncate text-center text-lg leading-none font-bold tracking-tight">
-                          {profile.firstName} {profile.lastName}
-                        </p>
-                        <p className="w-fit max-w-[80%] truncate text-center text-sm font-medium text-blue-300/90">
-                          @{profile.username}
-                        </p>
-                        <div className="flex w-fit items-center gap-1.5 rounded-full border border-blue-400/40 bg-linear-to-r from-blue-500/20 to-blue-600/20 px-3.5 pt-2 pb-2 text-center text-sm leading-none font-semibold text-blue-100 shadow-lg backdrop-blur-sm">
-                          <Briefcase size={16} className="text-blue-300" />
-                          <span>{title?.name}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
+                <Link key={key} href={`/profile/${profile.username}`}>
+                  <TalentListCard profile={profile} />
+                </Link>
               );
             })}
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+async function _RoleFiltersDropdown() {
+  const titles = await fetchAuthQuery(api.titles.listTitles, {});
+
+  return <RoleFilter titles={titles} />;
+}
+
+const levelBadge = (level: string) => {
+  switch (level) {
+    case "junior":
+      return "border-blue-600 text-blue-600";
+    case "mid-level":
+      return "border-green-600 text-green-600";
+    case "senior":
+      return "border-purple-400 text-purple-400";
+    default:
+      return "border-gray-600 text-gray-600";
+  }
+};
+
+type Props = { profile: TalentProfile };
+
+function TalentListCard({ profile }: Props) {
+  const title = profile.title;
+  const joined = ProfileImpl.joinedYearsAgo(profile);
+  const locationName = profile.location
+    ? [profile.location.city, profile.location.country]
+        .filter((e) => e.trim())
+        .join(", ")
+    : "Nigeria";
+  const experience = ProfileImpl.yearsOfExperience(profile) ?? "No experience";
+  const seniority = profile.seniority ?? "none";
+
+  return (
+    <div className="group bg-muted border-foreground/5 corner-sharp flex aspect-3/2 flex-col justify-between gap-8 rounded-2xl border px-6 py-8">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex gap-6">
+            <ProfileAvatar
+              name={ProfileImpl.initials(profile)}
+              src={profile.profileImage ?? undefined}
+              verified={true}
+            />
+          </div>
+
+          {seniority === "none" ? null : (
+            <Badge
+              variant={"outline"}
+              className={cn("font-medium", levelBadge(seniority))}
+            >
+              {seniority}
+            </Badge>
+          )}
+        </div>
+
+        <div className="flex flex-col">
+          <div className="text-xl">{ProfileImpl.displayName(profile)}</div>
+          <div className="text-brand-primary inline-flex items-center gap-2 text-sm">
+            <span>{title?.name ?? "Hacker"}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="text-muted-foreground -mb-3 flex items-end justify-between text-sm">
+        <div className="flex flex-1 flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Briefcase className="size-4 opacity-50" />
+            {experience}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <MapPinIcon className="size-4 opacity-50" />
+            {locationName}
+          </div>
+        </div>
+
+        <div className="text-muted-foreground text-xs">{joined}</div>
+      </div>
+    </div>
+  );
+}
+
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default function PublicTalentsPage({ searchParams }: PageProps) {
+  return (
+    <Suspense>
+      <TalentsCatalog searchParams={searchParams} />
+    </Suspense>
   );
 }

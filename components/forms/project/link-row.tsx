@@ -1,7 +1,8 @@
 "use client";
-import { Link as LinkIcon, X } from "lucide-react";
+import { IconButton } from "@hyperbridge/ui";
+import { GlobeIcon, MinusIcon } from "lucide-react";
 import { type Control, Controller } from "react-hook-form";
-import { Button } from "~/components/ui/button";
+import { Behance, Figma, Github } from "~/components/icons";
 import { Input } from "~/components/ui/input";
 import {
   Select,
@@ -10,15 +11,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { cn } from "~/lib/utils";
 import type { ProjectFormValues } from "./project-form";
 
 const LINK_TAGS = [
-  { value: "github", label: "GitHub" },
-  { value: "live", label: "Live Demo" },
-  { value: "figma", label: "Figma" },
-  { value: "behance", label: "Behance" },
-  { value: "docs", label: "Docs" },
-  { value: "other", label: "Other" },
+  {
+    prefix: "github.com/",
+    value: "github",
+    label: "GitHub",
+    icon: <Github size={"1em"} />,
+    placeholder: "username/project",
+  },
+  {
+    prefix: "figma.com/",
+    value: "figma",
+    label: "Figma",
+    icon: <Figma size={"1em"} />,
+    placeholder: "project-id",
+  },
+  {
+    prefix: "behance.com/",
+    value: "behance",
+    label: "Behance",
+    icon: <Behance size={"1em"} />,
+    placeholder: "project-id",
+  },
+  {
+    prefix: "https://",
+    value: "other",
+    label: "Other",
+    icon: <GlobeIcon size={"1em"} />,
+    placeholder: "www.somewhere.com",
+  },
 ] as const;
 
 const normalizeUrl = (val: string) => {
@@ -26,6 +50,61 @@ const normalizeUrl = (val: string) => {
   if (val.startsWith("www.")) return `https://${val}`;
   return val;
 };
+
+const MATCHABLE_HOSTS = ["github.com", "figma.com", "behance.net"];
+
+const HOST_TAG_MAP: Record<string, "github" | "figma" | "behance"> = {
+  "github.com": "github",
+  "figma.com": "figma",
+  "behance.net": "behance",
+};
+
+export function detectTagFromUrl(
+  url: string,
+): "github" | "figma" | "behance" | null {
+  try {
+    const { hostname } = new URL(url);
+    const bare = hostname.replace(/^www\./, "");
+    return HOST_TAG_MAP[bare] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function stripToPath(url: string, tag: string): string {
+  if (tag === "other" || !url.startsWith("http")) return url;
+  try {
+    const { pathname, search, hash } = new URL(url);
+    const path = pathname.replace(/^\//, "");
+    return path + search + hash;
+  } catch {
+    return url;
+  }
+}
+
+export function buildLinkUrl(tag: string, value: string): string {
+  if (tag === "other" || value.startsWith("http")) return value;
+  const prefixMap: Record<string, string> = {
+    github: "https://github.com/",
+    figma: "https://figma.com/",
+    behance: "https://behance.net/",
+  };
+  return (prefixMap[tag] ?? "") + value;
+}
+
+export function extractLinkValue(url: string): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    const isMatch = MATCHABLE_HOSTS.some(
+      (host) => parsed.hostname === host || parsed.hostname === `www.${host}`,
+    );
+    if (!isMatch) return null;
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
 
 interface LinkRowProps {
   linkIndex: number;
@@ -41,60 +120,85 @@ export default function LinkRow(props: LinkRowProps) {
     <Controller
       control={control}
       name={`link.${linkIndex}`}
-      render={({ field }) => (
-        <div>
-          <div className="flex items-center gap-2">
+      render={({ field }) => {
+        const tag = field.value?.tag ?? "other";
+        const match = LINK_TAGS.find((linkType) => linkType.value === tag);
+
+        return (
+          <div
+            title={error}
+            className={cn(
+              "focus-within:bg-card hover:bg-card relative flex grow basis-3/5 items-center rounded-xl px-2 py-2",
+              {
+                "border-destructive border": error,
+              },
+            )}
+          >
             <Select
-              value={field.value?.tag ?? "github"}
+              value={field.value?.tag ?? "other"}
               onValueChange={(val) =>
                 field.onChange({ ...field.value, tag: val })
               }
             >
-              <SelectTrigger className="w-32 shrink-0 border-white/15 bg-white/5 text-sm text-white">
+              <SelectTrigger className="w-20 grow-0! border-none shadow-none">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="border-white/15 bg-slate-900 text-white">
-                {LINK_TAGS.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
+
+              <SelectContent>
+                {LINK_TAGS.map((linkType) => (
+                  <SelectItem key={linkType.value} value={linkType.value}>
+                    <span className="inline-flex items-center gap-2">
+                      {linkType.icon}
+                      <span className="sr-only">{linkType.label}</span>
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <div className="relative flex flex-1 items-center">
-              <LinkIcon
-                size={13}
-                className="absolute left-3 shrink-0 text-white/30"
-              />
-              <Input
-                value={field.value?.value ?? ""}
-                onChange={(e) =>
-                  field.onChange({
-                    ...field.value,
-                    value: normalizeUrl(e.target.value),
-                  })
-                }
-                placeholder="https://..."
-                className="border-white/15 bg-white/5 pl-8 text-sm text-white placeholder:text-white/30"
-              />
-            </div>
+            {match ? (
+              <span className="text-foreground shrink-0 px-2 text-sm whitespace-nowrap">
+                {match?.prefix}
+              </span>
+            ) : null}
 
-            <Button
+            <Input
+              aria-label={`Link ${linkIndex + 1} value`}
+              value={field.value?.value ?? ""}
+              placeholder={match?.placeholder}
+              className="text-foreground bg-muted placeholder:text-muted-foreground w-full text-sm"
+              onChange={(e) => {
+                return field.onChange({
+                  ...field.value,
+                  value: normalizeUrl(e.target.value),
+                });
+              }}
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData("text");
+                const fullUrl = extractLinkValue(pasted);
+                if (fullUrl) {
+                  e.preventDefault();
+                  const detectedTag = detectTagFromUrl(fullUrl);
+                  const nextTag = detectedTag ?? field.value?.tag ?? "other";
+                  field.onChange({
+                    tag: nextTag,
+                    value: stripToPath(fullUrl, nextTag),
+                  });
+                }
+              }}
+            />
+
+            <IconButton
               type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0 text-white/30 hover:bg-red-400/10 hover:text-red-400"
+              variant="destructive"
+              className="ms-2 shrink-0"
               onClick={() => remove(linkIndex)}
             >
-              <X size={13} />
-            </Button>
+              <MinusIcon />
+            </IconButton>
           </div>
-          {error && (
-            <p className="ml-34 text-xs font-medium text-red-400">{error}</p>
-          )}
-        </div>
-      )}
+        );
+      }}
     />
   );
 }

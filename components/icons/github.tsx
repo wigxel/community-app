@@ -1,8 +1,9 @@
 import type { SVGProps } from "react";
 
 interface GitHubProps extends SVGProps<SVGSVGElement> {
-  size?: number;
+  size?: number | string;
 }
+
 export default function Github(props: GitHubProps) {
   const { size = 24, className = "", ...restProps } = props;
 

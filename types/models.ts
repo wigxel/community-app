@@ -51,7 +51,7 @@ export interface Link {
 }
 
 export interface ProjectLink {
-  tag: "github" | "live" | "figma" | "behance" | "docs" | "other";
+  tag: "github" | "figma" | "behance" | "other";
   value: string;
 }
 
@@ -113,6 +113,20 @@ export type FavouritedProject = Project & {
     profileImage: string | null;
   } | null;
 };
+
+export type SeniorityLevel =
+  | "none"
+  | "junior"
+  | "mid-level"
+  | "senior"
+  | "principal";
+
+export interface TalentProfile extends Omit<Profile, "title"> {
+  _creationTime: number;
+  title: Title | null;
+  totalYearsOfExperience: number;
+  seniority: SeniorityLevel;
+}
 
 export interface WorkExperience {
   logo?: string;

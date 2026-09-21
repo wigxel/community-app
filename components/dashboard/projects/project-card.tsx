@@ -19,14 +19,11 @@ import { Slot } from "@radix-ui/react-slot";
 import { useMutation } from "convex/react";
 import { More, Trash } from "iconsax-reactjs";
 import {
-  BookText,
   Calendar,
   Edit,
   ExternalLink,
   EyeIcon,
   FileText,
-  Globe,
-  LinkIcon,
   PencilIcon,
   Video,
 } from "lucide-react";
@@ -34,7 +31,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
+import { ProjectLinkIcon } from "~/components/atoms";
 import {
   ProjectCardContent,
   ProjectCardMedia,
@@ -51,21 +48,6 @@ import {
 import { api } from "~/convex/_generated/api";
 import { toast } from "~/lib/toast";
 import type { Project, TimelineDate } from "~/types/models";
-
-const getLinkIcon = (tag: string) => {
-  const iconMap: Record<
-    string,
-    React.ComponentType<{ size?: number; className?: string }>
-  > = {
-    linkedin: LinkedIn,
-    github: Github,
-    portfolio: Globe,
-    docs: BookText,
-    figma: Figma,
-    behance: Behance,
-  };
-  return iconMap[tag.toLowerCase()] || LinkIcon;
-};
 
 const formatTimeline = (project: Project) => {
   const fmt = (d: TimelineDate) =>
@@ -216,8 +198,6 @@ export function PrivateProjectCardLegacy(project: Project) {
             </h4>
             <div className="flex flex-wrap gap-3">
               {project.link.map(({ tag, value: url }) => {
-                const Icon = getLinkIcon(tag);
-
                 return (
                   <div key={project._id}>
                     <Link
@@ -227,7 +207,7 @@ export function PrivateProjectCardLegacy(project: Project) {
                       rel="noopener noreferrer"
                       className="group/link flex items-center gap-2.5 rounded-xl border border-white/20 bg-linear-to-r from-white/10 to-white/5 px-5 py-2.5 text-sm font-semibold text-white/90 transition-colors duration-300 ease-in-out hover:border-white/40 hover:from-white/13 hover:to-white/7 hover:text-blue-200 hover:shadow-lg"
                     >
-                      <Icon size={14} />
+                      <ProjectLinkIcon tag={tag} size={14} />
                       <span className="max-w-50 truncate">
                         {url.replace(/^https?:\/\/(www\.)?/, "")}
                       </span>
@@ -333,8 +313,8 @@ export function PrivateProjectCard(project: Project) {
 
 type DeleteProjectDialogProps = {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
   project: Project;
+  onOpenChange: (open: boolean) => void;
 };
 
 function DeleteProjectDialog(props: DeleteProjectDialogProps) {

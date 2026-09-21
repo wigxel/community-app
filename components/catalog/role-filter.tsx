@@ -21,19 +21,16 @@ export function RoleFilter({ titles }: RoleFilterProps) {
   });
 
   return (
-    <div className="flex w-full max-w-md items-center overflow-hidden rounded-2xl border border-white/20">
-      <span className="p-4 text-sm font-semibold text-nowrap text-white">
-        Filter by role
-      </span>
+    <div className="flex gap-2">
       <Select
         value={filter}
         onValueChange={(value) => setFilter(() => (value !== "#" ? value : ""))}
       >
-        <SelectTrigger className="h-full w-full grow rounded-none border-0 bg-white p-4 text-zinc-700">
+        <SelectTrigger>
           <SelectValue placeholder="All" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="#">All</SelectItem>
+          <SelectItem value="#">All roles</SelectItem>
           {titles.map(({ name }) => (
             <SelectItem key={name} value={name} className="capitalize">
               {name}
