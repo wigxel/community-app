@@ -1,15 +1,15 @@
 import { GlobeIcon } from "lucide-react";
 import { Behance, Figma, Github } from "~/components/icons";
 
-export function ProjectLinkIcon({
-  tag,
-  size = 14,
-  className,
-}: {
+export type ProjectLinkIconProps = {
   tag: string;
   size?: number;
   className?: string;
-}) {
+};
+
+export function ProjectLinkIcon(props: ProjectLinkIconProps) {
+  const { tag, size = 14, className } = props;
+
   const Icon = getLinkIcon(tag);
 
   return <Icon size={size} className={className} />;
