@@ -1,15 +1,15 @@
 import { Alert } from "@hyperbridge/ui/icons";
 import { InfoIcon } from "lucide-react";
 
-export function AlertBox({
-  children,
-  heading,
-  severity = "error",
-}: {
+export type AlertBoxProps = {
   severity?: "error" | "warning" | "info";
   heading: string;
   children?: React.ReactNode;
-}) {
+};
+
+export function AlertBox(props: AlertBoxProps) {
+  const { children, heading, severity = "error" } = props;
+
   const icon = icons[severity];
   return (
     <div className="corner-sharp bg-brand-black-500 text-muted-foreground flex flex-col items-start gap-3 rounded-2xl px-3 py-2.5 md:flex-row">

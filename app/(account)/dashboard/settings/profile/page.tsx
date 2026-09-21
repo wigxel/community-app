@@ -49,7 +49,7 @@ const LINK_TYPES = [
     tag: "github",
     title: "GitHub",
     prefix: "github.com/",
-    placeholder: "username",
+    placeholder: "username/project",
   },
   {
     tag: "portfolio",
