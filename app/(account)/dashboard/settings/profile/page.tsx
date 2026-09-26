@@ -262,10 +262,11 @@ const formSchema = z.object({
 export default function Profile() {
   const profile = useQuery(api.profiles.getProfile);
   const skills = useQuery(api.profiles.getSkills);
-  const existingWorkExp = useQuery(
+  const workExpQuery = useQuery(
     api.workExperience.getByUserId,
     profile?.userId ? { userId: profile.userId } : "skip",
   );
+  const existingWorkExp = profile && !profile.userId ? [] : workExpQuery;
 
   const mappedWorkExperience: z.infer<typeof workExperienceSchema>[] =
     existingWorkExp?.map((exp) => ({
@@ -294,7 +295,12 @@ export default function Profile() {
     <div className="px-2 md:px-4">
       <h1 className="mb-8 text-4xl font-semibold">Edit Profile</h1>
 
-      {profile && existingWorkExp !== undefined ? (
+      {profile === null ? (
+        <div className="text-muted-foreground text-center">
+          We couldn&apos;t find your profile. Please complete onboarding or sign
+          in again.
+        </div>
+      ) : profile && existingWorkExp !== undefined ? (
         <ProfileForm
           initialData={{
             firstname: profile.firstName,
