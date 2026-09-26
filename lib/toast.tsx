@@ -37,7 +37,9 @@ const createToast = (severity: ToastSeverity) => {
             onDismiss?.();
           }}
         >
-          <div className="lg:min-w-[30ch]">{description || message}</div>
+          <span className="block lg:min-w-[30ch]">
+            {description || message}
+          </span>
         </ToastBox>
       ),
       {
