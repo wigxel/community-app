@@ -21,8 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProjectLinkIcon } from "~/components/atoms";
-import { CoverImageUpload } from "~/components/profile/cover-image-upload";
-import { ImageUpload } from "~/components/profile/image-upload";
+import { ProfileImagesEditor } from "~/components/profile/profile-images-editor";
 import { SkillsSelect } from "~/components/profile/skills-select";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -312,6 +311,7 @@ export default function Profile() {
             profileImage: profile.profileImage || "",
             coverImage: profile.coverImage || "",
             interests: profile.interests?.join(", ") || "",
+            location: profile.location,
             workExperience: mappedWorkExperience,
             links:
               profile.links?.map((link) => normalizeLinkForEdit(link)) ?? [],
@@ -518,6 +518,33 @@ export function ProfileForm(props: ProfileFormProps) {
             </div>
           )}
 
+          {/* ── Profile & Cover Images ────────────────────────────────────── */}
+          <FormField
+            control={form.control}
+            name="coverImage"
+            render={({ field: cover }) => (
+              <FormField
+                control={form.control}
+                name="profileImage"
+                render={({ field: avatar }) => (
+                  <FormItem>
+                    <FormLabel className="sr-only">
+                      Profile and cover images
+                    </FormLabel>
+                    <ProfileImagesEditor
+                      profileImage={avatar.value}
+                      coverImage={cover.value}
+                      onProfileImageChange={avatar.onChange}
+                      onCoverImageChange={cover.onChange}
+                      fallbackInitial={form.watch("firstname")?.[0]}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          />
+
           {/* ── Basic Information ─────────────────────────────────────────── */}
           <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
@@ -603,7 +630,7 @@ export function ProfileForm(props: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>City</FormLabel>
                       <FormControl>
-                        <Input placeholder="Port-Harcourt" {...field} />
+                        <Input placeholder="Port Harcourt" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -671,47 +698,6 @@ export function ProfileForm(props: ProfileFormProps) {
                     </FormControl>
                     <FormDescription>
                       A brief description about yourself (optional).
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="profileImage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profile Image</FormLabel>
-                    <FormControl>
-                      <ImageUpload
-                        currentImage={field.value}
-                        onImageChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload a profile picture (max 5MB). You can crop and
-                      resize it.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="coverImage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cover Image</FormLabel>
-                    <FormControl>
-                      <CoverImageUpload
-                        currentImage={field.value || null}
-                        onImageChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload a cover/banner image for your profile.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
