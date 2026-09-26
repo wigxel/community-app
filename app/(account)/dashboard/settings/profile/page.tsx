@@ -518,6 +518,33 @@ export function ProfileForm(props: ProfileFormProps) {
             </div>
           )}
 
+          {/* ── Profile & Cover Images ────────────────────────────────────── */}
+          <FormField
+            control={form.control}
+            name="coverImage"
+            render={({ field: cover }) => (
+              <FormField
+                control={form.control}
+                name="profileImage"
+                render={({ field: avatar }) => (
+                  <FormItem>
+                    <FormLabel className="sr-only">
+                      Profile and cover images
+                    </FormLabel>
+                    <ProfileImagesEditor
+                      profileImage={avatar.value}
+                      coverImage={cover.value}
+                      onProfileImageChange={avatar.onChange}
+                      onCoverImageChange={cover.onChange}
+                      fallbackInitial={form.watch("firstname")?.[0]}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          />
+
           {/* ── Basic Information ─────────────────────────────────────────── */}
           <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
@@ -526,32 +553,6 @@ export function ProfileForm(props: ProfileFormProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="coverImage"
-                render={({ field: cover }) => (
-                  <FormField
-                    control={form.control}
-                    name="profileImage"
-                    render={({ field: avatar }) => (
-                      <FormItem>
-                        <FormLabel className="sr-only">
-                          Profile and cover images
-                        </FormLabel>
-                        <ProfileImagesEditor
-                          profileImage={avatar.value}
-                          coverImage={cover.value}
-                          onProfileImageChange={avatar.onChange}
-                          onCoverImageChange={cover.onChange}
-                          fallbackInitial={form.watch("firstname")?.[0]}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              />
-
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
