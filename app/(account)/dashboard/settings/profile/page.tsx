@@ -41,6 +41,7 @@ import type { Id } from "~/convex/_generated/dataModel";
 import { useTitles } from "~/hooks/useTitles";
 import { safeArray } from "~/lib/data.helpers";
 import { Result } from "~/lib/result";
+import { toast } from "~/lib/toast";
 
 // ─── Link types ────────────────────────────────────────────────────────────────
 
@@ -338,10 +339,6 @@ export function ProfileForm(props: ProfileFormProps) {
   const skills = useQuery(api.skills.listSkills);
   const updateProfile = useMutation(api.profiles.updateProfile);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
 
   const createWorkExp = useMutation(api.workExperience.create);
   const updateWorkExp = useMutation(api.workExperience.update);
@@ -397,7 +394,6 @@ export function ProfileForm(props: ProfileFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    setMessage(null);
 
     try {
       const normalizedLinks = values.links.map((link) => {
@@ -490,12 +486,11 @@ export function ProfileForm(props: ProfileFormProps) {
           work_experience_count: values.workExperience?.length ?? 0,
         });
       }
-      setMessage({ type: "success", text: "Profile updated successfully!" });
+      toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Failed to update profile:", error);
-      setMessage({
-        type: "error",
-        text: "Failed to update profile. Please try again.",
+      toast.error("Failed to update profile", {
+        description: "Please try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -506,18 +501,6 @@ export function ProfileForm(props: ProfileFormProps) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {message && (
-            <div
-              className={`rounded-lg p-4 ${
-                message.type === "success"
-                  ? "border border-green-500/30 bg-green-500/20 text-green-300"
-                  : "border border-red-500/30 bg-red-500/20 text-red-300"
-              }`}
-            >
-              {message.text}
-            </div>
-          )}
-
           {/* ── Basic Information ─────────────────────────────────────────── */}
           <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
