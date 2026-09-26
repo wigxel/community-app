@@ -18,13 +18,15 @@ interface ProfileImagesEditorProps {
   fallbackInitial?: string;
 }
 
-export function ProfileImagesEditor({
-  profileImage,
-  coverImage,
-  onProfileImageChange,
-  onCoverImageChange,
-  fallbackInitial,
-}: ProfileImagesEditorProps) {
+export function ProfileImagesEditor(props: ProfileImagesEditorProps) {
+  const {
+    profileImage,
+    coverImage,
+    onProfileImageChange,
+    onCoverImageChange,
+    fallbackInitial,
+  } = props;
+
   return (
     <div className="overflow-hidden rounded-xl border">
       <CoverImageUpload

@@ -11,12 +11,9 @@ interface ImageActionButtonProps {
   className?: string;
 }
 
-export function ImageActionButton({
-  onClick,
-  label,
-  icon: Icon = Camera,
-  className,
-}: ImageActionButtonProps) {
+export function ImageActionButton(props: ImageActionButtonProps) {
+  const { onClick, label, icon: Icon = Camera, className } = props;
+
   return (
     <button
       type="button"
@@ -33,7 +30,11 @@ export function ImageActionButton({
   );
 }
 
-export function ImageHoverOverlay({ className }: { className?: string }) {
+export type ImageHoverOverlayProps = { className?: string };
+
+export function ImageHoverOverlay(props: ImageHoverOverlayProps) {
+  const { className } = props;
+
   return (
     <span
       className={cn(
@@ -52,13 +53,9 @@ interface EditableAvatarProps {
   avatarClassName?: string;
 }
 
-export function EditableAvatar({
-  image,
-  fallbackInitial,
-  onClick,
-  className,
-  avatarClassName,
-}: EditableAvatarProps) {
+export function EditableAvatar(props: EditableAvatarProps) {
+  const { image, fallbackInitial, onClick, className, avatarClassName } = props;
+
   return (
     <div className={cn("group relative shrink-0 rounded-full", className)}>
       <Avatar className={cn("border-background border-4", avatarClassName)}>

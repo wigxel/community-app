@@ -13,11 +13,9 @@ interface CoverImageUploadProps {
   trigger?: (actions: { open: () => void; remove: () => void }) => ReactNode;
 }
 
-export function CoverImageUpload({
-  currentImage,
-  onImageChange,
-  trigger,
-}: CoverImageUploadProps) {
+export function CoverImageUpload(props: CoverImageUploadProps) {
+  const { currentImage, onImageChange, trigger } = props;
+
   const [isOpen, setIsOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState("");
   const [zoom, setZoom] = useState(1);

@@ -15,11 +15,9 @@ interface ImageUploadProps {
   trigger?: (open: () => void) => ReactNode;
 }
 
-export function ImageUpload({
-  currentImage,
-  onImageChange,
-  trigger,
-}: ImageUploadProps) {
+export function ImageUpload(props: ImageUploadProps) {
+  const { currentImage, onImageChange, trigger } = props;
+
   const firstName = useWatch({ name: "firstName" });
   const [isOpen, setIsOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState("");
