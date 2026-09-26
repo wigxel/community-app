@@ -300,7 +300,7 @@ export default function Profile() {
           We couldn&apos;t find your profile. Please complete onboarding or sign
           in again.
         </div>
-      ) : profile && existingWorkExp !== undefined ? (
+      ) : profile && existingWorkExp !== undefined && skills !== undefined ? (
         <ProfileForm
           initialData={{
             firstname: profile.firstName,
@@ -421,9 +421,12 @@ export function ProfileForm(props: ProfileFormProps) {
         : [];
 
       const existingIds = new Set(
-        (initialData.workExperience ?? []).map((e) => e._id).filter(Boolean),
+        (form.formState.defaultValues?.workExperience ?? [])
+          .map((e) => e?._id)
+          .filter(Boolean),
       );
 
+      const savedWorkExperience: z.infer<typeof workExperienceSchema>[] = [];
       for (const exp of values.workExperience ?? []) {
         const timeline = {
           start: new Date(exp.startDate).getTime(),
@@ -447,9 +450,14 @@ export function ProfileForm(props: ProfileFormProps) {
             ...payload,
           });
           existingIds.delete(exp._id);
+          savedWorkExperience.push(exp);
         } else {
-          if (!profile?.userId) return;
-          await createWorkExp({ userId: profile.userId, ...payload });
+          if (!profile?.userId) throw new Error("Profile is not loaded yet.");
+          const id = await createWorkExp({
+            userId: profile.userId,
+            ...payload,
+          });
+          savedWorkExperience.push({ ...exp, _id: id });
         }
       }
 
@@ -490,6 +498,7 @@ export function ProfileForm(props: ProfileFormProps) {
           work_experience_count: values.workExperience?.length ?? 0,
         });
       }
+      form.reset({ ...values, workExperience: savedWorkExperience });
       setMessage({ type: "success", text: "Profile updated successfully!" });
     } catch (error) {
       console.error("Failed to update profile:", error);
@@ -630,10 +639,7 @@ export function ProfileForm(props: ProfileFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Title</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a title" />
@@ -896,7 +902,7 @@ export function ProfileForm(props: ProfileFormProps) {
                             <FormLabel>Location Type</FormLabel>
                             <Select
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                             >
                               <FormControl>
                                 <SelectTrigger>
@@ -921,7 +927,7 @@ export function ProfileForm(props: ProfileFormProps) {
                             <FormLabel>Employment Type</FormLabel>
                             <Select
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                             >
                               <FormControl>
                                 <SelectTrigger>
