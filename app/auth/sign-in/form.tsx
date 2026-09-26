@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
+import { GoogleSignInButton } from "~/components/auth/google-sign-in-button";
 import { PasswordInput } from "~/components/fields/password";
 import { LoadingButton } from "~/components/forms/button";
 import {
@@ -16,6 +17,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Separator } from "~/components/ui/separator";
 import { authClient } from "~/lib/auth-client";
 import { toast } from "~/lib/toast";
 
@@ -134,6 +136,14 @@ export default function SignInForm(props: SignInFormProps) {
             </LoadingButton>
           </form>
         </Form>
+
+        <div className="my-6 flex items-center gap-3">
+          <Separator className="flex-1" />
+          <span className="text-muted-foreground text-xs uppercase">Or</span>
+          <Separator className="flex-1" />
+        </div>
+
+        <GoogleSignInButton redirectTo={redirectTo} />
 
         <div className="mt-6 text-center">
           <p className="text-muted-foreground text-sm">
