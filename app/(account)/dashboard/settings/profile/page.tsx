@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProjectLinkIcon } from "~/components/atoms";
+import { NavigationFocus } from "~/components/molecules/navigation-focus";
 import { CoverImageUpload } from "~/components/profile/cover-image-upload";
 import { ImageUpload } from "~/components/profile/image-upload";
 import { SkillsSelect } from "~/components/profile/skills-select";
@@ -383,30 +384,14 @@ export function ProfileForm(props: ProfileFormProps) {
   const didAppendForFocus = useRef(false);
   useEffect(() => {
     const focus = new URLSearchParams(window.location.search).get("focus");
-    let name: "shortBio" | "workExperience.0.position";
-    if (focus === "shortBio") {
-      name = "shortBio";
-    } else if (focus === "workExperience") {
-      if (
-        !didAppendForFocus.current &&
-        !form.getValues("workExperience")?.length
-      ) {
-        didAppendForFocus.current = true;
-        appendWork(EMPTY_WORK_EXPERIENCE, { shouldFocus: false });
-      }
-      name = "workExperience.0.position";
-    } else {
-      return;
+    if (
+      focus === "workExperience" &&
+      !didAppendForFocus.current &&
+      !form.getValues("workExperience")?.length
+    ) {
+      didAppendForFocus.current = true;
+      appendWork(EMPTY_WORK_EXPERIENCE, { shouldFocus: false });
     }
-
-    const timeout = setTimeout(() => {
-      form.setFocus(name);
-      document.activeElement?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }, 100);
-    return () => clearTimeout(timeout);
   }, [form, appendWork]);
 
   // Links field array
@@ -702,12 +687,14 @@ export function ProfileForm(props: ProfileFormProps) {
                   <FormItem>
                     <FormLabel>Short Bio</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Tell us about yourself..."
-                        className="resize-none"
-                        rows={4}
-                        {...field}
-                      />
+                      <NavigationFocus id="shortBio">
+                        <Textarea
+                          placeholder="Tell us about yourself..."
+                          className="resize-none"
+                          rows={4}
+                          {...field}
+                        />
+                      </NavigationFocus>
                     </FormControl>
                     <FormDescription>
                       A brief description about yourself (optional).
@@ -891,10 +878,19 @@ export function ProfileForm(props: ProfileFormProps) {
                           <FormItem>
                             <FormLabel>Position</FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="Software Engineer"
-                                {...field}
-                              />
+                              {index === 0 ? (
+                                <NavigationFocus id="workExperience">
+                                  <Input
+                                    placeholder="Software Engineer"
+                                    {...field}
+                                  />
+                                </NavigationFocus>
+                              ) : (
+                                <Input
+                                  placeholder="Software Engineer"
+                                  {...field}
+                                />
+                              )}
                             </FormControl>
                             <FormMessage />
                           </FormItem>
