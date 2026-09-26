@@ -2,6 +2,7 @@ import { ToastBox } from "@hyperbridge/ui";
 import { Either } from "effect";
 import { isNullable as isNil } from "effect/Predicate";
 import type { ReactNode } from "react";
+// eslint-disable-next-line no-restricted-imports -- this is the wrapper module
 import { toast as sonnerToast } from "sonner";
 
 type ToastSeverity = "success" | "error" | "warning" | "info";
@@ -37,7 +38,9 @@ const createToast = (severity: ToastSeverity) => {
             onDismiss?.();
           }}
         >
-          <div className="lg:min-w-[30ch]">{description || message}</div>
+          <span className="block lg:min-w-[30ch]">
+            {description || message}
+          </span>
         </ToastBox>
       ),
       {
