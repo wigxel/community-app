@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { Reorder, useDragControls } from "motion/react";
 import posthog from "posthog-js";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   type FieldArrayWithId,
   type UseFormReturn,
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProjectLinkIcon } from "~/components/atoms";
+import { NavigationFocus } from "~/components/molecules/navigation-focus";
 import { CoverImageUpload } from "~/components/profile/cover-image-upload";
 import { ImageUpload } from "~/components/profile/image-upload";
 import { SkillsSelect } from "~/components/profile/skills-select";
@@ -257,6 +258,17 @@ const formSchema = z.object({
   skills: z.array(z.string()).optional(), // array of skill IDs
 });
 
+const EMPTY_WORK_EXPERIENCE: z.infer<typeof workExperienceSchema> = {
+  position: "",
+  company: "",
+  startDate: "",
+  endDate: "",
+  description: "",
+  location: "onsite",
+  type: "full-time",
+  isCurrent: false,
+};
+
 // ─── Page component ────────────────────────────────────────────────────────────
 
 export default function Profile() {
@@ -368,6 +380,19 @@ export function ProfileForm(props: ProfileFormProps) {
     control: form.control,
     name: "workExperience",
   });
+
+  const didAppendForFocus = useRef(false);
+  useEffect(() => {
+    const focus = new URLSearchParams(window.location.search).get("focus");
+    if (
+      focus === "workExperience" &&
+      !didAppendForFocus.current &&
+      !form.getValues("workExperience")?.length
+    ) {
+      didAppendForFocus.current = true;
+      appendWork(EMPTY_WORK_EXPERIENCE, { shouldFocus: false });
+    }
+  }, [form, appendWork]);
 
   // Links field array
   const {
@@ -662,12 +687,14 @@ export function ProfileForm(props: ProfileFormProps) {
                   <FormItem>
                     <FormLabel>Short Bio</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Tell us about yourself..."
-                        className="resize-none"
-                        rows={4}
-                        {...field}
-                      />
+                      <NavigationFocus id="shortBio">
+                        <Textarea
+                          placeholder="Tell us about yourself..."
+                          className="resize-none"
+                          rows={4}
+                          {...field}
+                        />
+                      </NavigationFocus>
                     </FormControl>
                     <FormDescription>
                       A brief description about yourself (optional).
@@ -806,18 +833,7 @@ export function ProfileForm(props: ProfileFormProps) {
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={() =>
-                    appendWork({
-                      position: "",
-                      company: "",
-                      startDate: "",
-                      endDate: "",
-                      description: "",
-                      location: "onsite",
-                      type: "full-time",
-                      isCurrent: false,
-                    })
-                  }
+                  onClick={() => appendWork(EMPTY_WORK_EXPERIENCE)}
                   className="group flex items-center border-gray-300 bg-white"
                 >
                   <Plus className="h-4 w-4 shrink-0 text-gray-900 transition-all group-hover:mr-2" />
@@ -862,10 +878,19 @@ export function ProfileForm(props: ProfileFormProps) {
                           <FormItem>
                             <FormLabel>Position</FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="Software Engineer"
-                                {...field}
-                              />
+                              {index === 0 ? (
+                                <NavigationFocus id="workExperience">
+                                  <Input
+                                    placeholder="Software Engineer"
+                                    {...field}
+                                  />
+                                </NavigationFocus>
+                              ) : (
+                                <Input
+                                  placeholder="Software Engineer"
+                                  {...field}
+                                />
+                              )}
                             </FormControl>
                             <FormMessage />
                           </FormItem>
