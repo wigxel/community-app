@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * Generated utilities for implementing server-side Convex query and mutation functions.
  *
@@ -20,6 +19,17 @@ import {
   GenericDatabaseWriter,
 } from "convex/server";
 import type { DataModel } from "./dataModel.js";
+
+/**
+ * Typesafe environment variables.
+ *
+ * This includes platform-provided env vars and any variables declared in
+ * `convex.config.ts`.
+ */
+type Env = {
+  readonly CONVEX_CLOUD_URL: string;
+  readonly CONVEX_SITE_URL: string;
+};
 
 /**
  * Define a query in this Convex app's public API.
@@ -94,6 +104,14 @@ export declare const internalAction: ActionBuilder<DataModel, "internal">;
  * @returns The wrapped function. Import this function from `convex/http.js` and route it to hook it up.
  */
 export declare const httpAction: HttpActionBuilder;
+
+/**
+ * Typesafe environment variables.
+ *
+ * This includes platform-provided env vars and any variables declared in
+ * `convex.config.ts`.
+ */
+export declare const env: Env;
 
 /**
  * A set of services for use within Convex query functions.
