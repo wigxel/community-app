@@ -78,6 +78,11 @@ export default function OnboardingForm(props: OnboardingFormProps) {
 
       form.setValue("firstName", firstname);
       form.setValue("lastName", safeArray(lastname).join(" "));
+
+      const image = result?.data?.user?.image;
+      if (image && !form.getValues("profileImage")) {
+        form.setValue("profileImage", image);
+      }
     },
   });
 
