@@ -3,11 +3,11 @@ import { Calendar } from "iconsax-reactjs";
 import { FileText } from "lucide-react";
 import React, { useRef } from "react";
 import { ProjectImpl } from "~/lib/factories/project";
-import type { Project } from "~/types/models";
+import type { BasicProject } from "~/types/models";
 import { FavouriteButton } from "./FavouriteButton";
 import { MediaThumb } from "./MediaThumb";
 
-type ProjectDetailsProps = { project: Project };
+type ProjectDetailsProps = { project: BasicProject };
 
 export function ProjectDetails(props: ProjectDetailsProps) {
   const { project } = props;
