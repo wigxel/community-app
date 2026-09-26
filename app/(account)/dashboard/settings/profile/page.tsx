@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { Reorder, useDragControls } from "motion/react";
 import posthog from "posthog-js";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   type FieldArrayWithId,
   type UseFormReturn,
@@ -257,6 +257,17 @@ const formSchema = z.object({
   skills: z.array(z.string()).optional(), // array of skill IDs
 });
 
+const EMPTY_WORK_EXPERIENCE: z.infer<typeof workExperienceSchema> = {
+  position: "",
+  company: "",
+  startDate: "",
+  endDate: "",
+  description: "",
+  location: "onsite",
+  type: "full-time",
+  isCurrent: false,
+};
+
 // ─── Page component ────────────────────────────────────────────────────────────
 
 export default function Profile() {
@@ -368,6 +379,35 @@ export function ProfileForm(props: ProfileFormProps) {
     control: form.control,
     name: "workExperience",
   });
+
+  const didAppendForFocus = useRef(false);
+  useEffect(() => {
+    const focus = new URLSearchParams(window.location.search).get("focus");
+    let name: "shortBio" | "workExperience.0.position";
+    if (focus === "shortBio") {
+      name = "shortBio";
+    } else if (focus === "workExperience") {
+      if (
+        !didAppendForFocus.current &&
+        !form.getValues("workExperience")?.length
+      ) {
+        didAppendForFocus.current = true;
+        appendWork(EMPTY_WORK_EXPERIENCE, { shouldFocus: false });
+      }
+      name = "workExperience.0.position";
+    } else {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      form.setFocus(name);
+      document.activeElement?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, [form, appendWork]);
 
   // Links field array
   const {
@@ -806,18 +846,7 @@ export function ProfileForm(props: ProfileFormProps) {
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={() =>
-                    appendWork({
-                      position: "",
-                      company: "",
-                      startDate: "",
-                      endDate: "",
-                      description: "",
-                      location: "onsite",
-                      type: "full-time",
-                      isCurrent: false,
-                    })
-                  }
+                  onClick={() => appendWork(EMPTY_WORK_EXPERIENCE)}
                   className="group flex items-center border-gray-300 bg-white"
                 >
                   <Plus className="h-4 w-4 shrink-0 text-gray-900 transition-all group-hover:mr-2" />
