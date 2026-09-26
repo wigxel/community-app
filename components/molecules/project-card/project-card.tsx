@@ -157,7 +157,7 @@ const ProjectCardOwner = forwardRef<HTMLDivElement, ProjectCardOwnerProps>(
       >
         <ProfileAvatar
           className="size-[2.4em] rounded-full"
-          name={resolvedName}
+          name={resolvedName ?? ""}
         />
         <h3 className="text-foreground line-clamp-1 max-w-[15ch] truncate text-sm font-semibold">
           {resolvedUsername ?? "--"}
