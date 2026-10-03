@@ -197,6 +197,7 @@ body {
 }
 
 .marquee-track {
+  display: flex;
   width: max-content;
   animation: marquee-x 60s linear infinite;
 }

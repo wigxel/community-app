@@ -5,7 +5,11 @@ import { createPortal } from "react-dom";
 
 export const LOAD_MORE_PORTAL_ID = "profile-page-load-more-portal";
 
-export function LoadMoreButton() {
+export function LoadMoreButton(props: {
+  status?: "LoadingFirstPage" | "LoadingMore" | "CanLoadMore" | "Exhausted";
+  onLoadMore?: () => void;
+}) {
+  const { status, onLoadMore } = props;
   const [parent, setMountParent] = React.useState<HTMLElement | null>(null);
 
   React.useLayoutEffect(() => {
@@ -22,9 +26,18 @@ export function LoadMoreButton() {
   }, []);
 
   if (!parent) return;
+  if (status === "Exhausted") return null;
+
+  const isLoading = status === "LoadingMore" || status === "LoadingFirstPage";
 
   return createPortal(
-    <Button className="w-full" size="lg">
+    <Button
+      className="w-full"
+      size="lg"
+      variant={isLoading ? "level_1" : "default"}
+      disabled={isLoading}
+      onClick={onLoadMore}
+    >
       Load more
     </Button>,
     parent,

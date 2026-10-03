@@ -12,8 +12,6 @@ export function FeatureFlag({
 }) {
   const isEnabled = useFeatureFlagEnabled(FeatureFlags[flagKey]);
 
-  console.log({ isEnabled });
-
   if (isSSR()) return null;
 
   if (!isEnabled) return null;

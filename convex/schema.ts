@@ -135,6 +135,10 @@ const schema = defineSchema({
     interests: v.optional(v.array(v.string())),
     location: v.optional(profile_location_schema),
     skills: v.optional(v.array(v.id("skills"))),
+    // Denormalized running total of `project` rows for this user.
+    // Maintained by project.createProject / project.deleteProject;
+    // backfilled by seeds.backfillProjectCounts.
+    projectCount: v.optional(v.number()),
   })
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])

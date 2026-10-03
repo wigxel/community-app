@@ -1,5 +1,6 @@
 import {
   type AnyDataModel,
+  type GenericMutationCtx,
   type GenericQueryCtx,
   type PaginationResult,
   paginationOptsValidator,
@@ -10,7 +11,7 @@ import { Either } from "effect";
 import { Result, type ResultShape } from "../lib/result";
 import type { BasicProject, Project } from "../types/models";
 import { internal } from "./_generated/api";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { DataModel, Doc, Id } from "./_generated/dataModel";
 import { internalMutation, mutation } from "./_generated/server";
 import { authComponent } from "./auth";
 import { project_schema } from "./schema";
@@ -100,14 +101,23 @@ export const listProject = query({
 });
 
 export const listProjectByUserId = query({
-  args: { userId: v.string() },
-  handler: async (ctx, args): Promise<BasicProject[]> => {
-    const docs = await ctx.db
+  args: { userId: v.string(), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args): Promise<PaginationResult<BasicProject>> => {
+    const result = await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .collect();
+      .order("desc")
+      .paginate({
+        ...args.paginationOpts,
+        numItems: Math.min(50, args.paginationOpts.numItems),
+      });
 
-    return await Promise.all(docs.map((doc) => toStandardProject(ctx, doc)));
+    return {
+      ...result,
+      page: await Promise.all(
+        result.page.map((doc) => toStandardProject(ctx, doc)),
+      ),
+    };
   },
 });
 

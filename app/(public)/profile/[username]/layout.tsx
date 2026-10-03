@@ -116,10 +116,12 @@ export default async function ProfileCard(props: ProfileCardProps) {
           {/*<ShareButton username={username} />*/}
         </div>
 
-        <div className="flex flex-1 flex-col gap-4">
-          <MentorshipBanner profile={profile} />
-          <ProfileNavigation profile={profile} />
-          {children}
+        <div className="flex flex-1 flex-col">
+          <div className="flex flex-col gap-4">
+            <MentorshipBanner profile={profile} />
+            <ProfileNavigation profile={profile} />
+          </div>
+          <div className="mt-4 flex flex-1">{children}</div>
         </div>
       </section>
 
