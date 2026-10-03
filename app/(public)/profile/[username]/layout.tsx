@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Container } from "~/components/layouts/container";
+import { DiscoverMoreProjects } from "~/components/organism/discover-more-projects";
 import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeObj } from "~/lib/data.helpers";
@@ -105,8 +107,7 @@ export default async function ProfileCard(props: ProfileCardProps) {
   const profile: Profile = safeObj(currentProfile);
 
   return (
-    <div className="container mx-auto px-5 py-8 md:px-8">
-      {/* COVER IMAGE  */}
+    <Container level="max" className="mx-auto flex flex-col px-5 py-8 md:px-8">
       <ProfileCoverImage profile={profile} />
 
       <section className="relative z-10 flex flex-col gap-4 md:flex-row">
@@ -121,7 +122,9 @@ export default async function ProfileCard(props: ProfileCardProps) {
           {children}
         </div>
       </section>
-    </div>
+
+      <DiscoverMoreProjects />
+    </Container>
   );
 }
 
