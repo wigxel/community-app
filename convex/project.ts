@@ -1,4 +1,6 @@
 import {
+  type AnyDataModel,
+  type GenericQueryCtx,
   type PaginationResult,
   paginationOptsValidator,
   queryGeneric as query,
@@ -54,8 +56,23 @@ export function isStartAfterEnd(
   return Result.ok(start > end);
 }
 
-function toProject(doc: Doc<"project">): Project {
-  return doc as unknown as Project;
+async function toStandardProject(
+  ctx: GenericQueryCtx<AnyDataModel>,
+  project: Doc<"project">,
+): Promise<BasicProject> {
+  const profile: Doc<"profile"> | null = await ctx.db.get(
+    project?.userId as never,
+  );
+
+  const ownerName =
+    `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim();
+  const username = profile?.username ?? "@anonymous";
+
+  return {
+    ...project,
+    username,
+    ownerName,
+  } as never;
 }
 
 export const listProject = query({
@@ -73,19 +90,24 @@ export const listProject = query({
       .order("desc")
       .paginate(args.paginationOpts);
 
-    return { ...result, page: result.page.map(toProject) };
+    return {
+      ...result,
+      page: await Promise.all(
+        result.page.map((doc) => toStandardProject(ctx, doc)),
+      ),
+    };
   },
 });
 
 export const listProjectByUserId = query({
   args: { userId: v.string() },
-  handler: async (ctx, args): Promise<Project[]> => {
+  handler: async (ctx, args): Promise<BasicProject[]> => {
     const docs = await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .collect();
 
-    return docs.map(toProject);
+    return await Promise.all(docs.map((doc) => toStandardProject(ctx, doc)));
   },
 });
 
@@ -101,7 +123,7 @@ export const getProject = query({
       return Result.error("Not found");
     }
 
-    return Result.ok(toProject(doc));
+    return Result.ok(await toStandardProject(ctx, doc));
   },
 });
 
@@ -288,16 +310,7 @@ export const listAll = query({
     return {
       ...records,
       page: await Promise.all(
-        records.page.map(async (project) => {
-          const profile: Doc<"profile"> = await ctx.db.get(project.userId);
-
-          return {
-            ...project,
-            username: profile?.username ?? "@anonymous",
-            ownerName:
-              `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
-          };
-        }),
+        records.page.map(async (project) => toStandardProject(ctx, project)),
       ),
     };
   },
