@@ -4,30 +4,11 @@ import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 import { ProjectLinkIcon } from "~/components/atoms";
 import { EmptyState } from "~/components/layouts/empty-state";
+import { SectionCard } from "~/components/layouts/section-card";
 import { ProfileAvatar } from "~/components/profile/avatar";
 import { safeArray } from "~/lib/data.helpers";
 import { LocationImpl, ProfileImpl } from "~/lib/factories";
-import { cn } from "~/lib/utils";
 import type { Profile } from "~/types/models";
-
-function SectionCard({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        `bg-muted border-border-subtle rounded-2xl border p-4`,
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
-}
 
 export function ProfileDetailsSection({ profile }: { profile: Profile }) {
   const profile_links = safeArray(profile.links);
