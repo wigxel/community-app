@@ -13,8 +13,7 @@ import type { Profile } from "~/types/models";
 export function ProfileDetailsSection({ profile }: { profile: Profile }) {
   const profile_links = safeArray(profile.links);
 
-  /* @todo: integrate project counts */
-  const project_count = 0;
+  /* @todo: integrate seniority — leaderboard score vs user-selected */
   const seniority = "Senior";
 
   return (
@@ -50,7 +49,9 @@ export function ProfileDetailsSection({ profile }: { profile: Profile }) {
             </div>
             <div>
               <div className="text-muted-foreground text-sm">Projects</div>
-              <div className="text-2xl font-semibold">{project_count}</div>
+              <div className="text-2xl font-semibold">
+                {profile.projectCount ?? 0}
+              </div>
             </div>
           </div>
 

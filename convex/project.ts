@@ -76,10 +76,60 @@ async function toStandardProject(
   } as never;
 }
 
+/**
+ * Maintain the denormalized `profile.projectCount` total.
+ *
+ * Keyed by email: `profile.userId` is optional in the schema and legacy rows
+ * may lack it, while email is required — it is the identity `getProfile` and
+ * `createProfile` already look profiles up by.
+ *
+ * Returns false when no profile exists yet (project created before onboarding
+ * completed); `createProfile` seeds the total when the profile arrives.
+ */
+export async function bumpProjectCount(
+  ctx: GenericMutationCtx<DataModel>,
+  email: string,
+  delta: number,
+): Promise<boolean> {
+  const profile = await ctx.db
+    .query("profile")
+    .withIndex("by_email", (q) => q.eq("email", email))
+    .first();
+
+  if (!profile) return false;
+
+  await ctx.db.patch(profile._id, {
+    projectCount: Math.max(0, (profile.projectCount ?? 0) + delta),
+  });
+
+  return true;
+}
+
+/**
+ * Set `projectCount` on a freshly created profile. Projects may already exist
+ * because `/dashboard/projects` is reachable before onboarding completes.
+ * Bounded by one user's projects, run once at profile creation.
+ */
+export async function seedProjectCount(
+  ctx: GenericMutationCtx<DataModel>,
+  profileId: Id<"profile">,
+  userId: string,
+): Promise<void> {
+  let count = 0;
+  for await (const _ of ctx.db
+    .query("project")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))) {
+    count++;
+  }
+
+  await ctx.db.patch(profileId, { projectCount: count });
+}
+
 export const listProject = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args): Promise<PaginationResult<Project>> => {
     const authUser = await authComponent.getAuthUser(ctx);
+
     if (!authUser) {
       console.error("Not authenticated");
       return { page: [], isDone: true, continueCursor: "" };
@@ -182,6 +232,8 @@ export const createProject = mutation({
       userId: authUser._id,
     });
 
+    await bumpProjectCount(ctx, authUser.email, 1);
+
     // Schedule blurhash generation for photos
     await ctx.scheduler.runAfter(0, internal.blurhash.generateForProject, {
       projectId,
@@ -273,6 +325,8 @@ export const deleteProject = mutation({
       throw new Error("Unauthorized action");
 
     await ctx.db.delete(existingProject._id);
+
+    await bumpProjectCount(ctx, authUser.email, -1);
   },
 });
 

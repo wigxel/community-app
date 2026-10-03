@@ -23,6 +23,7 @@ export interface Profile {
   location?: ProfileLocation;
   skills?: string[];
   verified: boolean;
+  projectCount?: number;
 }
 
 export interface ProfileWorkExperience {
