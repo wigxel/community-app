@@ -141,7 +141,9 @@ const schema = defineSchema({
     .index("by_email", ["email"])
     .index("by_title", ["title"]),
 
-  project: defineTable(project_schema).index("by_userId", ["userId"]),
+  project: defineTable(project_schema)
+    .index("by_userId", ["userId"])
+    .searchIndex("search_title", { searchField: "title" }),
 
   workExperience: defineTable(work_experience_schema).index("by_userId", [
     "userId",
