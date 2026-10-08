@@ -1,6 +1,7 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
+import { EditableAvatar } from "~/components/profile/editable-avatar";
 import { ImageUpload } from "~/components/profile/image-upload";
 import {
   FormControl,
@@ -41,6 +42,25 @@ export function AvatarStep(props: AvatarStepProps) {
               <ImageUpload
                 currentImage={field.value}
                 onImageChange={field.onChange}
+                trigger={(open) => (
+                  <div className="flex flex-col items-center gap-3 rounded-xl border py-6">
+                    <EditableAvatar
+                      image={field.value}
+                      fallbackInitial={form.watch("firstName")?.[0]}
+                      onClick={open}
+                      avatarClassName="size-28"
+                    />
+                    <div className="text-center">
+                      <p className="text-sm font-medium">
+                        {field.value ? "Looking good!" : "Add a photo"}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        Tap the camera to {field.value ? "change" : "upload"}{" "}
+                        it. Max 5MB — JPG, PNG, GIF.
+                      </p>
+                    </div>
+                  </div>
+                )}
               />
             </FormControl>
             <FormMessage />

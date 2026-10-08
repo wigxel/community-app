@@ -21,8 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProjectLinkIcon } from "~/components/atoms";
-import { CoverImageUpload } from "~/components/profile/cover-image-upload";
-import { ImageUpload } from "~/components/profile/image-upload";
+import { ProfileImagesEditor } from "~/components/profile/profile-images-editor";
 import { SkillsSelect } from "~/components/profile/skills-select";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -301,7 +300,7 @@ export default function Profile() {
           We couldn&apos;t find your profile. Please complete onboarding or sign
           in again.
         </div>
-      ) : profile && existingWorkExp !== undefined ? (
+      ) : profile && existingWorkExp !== undefined && skills !== undefined ? (
         <ProfileForm
           initialData={{
             firstname: profile.firstName,
@@ -313,6 +312,7 @@ export default function Profile() {
             profileImage: profile.profileImage || "",
             coverImage: profile.coverImage || "",
             interests: profile.interests?.join(", ") || "",
+            location: profile.location,
             workExperience: mappedWorkExperience,
             links:
               profile.links?.map((link) => normalizeLinkForEdit(link)) ?? [],
@@ -417,9 +417,12 @@ export function ProfileForm(props: ProfileFormProps) {
         : [];
 
       const existingIds = new Set(
-        (initialData.workExperience ?? []).map((e) => e._id).filter(Boolean),
+        (form.formState.defaultValues?.workExperience ?? [])
+          .map((e) => e?._id)
+          .filter(Boolean),
       );
 
+      const savedWorkExperience: z.infer<typeof workExperienceSchema>[] = [];
       for (const exp of values.workExperience ?? []) {
         const timeline = {
           start: new Date(exp.startDate).getTime(),
@@ -443,9 +446,14 @@ export function ProfileForm(props: ProfileFormProps) {
             ...payload,
           });
           existingIds.delete(exp._id);
+          savedWorkExperience.push(exp);
         } else {
-          if (!profile?.userId) return;
-          await createWorkExp({ userId: profile.userId, ...payload });
+          if (!profile?.userId) throw new Error("Profile is not loaded yet.");
+          const id = await createWorkExp({
+            userId: profile.userId,
+            ...payload,
+          });
+          savedWorkExperience.push({ ...exp, _id: id });
         }
       }
 
@@ -486,6 +494,8 @@ export function ProfileForm(props: ProfileFormProps) {
           work_experience_count: values.workExperience?.length ?? 0,
         });
       }
+      
+      form.reset({ ...values, workExperience: savedWorkExperience });
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Failed to update profile:", error);
@@ -501,6 +511,33 @@ export function ProfileForm(props: ProfileFormProps) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* ── Profile & Cover Images ────────────────────────────────────── */}
+          <FormField
+            control={form.control}
+            name="coverImage"
+            render={({ field: cover }) => (
+              <FormField
+                control={form.control}
+                name="profileImage"
+                render={({ field: avatar }) => (
+                  <FormItem>
+                    <FormLabel className="sr-only">
+                      Profile and cover images
+                    </FormLabel>
+                    <ProfileImagesEditor
+                      profileImage={avatar.value}
+                      coverImage={cover.value}
+                      onProfileImageChange={avatar.onChange}
+                      onCoverImageChange={cover.onChange}
+                      fallbackInitial={form.watch("firstname")?.[0]}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          />
+          
           {/* ── Basic Information ─────────────────────────────────────────── */}
           <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
@@ -586,7 +623,7 @@ export function ProfileForm(props: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>City</FormLabel>
                       <FormControl>
-                        <Input placeholder="Port-Harcourt" {...field} />
+                        <Input placeholder="Port Harcourt" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -613,10 +650,7 @@ export function ProfileForm(props: ProfileFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Title</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a title" />
@@ -654,47 +688,6 @@ export function ProfileForm(props: ProfileFormProps) {
                     </FormControl>
                     <FormDescription>
                       A brief description about yourself (optional).
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="profileImage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profile Image</FormLabel>
-                    <FormControl>
-                      <ImageUpload
-                        currentImage={field.value}
-                        onImageChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload a profile picture (max 5MB). You can crop and
-                      resize it.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="coverImage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cover Image</FormLabel>
-                    <FormControl>
-                      <CoverImageUpload
-                        currentImage={field.value || null}
-                        onImageChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload a cover/banner image for your profile.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -879,7 +872,7 @@ export function ProfileForm(props: ProfileFormProps) {
                             <FormLabel>Location Type</FormLabel>
                             <Select
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                             >
                               <FormControl>
                                 <SelectTrigger>
@@ -904,7 +897,7 @@ export function ProfileForm(props: ProfileFormProps) {
                             <FormLabel>Employment Type</FormLabel>
                             <Select
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                             >
                               <FormControl>
                                 <SelectTrigger>
