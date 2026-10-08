@@ -494,7 +494,7 @@ export function ProfileForm(props: ProfileFormProps) {
           work_experience_count: values.workExperience?.length ?? 0,
         });
       }
-      
+
       form.reset({ ...values, workExperience: savedWorkExperience });
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -537,7 +537,7 @@ export function ProfileForm(props: ProfileFormProps) {
               />
             )}
           />
-          
+
           {/* ── Basic Information ─────────────────────────────────────────── */}
           <Card className="border-white/10 bg-blue-500/10">
             <CardHeader>
