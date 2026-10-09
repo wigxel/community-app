@@ -15,6 +15,7 @@ import { projectSearchConfig } from "~/lib/search-config";
 import type { BasicProject } from "~/types/models";
 import LandingProjectCard from "./landing-project-card";
 import { ProjectModal } from "./ProjectModal";
+import { SearchNoResultsState } from "./search-no-results-state";
 
 const PAGE_SIZE = 12;
 
@@ -147,6 +148,8 @@ export default function PublicProjectsCatalog({
   }
 
   const hasInitialData = initialProjects && initialProjects.length > 0;
+  const isSearchWithNoResults =
+    searchQuery && !emptyPrompt && initialProjects?.length === 0;
 
   return (
     <Container level="max" className="flex flex-col gap-[3.2rem]">
@@ -154,8 +157,9 @@ export default function PublicProjectsCatalog({
         <SearchBox config={projectSearchConfig} onSearch={handleSearch} />
       </Suspense>
 
-      {/* Grid */}
-      {emptyPrompt ? (
+      {isSearchWithNoResults ? (
+        <SearchNoResultsState query={searchQuery} />
+      ) : emptyPrompt ? (
         <SearchPromptState />
       ) : hasInitialData ? (
         <CatalogGrid
