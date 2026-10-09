@@ -7,11 +7,13 @@ export const revalidate = 30;
 
 const SSR_PAGE_SIZE = 12;
 
-export default async function SearchPage({
-  searchParams,
-}: {
+export type SearchPageProps = {
   searchParams: Promise<{ q?: string }>;
-}) {
+};
+
+export default async function SearchPage(props: SearchPageProps) {
+  const { searchParams } = props;
+
   const { q = "" } = await searchParams;
   const trimmed = q.trim();
 

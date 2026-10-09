@@ -121,12 +121,11 @@ type PublicProjectsCatalogProps = {
   emptyPrompt?: boolean;
 };
 
-export default function PublicProjectsCatalog({
-  initialProjects,
-  ssrError,
-  searchQuery,
-  emptyPrompt,
-}: PublicProjectsCatalogProps) {
+export default function PublicProjectsCatalog(
+  props: PublicProjectsCatalogProps,
+) {
+  const { initialProjects, ssrError, searchQuery, emptyPrompt } = props;
+
   const router = useRouter();
 
   const handleSearch = (value: string) => {
