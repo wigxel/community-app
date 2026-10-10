@@ -221,6 +221,42 @@ const DEFAULT_TITLES = [
   },
 ] as const;
 
+const DEFAULT_PROJECTS = [
+  {
+    title: "Portfolio Website",
+    description: "Personal portfolio built with Next.js and Tailwind",
+  },
+  { title: "Figma Clone", description: "Real-time collaborative design tool" },
+  {
+    title: "E-commerce Platform",
+    description: "Full-stack storefront with Stripe integration",
+  },
+  { title: "Blog Engine", description: "Markdown-based blog with MDX support" },
+  { title: "Task Manager", description: "Kanban board with drag-and-drop" },
+  { title: "Chat Application", description: "WebSocket-based real-time chat" },
+  {
+    title: "Weather Dashboard",
+    description: "Live weather with OpenWeather API",
+  },
+  { title: "Recipe Finder", description: "Search recipes by ingredients" },
+  {
+    title: "Fitness Tracker",
+    description: "Workout logging and progress charts",
+  },
+  {
+    title: "Music Player",
+    description: "Audio streaming with playlist management",
+  },
+  {
+    title: "Photo Gallery",
+    description: "Image gallery with lightbox and lazy loading",
+  },
+  {
+    title: "Expense Tracker",
+    description: "Personal finance and budget management",
+  },
+] as const;
+
 /**
  * Seed the skills table with default skills.
  * Defaults to dryRun — pass { dryRun: false } to actually insert.
@@ -353,10 +389,100 @@ export const seedTitles = internalMutation({
 });
 
 /**
- * Seed all tables (skills + titles).
+ * Seed the project table with default projects.
+ * Also creates a test profile so project enrichment (username/ownerName) works.
  * Defaults to dryRun — pass { dryRun: false } to actually insert.
  * Use { force: true } to re-seed even if already run.
  */
+export const seedProjects = internalMutation({
+  args: {
+    dryRun: v.optional(v.boolean()),
+    force: v.optional(v.boolean()),
+  },
+  async handler(ctx, { dryRun = true, force = false }) {
+    if (dryRun) {
+      const existing = await ctx.db.query("project").collect();
+      const existingTitles = new Set(existing.map((p) => p.title));
+      const wouldInsert = DEFAULT_PROJECTS.filter(
+        (p) => !existingTitles.has(p.title),
+      );
+      return {
+        inserted: 0,
+        skipped: DEFAULT_PROJECTS.length - wouldInsert.length,
+        dryRun: true,
+        wouldInsert: wouldInsert.map((p) => p.title),
+      };
+    }
+
+    if (!force) {
+      const alreadyRan = await ctx.db
+        .query("migrations")
+        .withIndex("by_name", (q) => q.eq("name", "seed:projects"))
+        .first();
+      if (alreadyRan) {
+        return { inserted: 0, skipped: 0, dryRun: false, alreadyRan: true };
+      }
+    }
+
+    // Ensure a test profile exists — projects are enriched with profile data
+    // in listAll/search, so without this the results show "@anonymous".
+    let profile = await ctx.db
+      .query("profile")
+      .withIndex("by_username", (q) => q.eq("username", "testuser"))
+      .first();
+
+    if (!profile) {
+      const profileId = await ctx.db.insert("profile", {
+        firstName: "Test",
+        lastName: "User",
+        email: "test@example.com",
+        username: "testuser",
+        phoneNumbers: [],
+        profileImage: null,
+        title: null,
+      });
+      profile = await ctx.db.get(profileId);
+    }
+
+    if (!profile) {
+      throw new Error("Failed to create or find test profile");
+    }
+
+    const existing = await ctx.db.query("project").collect();
+    const existingTitles = new Set(existing.map((p) => p.title));
+    const wouldInsert = DEFAULT_PROJECTS.filter(
+      (p) => !existingTitles.has(p.title),
+    );
+
+    let inserted = 0;
+    for (const proj of wouldInsert) {
+      await ctx.db.insert("project", {
+        userId: profile._id as unknown as string,
+        title: proj.title,
+        description: proj.description,
+        timeline: { start: null, end: null },
+        ongoing: false,
+        media: [],
+        link: [],
+      });
+      inserted++;
+    }
+
+    await ctx.db.insert("migrations", {
+      name: "seed:projects",
+      type: "seed",
+      status: "success",
+      executedAt: Date.now(),
+    });
+
+    return {
+      inserted,
+      skipped: DEFAULT_PROJECTS.length - inserted,
+      dryRun: false,
+    };
+  },
+});
+
 export const seedSome = internalMutation({
   args: {
     dryRun: v.optional(v.boolean()),
@@ -371,7 +497,11 @@ export const seedSome = internalMutation({
       dryRun,
       force,
     });
+    const projects: any = await ctx.runMutation(internal.seeds.seedProjects, {
+      dryRun,
+      force,
+    });
 
-    return { skills, titles };
+    return { skills, titles, projects };
   },
 });
