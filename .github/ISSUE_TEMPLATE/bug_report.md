@@ -45,18 +45,18 @@ assignees: ""
 
 <!-- Check all that apply -->
 
-- [ ] Authentication (Clerk sign-in / sign-up / session)
+- [ ] Authentication (Better Auth sign-in / sign-up / session)
 - [ ] Profile page (avatar, bio, links)
 - [ ] Convex backend / real-time sync
 
-## Convex & Clerk Details _(if relevant)_
+## Convex & Better Auth Details _(if relevant)_
 
 <!-- If the bug involves auth or backend data, include any relevant info below.
      Do NOT share secret keys or sensitive credentials. -->
 
 - Convex deployment region: <!-- e.g. us-east-1 -->
 - Error shown in Convex dashboard: <!-- Yes / No / N/A -->
-- Clerk error code or message: <!-- e.g. "session expired", "Missing publishableKey" -->
+- Better Auth error code or message: <!-- e.g. "session expired", "invalid credentials" -->
 
 ## Console Output / Logs
 
