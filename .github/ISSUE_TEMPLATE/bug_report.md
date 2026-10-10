@@ -56,7 +56,7 @@ assignees: ""
 
 - Convex deployment region: <!-- e.g. us-east-1 -->
 - Error shown in Convex dashboard: <!-- Yes / No / N/A -->
-- Better Auth error code or message: <!-- e.g. "session expired", "invalid credentials" -->'
+- Better Auth error code or message: <!-- e.g. "session expired", "invalid credentials" -->
 
 ## Console Output / Logs
 
