@@ -199,7 +199,7 @@ export const createProfile = mutation({
       lastName: args.lastName,
       username,
       phoneNumbers: [],
-      profileImage: null,
+      profileImage: authUser.image ?? null,
       coverImage: null,
       title: null,
       shortBio: "",

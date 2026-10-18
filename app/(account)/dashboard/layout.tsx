@@ -1,13 +1,23 @@
+import { redirect } from "next/navigation";
 import { GettingStartedWidget } from "~/components/dashboard/getting-started-widget";
 import { DBHeaderPortal } from "~/components/layouts/dashboard-page-header";
 import { BrandLogo } from "~/components/layouts/header";
-import { AuthUserAvatar } from "~/components/profile/auth-user-avatar";
+import { AuthUserMenu } from "~/components/profile/auth-user-menu";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { api } from "~/convex/_generated/api";
+import { fetchAuthQuery } from "~/lib/auth-server";
 import { Sidebar } from "./_components/sidebar";
 
 type DashboardLayoutProps = { children: React.ReactNode };
 async function DashboardLayout(props: DashboardLayoutProps) {
   const { children } = props;
+
+  const profile = await fetchAuthQuery(api.profiles.getForCurrentUser).catch(
+    () => null,
+  );
+  if (!profile) {
+    redirect("/onboarding");
+  }
 
   return (
     <>
@@ -25,7 +35,7 @@ async function DashboardLayout(props: DashboardLayoutProps) {
           <div className="min-h-(--db-header-height) flex-1">
             <DBHeaderPortal />
           </div>
-          <AuthUserAvatar className="size-8" />
+          <AuthUserMenu className="size-8" />
         </nav>
 
         <div className="flex flex-1 basis-2/12 ps-4">

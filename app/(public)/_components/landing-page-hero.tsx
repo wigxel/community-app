@@ -20,10 +20,7 @@ export function LandingHero() {
             <Balancer>
               Show your best works <br /> in a{" "}
               <span className="text-accent-foreground">
-                <Type
-                  values={["professional", "best", "creative"]}
-                  speed={100}
-                />
+                <Type values={["professional", "creative"]} speed={100} />
               </span>{" "}
               way
             </Balancer>

@@ -26,7 +26,7 @@ assignees: ""
 <!-- Check all areas this feature would touch -->
 
 - [ ] Profile page (avatar, bio, links)
-- [ ] Authentication (Clerk)
+- [ ] Authentication (Better Auth)
 - [ ] Convex backend / data model
 
 ## User Story
