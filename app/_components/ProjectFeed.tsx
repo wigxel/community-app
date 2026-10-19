@@ -9,9 +9,8 @@ import { ProjectCardSkeleton } from "~/components/dashboard/projects/project-car
 import { Container } from "~/components/layouts/container";
 import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { StandardGrid } from "~/components/layouts/grids";
-import { SearchBox } from "~/components/organism/searchbox";
+import { SearchBoxSubmit } from "~/components/organism/searchbox";
 import { api } from "~/convex/_generated/api";
-import { projectSearchConfig } from "~/lib/search-config";
 import type { BasicProject } from "~/types/models";
 import LandingProjectCard from "./landing-project-card";
 import { ProjectModal } from "./ProjectModal";
@@ -135,12 +134,18 @@ export default function PublicProjectsCatalog(
     }
   };
 
+  const searchInput = (
+    <SearchBoxSubmit
+      defaultValue={searchQuery}
+      onSubmit={handleSearch}
+      placeholder="What you looking for?"
+    />
+  );
+
   if (ssrError) {
     return (
       <Container level="max" className="flex flex-col gap-[3.2rem]">
-        <Suspense>
-          <SearchBox config={projectSearchConfig} onSearch={handleSearch} />
-        </Suspense>
+        <Suspense>{searchInput}</Suspense>
         <SsrErrorState />
       </Container>
     );
@@ -152,9 +157,7 @@ export default function PublicProjectsCatalog(
 
   return (
     <Container level="max" className="flex flex-col gap-[3.2rem]">
-      <Suspense>
-        <SearchBox config={projectSearchConfig} onSearch={handleSearch} />
-      </Suspense>
+      <Suspense>{searchInput}</Suspense>
 
       {isSearchWithNoResults ? (
         <SearchNoResultsState query={searchQuery} />

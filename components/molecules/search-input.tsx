@@ -25,7 +25,7 @@ export function SearchInput(props: SearchInputProps) {
   return (
     <label
       className={cn(
-        "bg-muted/50 focus-within:bg-muted flex items-center gap-4 rounded-xl py-[0.4rem] ps-4 pe-[0.4em]",
+        "focus-within:bg-muted flex items-center gap-4 rounded-xl bg-[hsl(from_var(--muted)_h_s_12%)] py-[0.4rem] ps-4 pe-[0.4em]",
         className,
       )}
     >

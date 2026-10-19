@@ -1,7 +1,7 @@
 // app/(public)/search/page.tsx
 import { fetchQuery } from "convex/nextjs";
 import { api } from "~/convex/_generated/api";
-import PublicProjectsCatalog from "../../_components/ProjectFeed";
+import SearchProjectsCatalog from "./_components/search-catalog";
 
 export const revalidate = 30;
 
@@ -24,7 +24,7 @@ export default async function SearchPage(props: SearchPageProps) {
 
   return (
     <div className="container mx-auto">
-      <PublicProjectsCatalog
+      <SearchProjectsCatalog
         initialProjects={initialData?.page}
         ssrError={!initialData}
         searchQuery={trimmed}
