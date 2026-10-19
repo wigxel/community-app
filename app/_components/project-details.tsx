@@ -2,6 +2,7 @@
 import { Calendar } from "iconsax-reactjs";
 import { FileText } from "lucide-react";
 import React, { useRef } from "react";
+import { RequireAuth } from "~/components/auth/require-auth";
 import { ProjectImpl } from "~/lib/factories/project";
 import type { BasicProject } from "~/types/models";
 import { FavouriteButton } from "./FavouriteButton";
@@ -105,11 +106,13 @@ export function ProjectDetails(props: ProjectDetailsProps) {
 
           <div className="flex flex-wrap items-center gap-2">
             {project._id ? (
-              <FavouriteButton
-                projectId={project._id}
-                variant="card"
-                className="border-white/20 bg-white/8 hover:bg-rose-500/20"
-              />
+              <RequireAuth>
+                <FavouriteButton
+                  projectId={project._id}
+                  variant="card"
+                  className="border-white/20 bg-white/8 hover:bg-rose-500/20"
+                />
+              </RequireAuth>
             ) : null}
 
             {links.map((link) => {
