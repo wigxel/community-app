@@ -13,6 +13,7 @@ const DEFAULT_PROJECT: ProjectFormValues = {
   ongoing: false,
   media: [],
   link: [],
+  tags: [],
 };
 
 function renderSection(override: Partial<ProjectFormValues> = {}) {

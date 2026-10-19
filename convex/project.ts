@@ -9,6 +9,7 @@ import {
 import { v } from "convex/values";
 import { Either } from "effect";
 import { Result, type ResultShape } from "../lib/result";
+import { MAX_PROJECT_TAGS, MAX_TAG_LENGTH, normalizeTags } from "../lib/tags";
 import type { BasicProject, Project } from "../types/models";
 import { internal } from "./_generated/api";
 import type { DataModel, Doc, Id } from "./_generated/dataModel";
@@ -125,6 +126,22 @@ export async function seedProjectCount(
   await ctx.db.patch(profileId, { projectCount: count });
 }
 
+const project_args = {
+  ...project_schema,
+  tags: v.array(v.string()),
+};
+
+function normalizeProjectTags(tags: readonly string[]): string[] {
+  const normalized = normalizeTags(tags);
+
+  if (normalized.length > MAX_PROJECT_TAGS)
+    throw new Error(`Max of ${MAX_PROJECT_TAGS} tags per project`);
+  if (normalized.some((tag) => tag.length > MAX_TAG_LENGTH))
+    throw new Error(`Tags cannot exceed ${MAX_TAG_LENGTH} characters`);
+
+  return normalized;
+}
+
 export const listProject = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args): Promise<PaginationResult<Project>> => {
@@ -189,7 +206,7 @@ export const getProject = query({
 
 export const createProject = mutation({
   args: {
-    project: v.object(project_schema),
+    project: v.object(project_args),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
@@ -201,6 +218,8 @@ export const createProject = mutation({
     const nonOtherLinks = args.project.link.filter((l) => l.tag !== "other");
     if (new Set(nonOtherLinks.map((l) => l.tag)).size !== nonOtherLinks.length)
       throw new Error("Duplicate link types are not allowed");
+
+    const tags = normalizeProjectTags(args.project.tags);
 
     const { ongoing, timeline } = args.project;
     const { start, end } = timeline;
@@ -229,6 +248,7 @@ export const createProject = mutation({
 
     const projectId = await ctx.db.insert("project", {
       ...args.project,
+      tags,
       userId: authUser._id,
     });
 
@@ -246,7 +266,7 @@ export const createProject = mutation({
 export const updateProject = mutation({
   args: {
     project: v.object({
-      ...project_schema,
+      ...project_args,
       _id: v.optional(v.string()),
     }),
   },
@@ -274,6 +294,8 @@ export const updateProject = mutation({
     if (new Set(nonOtherLinks.map((l) => l.tag)).size !== nonOtherLinks.length)
       throw new Error("Duplicate link types are not allowed");
 
+    const tags = normalizeProjectTags(projectData.tags);
+
     const { ongoing, timeline } = projectData;
     const { start, end } = timeline;
 
@@ -299,7 +321,7 @@ export const updateProject = mutation({
       if (result._tag === "Left") return result;
     }
 
-    await ctx.db.patch(existingProject._id, projectData);
+    await ctx.db.patch(existingProject._id, { ...projectData, tags });
 
     // Schedule blurhash generation for photos
     await ctx.scheduler.runAfter(0, internal.blurhash.generateForProject, {
