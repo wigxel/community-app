@@ -20,6 +20,7 @@ import { LinksSection } from "./links-section";
 import { pendingFiles } from "./media-row";
 import { MediaSection } from "./media-section";
 import { ProjectFormItem } from "./project-form-item";
+import { TaxonomySection } from "./taxonomy-section";
 
 const EMPTY_PROJECT = {
   userId: "",
@@ -29,6 +30,7 @@ const EMPTY_PROJECT = {
   ongoing: false,
   media: [],
   link: [],
+  tags: [],
 };
 
 export type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -93,6 +95,7 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
         reset(
           {
             ...projectData,
+            tags: projectData.tags ?? [],
             link: projectData.link.map((l) => ({
               ...l,
               value: stripToPath(l.value, l.tag),
@@ -246,6 +249,8 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
 
           {/* Links Section */}
           <LinksSection />
+
+          <TaxonomySection />
         </div>
 
         {uploadProgress && (

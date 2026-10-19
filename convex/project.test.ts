@@ -32,6 +32,7 @@ function validProject(overrides?: Record<string, unknown>) {
     ongoing: true,
     media: [],
     link: [],
+    tags: [],
     ...overrides,
   };
 }
@@ -195,6 +196,74 @@ describe("project mutations — link guards", () => {
         }),
       ).resolves.toBeDefined();
     });
+  });
+});
+
+describe("project mutations — tag guards", () => {
+  let t: ReturnType<typeof convexTest>;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    t = convexTest(schema, modules);
+    mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("throws when createProject receives more than 8 tags", async () => {
+    await expect(
+      t.mutation(api.project.createProject, {
+        project: validProject({
+          tags: Array.from({ length: 9 }, (_, index) => `tag-${index}`),
+        }),
+      }),
+    ).rejects.toThrow("Max of 8 tags per project");
+  });
+
+  it("throws when a tag exceeds 32 characters", async () => {
+    await expect(
+      t.mutation(api.project.createProject, {
+        project: validProject({ tags: ["a".repeat(33)] }),
+      }),
+    ).rejects.toThrow("Tags cannot exceed 32 characters");
+  });
+
+  it("normalizes tags before persisting on create", async () => {
+    await t.mutation(api.project.createProject, {
+      project: validProject({ tags: ["  UI  ", "ui", "Design"] }),
+    });
+    await t.finishInProgressScheduledFunctions();
+
+    const projects = await t.query(api.project.listProjectByUserId, {
+      userId: FAKE_USER._id,
+    });
+
+    expect(projects[0].tags).toEqual(["UI", "Design"]);
+  });
+
+  it("normalizes tags before persisting on update", async () => {
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.finishInProgressScheduledFunctions();
+
+    const created = await t.query(api.project.listProjectByUserId, {
+      userId: FAKE_USER._id,
+    });
+
+    await t.mutation(api.project.updateProject, {
+      project: {
+        ...validProject({ tags: ["Web", "web", " Mobile "] }),
+        _id: created[0]._id,
+      },
+    });
+
+    const updated = await t.query(api.project.listProjectByUserId, {
+      userId: FAKE_USER._id,
+    });
+
+    expect(updated[0].tags).toEqual(["Web", "Mobile"]);
   });
 });
 

@@ -57,6 +57,7 @@ const project_link_schema = v.object({
 export const project_schema = {
   userId: v.string(),
   title: v.string(),
+  tags: v.optional(v.array(v.string())),
   timeline: v.object({
     start: v.union(
       v.null(),
@@ -117,7 +118,7 @@ const schema = defineSchema({
   skills: defineTable({
     name: v.string(),
     description: v.nullable(v.string()),
-  }),
+  }).searchIndex("search_name", { searchField: "name" }),
   profile: defineTable({
     userId: v.optional(v.string()),
     firstName: v.string(),

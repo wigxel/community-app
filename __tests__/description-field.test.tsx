@@ -13,6 +13,7 @@ const DEFAULT_PROJECT = {
   ongoing: false,
   media: [],
   link: [],
+  tags: [],
 };
 
 function renderField(props: {

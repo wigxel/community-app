@@ -20,6 +20,7 @@ const DEFAULTS: ProjectFormValues = {
   ongoing: false,
   media: [],
   link: [],
+  tags: [],
 };
 
 function renderWithForm(defaults: Partial<ProjectFormValues> = {}) {
