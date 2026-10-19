@@ -302,3 +302,45 @@ export const listAll = query({
     };
   },
 });
+
+export const search = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    q: v.string(),
+  },
+  handler: async (
+    ctx,
+    { paginationOpts, q },
+  ): Promise<PaginationResult<BasicProject>> => {
+    const trimmed = q.trim();
+
+    // Empty query → return empty page (the /search page handles the prompt state)
+    if (!trimmed) {
+      return { page: [], isDone: true, continueCursor: "" };
+    }
+
+    const records = await ctx.db
+      .query("project")
+      .withSearchIndex("search_title", (s) => s.search("title", trimmed))
+      .paginate({
+        ...paginationOpts,
+        numItems: Math.min(50, paginationOpts.numItems),
+      });
+
+    return {
+      ...records,
+      page: await Promise.all(
+        records.page.map(async (project) => {
+          const profile: Doc<"profile"> = await ctx.db.get(project.userId);
+
+          return {
+            ...project,
+            username: profile?.username ?? "@anonymous",
+            ownerName:
+              `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
+          };
+        }),
+      ),
+    };
+  },
+});

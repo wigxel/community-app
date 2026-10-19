@@ -2,6 +2,7 @@
 import { convexTest } from "convex-test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -194,5 +195,117 @@ describe("project mutations — link guards", () => {
         }),
       ).resolves.toBeDefined();
     });
+  });
+});
+
+describe("project search", () => {
+  let t: ReturnType<typeof convexTest>;
+  let profileId: Id<"profile">;
+
+  beforeEach(async () => {
+    t = convexTest(schema, modules);
+    profileId = await t.run((ctx) =>
+      ctx.db.insert("profile", {
+        userId: FAKE_USER._id,
+        email: FAKE_USER.email,
+        firstName: "Test",
+        lastName: "User",
+        username: "testuser",
+        phoneNumbers: [],
+        profileImage: null,
+        title: null,
+      }),
+    );
+  });
+
+  it("returns empty page for empty query", async () => {
+    const result = await t.query(api.project.search, {
+      q: "",
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    expect(result.page).toEqual([]);
+    expect(result.isDone).toBe(true);
+  });
+
+  it("returns empty page for whitespace-only query", async () => {
+    const result = await t.query(api.project.search, {
+      q: "   ",
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    expect(result.page).toEqual([]);
+    expect(result.isDone).toBe(true);
+  });
+
+  it("finds project by title", async () => {
+    await t.run((ctx) =>
+      ctx.db.insert("project", {
+        ...validProject({ title: "Unique Searchable Project" }),
+        userId: profileId,
+      }),
+    );
+
+    const result = await t.query(api.project.search, {
+      q: "Unique",
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    expect(result.page).toHaveLength(1);
+    expect(result.page[0]?.title).toBe("Unique Searchable Project");
+    expect(result.page[0]?.username).toBe("testuser");
+    expect(result.page[0]?.ownerName).toBe("Test User");
+  });
+
+  it("returns no results for non-matching query", async () => {
+    await t.run((ctx) =>
+      ctx.db.insert("project", {
+        ...validProject({ title: "Another Project" }),
+        userId: profileId,
+      }),
+    );
+
+    const result = await t.query(api.project.search, {
+      q: "zzzznotfound",
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    expect(result.page).toEqual([]);
+    expect(result.isDone).toBe(true);
+  });
+
+  it("trims leading and trailing whitespace from query", async () => {
+    await t.run((ctx) =>
+      ctx.db.insert("project", {
+        ...validProject({ title: "Trimmed Match" }),
+        userId: profileId,
+      }),
+    );
+
+    const result = await t.query(api.project.search, {
+      q: "  Trimmed  ",
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    expect(result.page).toHaveLength(1);
+    expect(result.page[0]?.title).toBe("Trimmed Match");
+  });
+
+  it("falls back to @anonymous when owner profile is missing", async () => {
+    await t.run((ctx) =>
+      ctx.db.insert("project", {
+        ...validProject({ title: "Orphan Project" }),
+        userId: "user_nonexistent",
+      }),
+    );
+
+    const result = await t.query(api.project.search, {
+      q: "Orphan",
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    expect(result.page).toHaveLength(1);
+    expect(result.page[0]?.username).toBe("@anonymous");
+    expect(result.page[0]?.ownerName).toBe("");
   });
 });
