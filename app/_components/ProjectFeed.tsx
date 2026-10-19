@@ -14,7 +14,6 @@ import { api } from "~/convex/_generated/api";
 import type { BasicProject } from "~/types/models";
 import LandingProjectCard from "./landing-project-card";
 import { ProjectModal } from "./ProjectModal";
-import { SearchNoResultsState } from "./search-no-results-state";
 
 const PAGE_SIZE = 12;
 
@@ -101,6 +100,16 @@ function SearchPromptState() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-2 py-24 text-neutral-500">
       <Text variant="h7">Type something to search projects.</Text>
+    </div>
+  );
+}
+
+function SearchNoResultsState(props: { query: string }) {
+  const { query } = props;
+
+  return (
+    <div className="flex min-h-svh flex-col items-center justify-center gap-2 py-24 text-neutral-500">
+      <Text variant="h7">No projects match &ldquo;{query}&rdquo;.</Text>
     </div>
   );
 }
