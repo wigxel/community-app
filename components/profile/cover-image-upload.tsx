@@ -2,7 +2,7 @@
 
 import { Maximize2, RotateCcw, RotateCw, Upload, X } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -10,12 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 interface CoverImageUploadProps {
   currentImage?: string | null;
   onImageChange: (imageDataUrl: string) => void;
+  trigger?: (actions: { open: () => void; remove: () => void }) => ReactNode;
 }
 
-export function CoverImageUpload({
-  currentImage,
-  onImageChange,
-}: CoverImageUploadProps) {
+export function CoverImageUpload(props: CoverImageUploadProps) {
+  const { currentImage, onImageChange, trigger } = props;
+
   const [isOpen, setIsOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState("");
   const [zoom, setZoom] = useState(1);
@@ -159,27 +159,8 @@ export function CoverImageUpload({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        {currentImage && (
-          <div className="relative">
-            <Image
-              src={currentImage}
-              alt="Cover"
-              className="h-24 w-24 rounded-lg border-2 border-white/20 object-cover"
-              width={240}
-              height={240}
-            />
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white transition-colors hover:bg-red-600"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-2">
+      {trigger ? (
+        <>
           <input
             ref={fileInputRef}
             type="file"
@@ -188,24 +169,60 @@ export function CoverImageUpload({
             className="hidden"
             id="cover-image-upload"
           />
-          <label htmlFor="cover-image-upload">
-            <Button
-              type="button"
-              variant="outline"
-              className="border-white/30 bg-white/10 !text-white hover:bg-white/20"
-              asChild
-            >
-              <span className="flex cursor-pointer items-center">
-                <Upload className="mr-2 h-4 w-4" />
-                {currentImage ? "Change Cover" : "Upload Cover"}
-              </span>
-            </Button>
-          </label>
-          <p className="text-muted-foreground text-xs">
-            Max size: 5MB. Supports JPG, PNG, GIF
-          </p>
+          {trigger({
+            open: () => fileInputRef.current?.click(),
+            remove: handleRemove,
+          })}
+        </>
+      ) : (
+        <div className="flex items-center gap-4">
+          {currentImage && (
+            <div className="relative">
+              <Image
+                src={currentImage}
+                alt="Cover"
+                className="h-24 w-24 rounded-lg border-2 border-white/20 object-cover"
+                width={240}
+                height={240}
+              />
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white transition-colors hover:bg-red-600"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={onSelectFile}
+              className="hidden"
+              id="cover-image-upload"
+            />
+            <label htmlFor="cover-image-upload">
+              <Button
+                type="button"
+                variant="outline"
+                className="border-white/30 bg-white/10 !text-white hover:bg-white/20"
+                asChild
+              >
+                <span className="flex cursor-pointer items-center">
+                  <Upload className="mr-2 h-4 w-4" />
+                  {currentImage ? "Change Cover" : "Upload Cover"}
+                </span>
+              </Button>
+            </label>
+            <p className="text-muted-foreground text-xs">
+              Max size: 5MB. Supports JPG, PNG, GIF
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       <Dialog open={isOpen} onOpenChange={handleCancel}>
         <DialogContent className="!w-[600px] !max-w-[600px] gap-0 overflow-hidden bg-white p-0 [&>button]:hidden">

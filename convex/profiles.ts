@@ -43,9 +43,9 @@ export const listProfile = query({
 
         const workExps = user.userId
           ? await ctx.db
-            .query("workExperience")
-            .withIndex("by_userId", (q) => q.eq("userId", user.userId))
-            .collect()
+              .query("workExperience")
+              .withIndex("by_userId", (q) => q.eq("userId", user.userId))
+              .collect()
           : [];
 
         const totalYearsOfExperience =
@@ -200,7 +200,7 @@ export const createProfile = mutation({
       lastName: args.lastName,
       username,
       phoneNumbers: [],
-      profileImage: null,
+      profileImage: authUser.image ?? null,
       coverImage: null,
       title: null,
       shortBio: "",

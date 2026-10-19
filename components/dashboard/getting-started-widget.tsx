@@ -33,19 +33,19 @@ export function GettingStartedWidget() {
       id: "bio",
       label: "Add a Short Bio",
       completed: hasShortBio,
-      href: "/dashboard/settings/profile",
+      href: "/dashboard/settings/profile?focus=shortBio",
     },
     {
       id: "projects",
       label: "Add a Project",
       completed: hasProjects,
-      href: "/dashboard/projects",
+      href: "/dashboard/projects/create",
     },
     {
       id: "experience",
       label: "Add Work Experience",
       completed: hasWorkExperience,
-      href: "/dashboard/settings/profile",
+      href: "/dashboard/settings/profile?focus=workExperience",
     },
   ];
 
@@ -119,13 +119,8 @@ export function GettingStartedWidget() {
             <CardContent className="space-y-4 bg-transparent pt-0">
               <div className="space-y-2">
                 {steps.map((step) => {
-                  return (
-                    <Link
-                      key={step.id}
-                      href={step.href}
-                      className="group flex items-center gap-3 rounded-lg py-1 transition-colors"
-                      draggable={false}
-                    >
+                  const content = (
+                    <>
                       {step.completed ? (
                         <CircleCheckIcon
                           strokeWidth={1}
@@ -147,6 +142,28 @@ export function GettingStartedWidget() {
                       >
                         {step.label}
                       </span>
+                    </>
+                  );
+
+                  const className =
+                    "group flex items-center gap-3 rounded-lg py-1 transition-colors";
+
+                  if (step.completed) {
+                    return (
+                      <div key={step.id} className={className}>
+                        {content}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={step.id}
+                      href={step.href}
+                      className={className}
+                      draggable={false}
+                    >
+                      {content}
                     </Link>
                   );
                 })}

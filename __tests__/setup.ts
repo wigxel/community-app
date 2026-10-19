@@ -3,9 +3,9 @@ import { cleanup } from "@testing-library/react";
 
 // jsdom lacks ResizeObserver (used by Radix/shadcn Card)
 class MockResizeObserver {
-  observe() { }
-  unobserve() { }
-  disconnect() { }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
 }
 if (typeof globalThis.ResizeObserver === "undefined") {
   globalThis.ResizeObserver =

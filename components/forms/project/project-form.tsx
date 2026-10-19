@@ -7,6 +7,7 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Loader } from "~/components/layouts/loader";
+import { useUnsavedChangesGuard } from "~/components/providers/navigation-protection";
 import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
@@ -14,8 +15,8 @@ import { Result } from "~/lib/result";
 import { toast } from "~/lib/toast";
 import { projectSchema as projectFormSchema } from "~/lib/validators/schema";
 import { HoveringFormActions } from "../shared/hovering-form-action";
-import { LinksSection } from "./links-section";
 import { buildLinkUrl, stripToPath } from "./link-row";
+import { LinksSection } from "./links-section";
 import { pendingFiles } from "./media-row";
 import { MediaSection } from "./media-section";
 import { ProjectFormItem } from "./project-form-item";
@@ -76,7 +77,15 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
     defaultValues: EMPTY_PROJECT ?? projectData,
   });
 
-  const { handleSubmit, reset } = form;
+  const {
+    handleSubmit,
+    reset,
+    formState: { isDirty },
+  } = form;
+
+  const { ConfirmationDialog, navigate } = useUnsavedChangesGuard({
+    isDirty,
+  });
 
   React.useEffect(() => {
     if (mode === "edit" && projectData) {
@@ -189,6 +198,7 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
           ? "Project created successfully"
           : "Project updated successfully",
       );
+      reset(data);
       router.push("/dashboard/projects");
     } catch (err) {
       console.error("Save failed:", err);
@@ -245,13 +255,11 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
         <HoveringFormActions
           mode={mode}
           onCancel={() => {
-            if (window.history.length > 1) {
-              return router.back();
-            }
-
-            return router.push("/dashboard/projects");
+            navigate("/dashboard/projects");
           }}
         />
+
+        <ConfirmationDialog />
       </form>
     </FormProvider>
   );

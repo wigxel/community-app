@@ -19,6 +19,12 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
       protocol: "https",
       fallback: siteUrl,
     },
+    socialProviders: {
+      google: {
+        clientId: process.env.GOOGLE_CLIENT_ID!,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      },
+    },
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
