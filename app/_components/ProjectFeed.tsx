@@ -104,7 +104,9 @@ function SearchPromptState() {
   );
 }
 
-function SearchNoResultsState(props: { query: string }) {
+type SearchNoResultsStateProps = { query: string };
+
+function SearchNoResultsState(props: SearchNoResultsStateProps) {
   const { query } = props;
 
   return (
