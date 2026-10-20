@@ -4,6 +4,7 @@ import { IconButton } from "@hyperbridge/ui";
 import { PlusIcon } from "lucide-react";
 import React from "react";
 import type { UseFormReturn } from "react-hook-form";
+import { Chip } from "~/components/ui/chip";
 import { FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { safeStr } from "~/lib/data.helpers";
@@ -117,6 +118,7 @@ export function InterestsStep(props: InterestsStepProps) {
             <button
               key={interest}
               type="button"
+              className="cursor-pointer"
               onClick={() => {
                 if (isPreset) {
                   toggleInterest(interest);
@@ -124,23 +126,26 @@ export function InterestsStep(props: InterestsStepProps) {
                   removeInterest(interest);
                 }
               }}
-              className={cn(
-                "inline-flex cursor-pointer items-center rounded-full border px-4 py-2 text-sm transition-all",
-                selectedInterest.size === 0
-                  ? isActive
-                    ? "border-brand-primary text-foreground"
-                    : "bg-muted text-muted-foreground font-normal hover:bg-white/20"
-                  : isActive
-                    ? "text-foreground"
-                    : "bg-background/50 group-hover:text-muted-foreground font-normal text-transparent hover:bg-white/20",
-              )}
             >
-              {interest}{" "}
-              <PlusIcon
-                size="1em"
-                className={cn("transition-default ms-2 transform opacity-50", {
-                  "rotate-45": isActive,
-                })}
+              <Chip
+                label={interest}
+                icon={
+                  <PlusIcon
+                    size="1em"
+                    className={cn("transition-default transform opacity-50", {
+                      "rotate-45": isActive,
+                    })}
+                  />
+                }
+                variant={
+                  selectedInterest.size === 0
+                    ? isActive
+                      ? "highlighted"
+                      : "muted"
+                    : isActive
+                      ? "default"
+                      : "ghost"
+                }
               />
             </button>
           );
