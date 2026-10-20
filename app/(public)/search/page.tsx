@@ -1,5 +1,6 @@
 // app/(public)/search/page.tsx
 import { fetchQuery } from "convex/nextjs";
+import type { Metadata } from "next";
 import { api } from "~/convex/_generated/api";
 import SearchProjectsCatalog from "./_components/search-catalog";
 
@@ -10,6 +11,17 @@ const SSR_PAGE_SIZE = 12;
 export type SearchPageProps = {
   searchParams: Promise<{ q?: string }>;
 };
+
+export async function generateMetadata(
+  props: SearchPageProps,
+): Promise<Metadata> {
+  const { q = "" } = await props.searchParams;
+  const trimmed = q.trim();
+
+  return {
+    title: trimmed ? `Search results for “${trimmed}”` : "Search",
+  };
+}
 
 export default async function SearchPage(props: SearchPageProps) {
   const { searchParams } = props;

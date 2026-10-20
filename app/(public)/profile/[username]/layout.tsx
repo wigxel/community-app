@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Container } from "~/components/layouts/container";
 import { DiscoverMoreProjects } from "~/components/organism/discover-more-projects";
+import { APP_NAME } from "~/config/constants";
 import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeObj } from "~/lib/data.helpers";
@@ -42,7 +43,10 @@ export async function generateMetadata({
   const ogImageUrl = `${baseUrl}/api/og-image/${username}`;
 
   return {
-    title: `${fullName} | Profile`,
+    title: {
+      default: fullName,
+      template: `%s | ${fullName} | ${APP_NAME}`,
+    },
     description:
       profile.shortBio || `View ${fullName}'s profile on Wigxel Community`,
     openGraph: {
