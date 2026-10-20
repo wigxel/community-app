@@ -49,13 +49,14 @@ export const EmptyState = Object.assign(EmptyStateRoot, {
   Button: EmptyStateButton,
 });
 
-export function BaseEmptyState({
-  heading,
-  children,
-}: {
+export type BaseEmptyStateProps = {
   heading: React.ReactNode;
   children?: React.ReactNode;
-}) {
+};
+
+export function BaseEmptyState(props: BaseEmptyStateProps) {
+  const { heading, children } = props;
+
   return (
     <EmptyState isEmpty={true}>
       <EmptyState.Content>

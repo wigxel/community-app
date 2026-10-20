@@ -6,11 +6,13 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
-export default function RequireAuthDialog({
-  onSignedIn,
-}: {
+export type RequireAuthDialogProps = {
   onSignedIn: () => void;
-}) {
+};
+
+export default function RequireAuthDialog(props: RequireAuthDialogProps) {
+  const { onSignedIn } = props;
+
   return (
     <DialogContent className="aspect-[2/2.3]">
       <DialogHeader>

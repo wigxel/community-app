@@ -10,7 +10,11 @@ import { safeArray } from "~/lib/data.helpers";
 import { LocationImpl, ProfileImpl } from "~/lib/factories";
 import type { Profile } from "~/types/models";
 
-export function ProfileDetailsSection({ profile }: { profile: Profile }) {
+export type ProfileDetailsSectionProps = { profile: Profile };
+
+export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
+  const { profile } = props;
+
   const profile_links = safeArray(profile.links);
 
   /* @todo: integrate seniority — leaderboard score vs user-selected */

@@ -7,7 +7,11 @@ import { FeatureFlags } from "~/lib/constants";
 import { ProfileImpl } from "~/lib/factories";
 import type { Profile } from "~/types/models";
 
-export function MentorshipBanner({ profile }: { profile?: Profile }) {
+export type MentorshipBannerProps = { profile?: Profile };
+
+export function MentorshipBanner(props: MentorshipBannerProps) {
+  const { profile } = props;
+
   const isEnabled = useFeatureFlagEnabled(
     FeatureFlags.ENABLE_MENTORSHIP_BANNER,
   );

@@ -130,7 +130,11 @@ export default async function ProfileCard(props: ProfileCardProps) {
   );
 }
 
-function ProfileCoverImage({ profile }: { profile: Profile }) {
+type ProfileCoverImageProps = { profile: Profile };
+
+function ProfileCoverImage(props: ProfileCoverImageProps) {
+  const { profile } = props;
+
   return (
     <div className="from-background to-muted relative mb-8 h-40 w-full overflow-hidden rounded-3xl border border-white/10 shadow-2xl lg:h-50">
       {profile.coverImage ? (

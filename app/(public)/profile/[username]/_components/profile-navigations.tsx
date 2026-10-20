@@ -5,7 +5,11 @@ import { usePathname } from "next/navigation";
 import { FeatureFlag } from "~/components/feature-flags";
 import type { Profile } from "~/types/models";
 
-export function ProfileNavigation({ profile }: { profile: Profile }) {
+export type ProfileNavigationProps = { profile: Profile };
+
+export function ProfileNavigation(props: ProfileNavigationProps) {
+  const { profile } = props;
+
   const prefix = !profile?.username ? "" : `/profile/${profile?.username}`;
   const pathname = usePathname();
 

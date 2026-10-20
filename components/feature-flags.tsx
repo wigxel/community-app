@@ -3,13 +3,14 @@ import { useFeatureFlagEnabled } from "@posthog/react";
 import { type FeatureFlagKeys, FeatureFlags } from "~/lib/constants";
 import { isSSR } from "~/lib/utils";
 
-export function FeatureFlag({
-  flagKey,
-  children,
-}: {
+export type FeatureFlagProps = {
   readonly flagKey: FeatureFlagKeys;
   readonly children: React.ReactNode;
-}) {
+};
+
+export function FeatureFlag(props: FeatureFlagProps) {
+  const { flagKey, children } = props;
+
   const isEnabled = useFeatureFlagEnabled(FeatureFlags[flagKey]);
 
   if (isSSR()) return null;

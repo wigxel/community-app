@@ -5,10 +5,12 @@ import { createPortal } from "react-dom";
 
 export const LOAD_MORE_PORTAL_ID = "profile-page-load-more-portal";
 
-export function LoadMoreButton(props: {
+export type LoadMoreButtonProps = {
   status?: "LoadingFirstPage" | "LoadingMore" | "CanLoadMore" | "Exhausted";
   onLoadMore?: () => void;
-}) {
+};
+
+export function LoadMoreButton(props: LoadMoreButtonProps) {
   const { status, onLoadMore } = props;
   const [parent, setMountParent] = React.useState<HTMLElement | null>(null);
 

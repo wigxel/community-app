@@ -8,7 +8,11 @@ import { useAuthProfile } from "~/hooks/use-auth";
 // ponytail: capture-phase span instead of Radix Slot — Slot merges props the
 // child must forward, and FavouriteButton doesn't. Ancestor capture always runs
 // first with zero child cooperation; upgrade to Slot if children forward props.
-export function RequireAuth({ children }: { children: React.ReactElement }) {
+export type RequireAuthProps = { children: React.ReactElement };
+
+export function RequireAuth(props: RequireAuthProps) {
+  const { children } = props;
+
   const profile = useAuthProfile();
   const [open, setOpen] = React.useState(false);
 
