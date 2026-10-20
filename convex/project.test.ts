@@ -200,7 +200,6 @@ describe("project mutations — link guards", () => {
   });
 });
 
-
 describe("project mutations — tag guards", () => {
   let t: ReturnType<typeof convexTest>;
 
@@ -241,9 +240,10 @@ describe("project mutations — tag guards", () => {
 
     const projects = await t.query(api.project.listProjectByUserId, {
       userId: FAKE_USER._id,
+      paginationOpts: { numItems: 10, cursor: null },
     });
 
-    expect(projects[0].tags).toEqual(["UI", "Design"]);
+    expect(projects.page[0].tags).toEqual(["UI", "Design"]);
   });
 
   it("normalizes tags before persisting on update", async () => {
@@ -252,23 +252,24 @@ describe("project mutations — tag guards", () => {
 
     const created = await t.query(api.project.listProjectByUserId, {
       userId: FAKE_USER._id,
+      paginationOpts: { numItems: 10, cursor: null },
     });
 
     await t.mutation(api.project.updateProject, {
       project: {
         ...validProject({ tags: ["Web", "web", " Mobile "] }),
-        _id: created[0]._id,
+        _id: created.page[0]._id,
       },
     });
 
     const updated = await t.query(api.project.listProjectByUserId, {
       userId: FAKE_USER._id,
+      paginationOpts: { numItems: 10, cursor: null },
     });
 
-    expect(updated[0].tags).toEqual(["Web", "Mobile"]);
+    expect(updated.page[0].tags).toEqual(["Web", "Mobile"]);
   });
 });
-
 
 describe("project mutations — denormalized projectCount", () => {
   let t: ReturnType<typeof convexTest>;

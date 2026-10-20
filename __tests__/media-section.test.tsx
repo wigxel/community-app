@@ -48,7 +48,7 @@ describe("MediaSection", () => {
     await user.click(screen.getByRole("button", { name: /Add media/i }));
     await waitFor(() => {
       expect(
-        document.querySelector('input[placeholder="Title (optional)"]'),
+        document.querySelector('input[placeholder="Title"]'),
       ).not.toBeNull();
     });
     expect(screen.queryByText(/No media added yet/i)).toBeNull();
@@ -58,18 +58,12 @@ describe("MediaSection", () => {
   it("removing media row brings back empty state", async () => {
     const { user } = renderSection();
     await user.click(screen.getByRole("button", { name: /Add media/i }));
-    expect(
-      await screen.findByPlaceholderText(/Title \(optional\)/i),
-    ).toBeDefined();
-    const trash = document.querySelector(
-      'button[class*="hover:bg-red"]',
-    ) as HTMLElement;
-    expect(trash).toBeDefined();
-    await user.click(trash);
+    expect(await screen.findByPlaceholderText(/^Title$/)).toBeDefined();
+    await user.click(screen.getByRole("button", { name: /Remove media/i }));
     expect(await screen.findByText(/No media added yet/i)).toBeDefined();
   });
 
-  it("disables Add media and shows Max of 10 when at limit", () => {
+  it("disables Add media and shows Max. of 10 when at limit", () => {
     const media = Array.from({ length: 10 }, (_, i) => ({
       type: "photo" as const,
       metadata: {
@@ -83,9 +77,8 @@ describe("MediaSection", () => {
     }));
     renderSection({ media } as unknown as Partial<ProjectFormValues>);
     const btn = screen.getByRole("button", {
-      name: /Max of 10/i,
+      name: /Max\. of 10/i,
     }) as HTMLButtonElement;
     expect(btn.disabled).toBe(true);
-    expect(screen.getByText(/Maximum 10 media reached/i)).toBeDefined();
   });
 });

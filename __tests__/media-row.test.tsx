@@ -170,10 +170,7 @@ describe("MediaRow", () => {
     const file = new File(["img"], "photo.jpg", { type: "image/jpeg" });
     fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() => expect(pendingFiles.size).toBe(1));
-    const trash = document.querySelector(
-      'button[class*="hover:bg-red"]',
-    ) as HTMLElement;
-    await user.click(trash);
+    await user.click(screen.getByRole("button", { name: /Remove media/i }));
     await waitFor(() => {
       expect(pendingFiles.size).toBe(0);
       expect(screen.getByText(/No media added yet/i)).toBeDefined();

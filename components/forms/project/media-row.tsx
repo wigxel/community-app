@@ -130,6 +130,7 @@ export default function MediaRow(props: MediaRowProps) {
               <IconButton
                 type="button"
                 variant="destructive"
+                aria-label="Remove media"
                 onClick={() => {
                   pendingFiles.delete(storeKey);
                   if (localPreview) URL.revokeObjectURL(localPreview);
