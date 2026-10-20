@@ -61,6 +61,7 @@ Closes #
 - [ ] `convex/` folder changes are discarded unless this PR intentionally modifies backend functions (`git restore convex/`)
 - [ ] My commit messages follow the conventional commit format (`feat:`, `fix:`, `docs:`, etc.)
 - [ ] I have not introduced any new lint or TypeScript errors
+- [ ] I have added or updated unit tests for any new or changed business logic
 
 ## Additional Notes for Reviewers
 

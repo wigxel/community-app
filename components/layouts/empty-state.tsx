@@ -1,3 +1,4 @@
+"use client";
 import {
   EmptyStateConceal,
   EmptyStateContent,
@@ -5,8 +6,10 @@ import {
   EmptyState as EmptyStateRoot,
   EmptyStateTitle as EmptyStateTitleMain,
 } from "@hyperbridge/ui";
+import { AlertOctagon } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { FABPlusIcon, FAButton } from "../ui/fab-button";
+import { SectionCard } from "./section-card";
 
 function EmptyStateTitle(
   props: React.ComponentProps<typeof EmptyStateTitleMain>,
@@ -45,3 +48,27 @@ export const EmptyState = Object.assign(EmptyStateRoot, {
   Title: EmptyStateTitle,
   Button: EmptyStateButton,
 });
+
+export type BaseEmptyStateProps = {
+  heading: React.ReactNode;
+  children?: React.ReactNode;
+};
+
+export function BaseEmptyState(props: BaseEmptyStateProps) {
+  const { heading, children } = props;
+
+  return (
+    <EmptyState isEmpty={true}>
+      <EmptyState.Content>
+        <SectionCard className="flex min-h-100 w-full flex-col items-center justify-center">
+          <AlertOctagon className="text-3xl text-yellow-500" />
+
+          <EmptyState.Title className="mt-4">{heading}</EmptyState.Title>
+          {children ? (
+            <EmptyState.Description>{children}</EmptyState.Description>
+          ) : null}
+        </SectionCard>
+      </EmptyState.Content>
+    </EmptyState>
+  );
+}

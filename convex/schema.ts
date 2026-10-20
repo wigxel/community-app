@@ -57,6 +57,7 @@ const project_link_schema = v.object({
 export const project_schema = {
   userId: v.string(),
   title: v.string(),
+  tags: v.optional(v.array(v.string())),
   timeline: v.object({
     start: v.union(
       v.null(),
@@ -117,7 +118,7 @@ const schema = defineSchema({
   skills: defineTable({
     name: v.string(),
     description: v.nullable(v.string()),
-  }),
+  }).searchIndex("search_name", { searchField: "name" }),
   profile: defineTable({
     userId: v.optional(v.string()),
     firstName: v.string(),
@@ -135,13 +136,19 @@ const schema = defineSchema({
     interests: v.optional(v.array(v.string())),
     location: v.optional(profile_location_schema),
     skills: v.optional(v.array(v.id("skills"))),
+    // Denormalized running total of `project` rows for this user.
+    // Maintained by project.createProject / project.deleteProject;
+    // backfilled by seeds.backfillProjectCounts.
+    projectCount: v.optional(v.number()),
   })
     .index("by_username", ["username"])
     .index("by_userId", ["userId"])
     .index("by_email", ["email"])
     .index("by_title", ["title"]),
 
-  project: defineTable(project_schema).index("by_userId", ["userId"]),
+  project: defineTable(project_schema)
+    .index("by_userId", ["userId"])
+    .searchIndex("search_title", { searchField: "title" }),
 
   workExperience: defineTable(work_experience_schema).index("by_userId", [
     "userId",

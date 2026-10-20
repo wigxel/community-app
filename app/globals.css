@@ -24,6 +24,7 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-border-subtle: hsl(from var(--color-foreground) h s l / 0.05);
 
   /* Charts */
   --color-chart-5: var(--chart-5);
@@ -192,5 +193,27 @@ body {
 @layer system {
   ol[data-sonner-toaster] > li[data-sonner-toast] {
     font-family: var(--font-body);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-x 60s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-x {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
   }
 }

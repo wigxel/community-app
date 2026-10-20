@@ -4,6 +4,9 @@ import { Calendar } from "iconsax-reactjs";
 import Link from "next/link";
 import { Container } from "~/components/layouts/container";
 import { ProfileAvatar } from "~/components/profile/avatar";
+import { FileText } from "lucide-react";
+import React, { useRef } from "react";
+import { RequireAuth } from "~/components/auth/require-auth";
 import { ProjectImpl } from "~/lib/factories/project";
 import type { BasicProject } from "~/types/models";
 import { FavouriteButton } from "./FavouriteButton";
@@ -45,8 +48,12 @@ export function ProjectDetails(props: ProjectDetailsProps) {
         </div>
 
         <div className="flex items-center gap-2">
+         <RequireAuth>
           <FavouriteButton projectId={project._id} variant="overlay" />
+          </RequireAuth>
+           <RequireAuth>
           <SaveButton projectId={project._id} variant="overlay" />
+          </RequireAuth>
         </div>
       </Container>
 

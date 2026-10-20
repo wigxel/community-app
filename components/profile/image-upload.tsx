@@ -2,7 +2,7 @@
 
 import { IconButton } from "@hyperbridge/ui";
 import { Maximize2, RotateCcw, RotateCw, Upload, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { useWatch } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
@@ -12,9 +12,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 interface ImageUploadProps {
   currentImage?: string;
   onImageChange: (imageDataUrl: string) => void;
+  trigger?: (open: () => void) => ReactNode;
 }
 
-export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
+export function ImageUpload(props: ImageUploadProps) {
+  const { currentImage, onImageChange, trigger } = props;
+
   const firstName = useWatch({ name: "firstName" });
   const [isOpen, setIsOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState("");
@@ -159,50 +162,69 @@ export function ImageUpload({ currentImage, onImageChange }: ImageUploadProps) {
     setPosition({ x: 0, y: 0 });
   }
 
+  const fileInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept="image/*"
+      onChange={onSelectFile}
+      className="hidden"
+      id="image-upload"
+    />
+  );
+
+  const uploadButton = (
+    <label htmlFor="image-upload" className="shrink-0">
+      <Button
+        type="button"
+        variant="outline"
+        className="border-white/30 bg-white/10 !text-white hover:bg-white/20"
+        asChild
+      >
+        <span className="flex cursor-pointer items-center">
+          <Upload className="mr-2 h-4 w-4" />
+          {currentImage ? "Change Image" : "Upload Image"}
+        </span>
+      </Button>
+    </label>
+  );
+
+  const avatar = (
+    <Avatar className="size-[40%]">
+      <AvatarImage
+        src={currentImage ?? undefined}
+        alt="Profile"
+        width={240}
+        height={240}
+      />
+      <AvatarFallback className="bg-gray-500 text-xl uppercase">
+        {firstName?.[0] ?? "--"}
+      </AvatarFallback>
+    </Avatar>
+  );
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative flex aspect-square w-full flex-col items-center justify-center rounded-2xl border">
-          <Avatar className="size-[40%]">
-            <AvatarImage
-              src={currentImage ?? undefined}
-              alt="Profile"
-              width={240}
-              height={240}
-            />
-            <AvatarFallback className="bg-gray-500 text-xl uppercase">
-              {firstName?.[0] ?? "--"}
-            </AvatarFallback>
-          </Avatar>
+      {trigger ? (
+        <>
+          {fileInput}
+          {trigger(() => fileInputRef.current?.click())}
+        </>
+      ) : (
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative flex aspect-square w-full flex-col items-center justify-center rounded-2xl border">
+            {avatar}
 
-          <div className="mt-4 flex flex-col items-center gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={onSelectFile}
-              className="hidden"
-              id="image-upload"
-            />
-            <label htmlFor="image-upload">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-white/30 bg-white/10 !text-white hover:bg-white/20"
-                asChild
-              >
-                <span className="flex cursor-pointer items-center">
-                  <Upload className="mr-2 h-4 w-4" />
-                  {currentImage ? "Change Image" : "Upload Image"}
-                </span>
-              </Button>
-            </label>
-            <p className="text-muted-foreground text-xs">
-              Max size: 5MB. Supports JPG, PNG, GIF
-            </p>
+            <div className="mt-4 flex flex-col items-center gap-2">
+              {fileInput}
+              {uploadButton}
+              <p className="text-muted-foreground text-xs">
+                Max size: 5MB. Supports JPG, PNG, GIF
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <Dialog open={isOpen} onOpenChange={handleCancel}>
         <DialogContent className="bg-background aspect-2/1.5 w-[70svh] max-w-200 gap-0 overflow-hidden p-0 [&>button]:hidden">

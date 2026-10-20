@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { Reorder, useDragControls } from "motion/react";
 import posthog from "posthog-js";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   type FieldArrayWithId,
   type UseFormReturn,
@@ -21,8 +21,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProjectLinkIcon } from "~/components/atoms";
+import { NavigationFocus } from "~/components/molecules/navigation-focus";
 import { CoverImageUpload } from "~/components/profile/cover-image-upload";
 import { ImageUpload } from "~/components/profile/image-upload";
+import { ProfileImagesEditor } from "~/components/profile/profile-images-editor";
 import { SkillsSelect } from "~/components/profile/skills-select";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -41,6 +43,7 @@ import type { Id } from "~/convex/_generated/dataModel";
 import { useTitles } from "~/hooks/useTitles";
 import { safeArray } from "~/lib/data.helpers";
 import { Result } from "~/lib/result";
+import { toast } from "~/lib/toast";
 
 // ─── Link types ────────────────────────────────────────────────────────────────
 
@@ -257,15 +260,27 @@ const formSchema = z.object({
   skills: z.array(z.string()).optional(), // array of skill IDs
 });
 
+const EMPTY_WORK_EXPERIENCE: z.infer<typeof workExperienceSchema> = {
+  position: "",
+  company: "",
+  startDate: "",
+  endDate: "",
+  description: "",
+  location: "onsite",
+  type: "full-time",
+  isCurrent: false,
+};
+
 // ─── Page component ────────────────────────────────────────────────────────────
 
 export default function Profile() {
   const profile = useQuery(api.profiles.getProfile);
   const skills = useQuery(api.profiles.getSkills);
-  const existingWorkExp = useQuery(
+  const workExpQuery = useQuery(
     api.workExperience.getByUserId,
     profile?.userId ? { userId: profile.userId } : "skip",
   );
+  const existingWorkExp = profile && !profile.userId ? [] : workExpQuery;
 
   const mappedWorkExperience: z.infer<typeof workExperienceSchema>[] =
     existingWorkExp?.map((exp) => ({
@@ -294,7 +309,12 @@ export default function Profile() {
     <div className="px-2 md:px-4">
       <h1 className="mb-8 text-4xl font-semibold">Edit Profile</h1>
 
-      {profile && existingWorkExp !== undefined ? (
+      {profile === null ? (
+        <div className="text-muted-foreground text-center">
+          We couldn&apos;t find your profile. Please complete onboarding or sign
+          in again.
+        </div>
+      ) : profile && existingWorkExp !== undefined && skills !== undefined ? (
         <ProfileForm
           initialData={{
             firstname: profile.firstName,
@@ -306,6 +326,7 @@ export default function Profile() {
             profileImage: profile.profileImage || "",
             coverImage: profile.coverImage || "",
             interests: profile.interests?.join(", ") || "",
+            location: profile.location,
             workExperience: mappedWorkExperience,
             links:
               profile.links?.map((link) => normalizeLinkForEdit(link)) ?? [],
@@ -332,10 +353,6 @@ export function ProfileForm(props: ProfileFormProps) {
   const skills = useQuery(api.skills.listSkills);
   const updateProfile = useMutation(api.profiles.updateProfile);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
 
   const createWorkExp = useMutation(api.workExperience.create);
   const updateWorkExp = useMutation(api.workExperience.update);
@@ -362,6 +379,19 @@ export function ProfileForm(props: ProfileFormProps) {
     control: form.control,
     name: "workExperience",
   });
+
+  const didAppendForFocus = useRef(false);
+  useEffect(() => {
+    const focus = new URLSearchParams(window.location.search).get("focus");
+    if (
+      focus === "workExperience" &&
+      !didAppendForFocus.current &&
+      !form.getValues("workExperience")?.length
+    ) {
+      didAppendForFocus.current = true;
+      appendWork(EMPTY_WORK_EXPERIENCE, { shouldFocus: false });
+    }
+  }, [form, appendWork]);
 
   // Links field array
   const {
@@ -391,7 +421,6 @@ export function ProfileForm(props: ProfileFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    setMessage(null);
 
     try {
       const normalizedLinks = values.links.map((link) => {
@@ -415,9 +444,12 @@ export function ProfileForm(props: ProfileFormProps) {
         : [];
 
       const existingIds = new Set(
-        (initialData.workExperience ?? []).map((e) => e._id).filter(Boolean),
+        (form.formState.defaultValues?.workExperience ?? [])
+          .map((e) => e?._id)
+          .filter(Boolean),
       );
 
+      const savedWorkExperience: z.infer<typeof workExperienceSchema>[] = [];
       for (const exp of values.workExperience ?? []) {
         const timeline = {
           start: new Date(exp.startDate).getTime(),
@@ -441,9 +473,14 @@ export function ProfileForm(props: ProfileFormProps) {
             ...payload,
           });
           existingIds.delete(exp._id);
+          savedWorkExperience.push(exp);
         } else {
-          if (!profile?.userId) return;
-          await createWorkExp({ userId: profile.userId, ...payload });
+          if (!profile?.userId) throw new Error("Profile is not loaded yet.");
+          const id = await createWorkExp({
+            userId: profile.userId,
+            ...payload,
+          });
+          savedWorkExperience.push({ ...exp, _id: id });
         }
       }
 
@@ -484,12 +521,13 @@ export function ProfileForm(props: ProfileFormProps) {
           work_experience_count: values.workExperience?.length ?? 0,
         });
       }
-      setMessage({ type: "success", text: "Profile updated successfully!" });
+
+      form.reset({ ...values, workExperience: savedWorkExperience });
+      toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Failed to update profile:", error);
-      setMessage({
-        type: "error",
-        text: "Failed to update profile. Please try again.",
+      toast.error("Failed to update profile", {
+        description: "Please try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -500,17 +538,32 @@ export function ProfileForm(props: ProfileFormProps) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {message && (
-            <div
-              className={`rounded-lg p-4 ${
-                message.type === "success"
-                  ? "border border-green-500/30 bg-green-500/20 text-green-300"
-                  : "border border-red-500/30 bg-red-500/20 text-red-300"
-              }`}
-            >
-              {message.text}
-            </div>
-          )}
+          {/* ── Profile & Cover Images ────────────────────────────────────── */}
+          <FormField
+            control={form.control}
+            name="coverImage"
+            render={({ field: cover }) => (
+              <FormField
+                control={form.control}
+                name="profileImage"
+                render={({ field: avatar }) => (
+                  <FormItem>
+                    <FormLabel className="sr-only">
+                      Profile and cover images
+                    </FormLabel>
+                    <ProfileImagesEditor
+                      profileImage={avatar.value}
+                      coverImage={cover.value}
+                      onProfileImageChange={avatar.onChange}
+                      onCoverImageChange={cover.onChange}
+                      fallbackInitial={form.watch("firstname")?.[0]}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          />
 
           {/* ── Basic Information ─────────────────────────────────────────── */}
           <Card className="border-white/10 bg-blue-500/10">
@@ -597,7 +650,7 @@ export function ProfileForm(props: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>City</FormLabel>
                       <FormControl>
-                        <Input placeholder="Port-Harcourt" {...field} />
+                        <Input placeholder="Port Harcourt" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -624,10 +677,7 @@ export function ProfileForm(props: ProfileFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Title</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a title" />
@@ -656,56 +706,17 @@ export function ProfileForm(props: ProfileFormProps) {
                   <FormItem>
                     <FormLabel>Short Bio</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Tell us about yourself..."
-                        className="resize-none"
-                        rows={4}
-                        {...field}
-                      />
+                      <NavigationFocus id="shortBio">
+                        <Textarea
+                          placeholder="Tell us about yourself..."
+                          className="resize-none"
+                          rows={4}
+                          {...field}
+                        />
+                      </NavigationFocus>
                     </FormControl>
                     <FormDescription>
                       A brief description about yourself (optional).
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="profileImage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profile Image</FormLabel>
-                    <FormControl>
-                      <ImageUpload
-                        currentImage={field.value}
-                        onImageChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload a profile picture (max 5MB). You can crop and
-                      resize it.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="coverImage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cover Image</FormLabel>
-                    <FormControl>
-                      <CoverImageUpload
-                        currentImage={field.value || null}
-                        onImageChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload a cover/banner image for your profile.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -800,18 +811,7 @@ export function ProfileForm(props: ProfileFormProps) {
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={() =>
-                    appendWork({
-                      position: "",
-                      company: "",
-                      startDate: "",
-                      endDate: "",
-                      description: "",
-                      location: "onsite",
-                      type: "full-time",
-                      isCurrent: false,
-                    })
-                  }
+                  onClick={() => appendWork(EMPTY_WORK_EXPERIENCE)}
                   className="group flex items-center border-gray-300 bg-white"
                 >
                   <Plus className="h-4 w-4 shrink-0 text-gray-900 transition-all group-hover:mr-2" />
@@ -856,10 +856,19 @@ export function ProfileForm(props: ProfileFormProps) {
                           <FormItem>
                             <FormLabel>Position</FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="Software Engineer"
-                                {...field}
-                              />
+                              {index === 0 ? (
+                                <NavigationFocus id="workExperience">
+                                  <Input
+                                    placeholder="Software Engineer"
+                                    {...field}
+                                  />
+                                </NavigationFocus>
+                              ) : (
+                                <Input
+                                  placeholder="Software Engineer"
+                                  {...field}
+                                />
+                              )}
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -890,7 +899,7 @@ export function ProfileForm(props: ProfileFormProps) {
                             <FormLabel>Location Type</FormLabel>
                             <Select
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                             >
                               <FormControl>
                                 <SelectTrigger>
@@ -915,7 +924,7 @@ export function ProfileForm(props: ProfileFormProps) {
                             <FormLabel>Employment Type</FormLabel>
                             <Select
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                             >
                               <FormControl>
                                 <SelectTrigger>

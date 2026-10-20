@@ -47,7 +47,7 @@ function DashboardPage() {
     (completedFields / fields.length) * 100,
   );
 
-  const projectCount = profile?.projects?.length || 0;
+  const projectCount = profile?.projectCount ?? 0;
 
   return (
     <div className="space-y-6">

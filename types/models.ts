@@ -22,6 +22,8 @@ export interface Profile {
   interests?: string[];
   location?: ProfileLocation;
   skills?: string[];
+  verified: boolean;
+  projectCount?: number;
 }
 
 export interface ProfileWorkExperience {

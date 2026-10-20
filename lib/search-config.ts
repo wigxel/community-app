@@ -3,11 +3,6 @@ export interface SearchConfig {
   throttleMs?: number;
 }
 
-export const projectSearchConfig: SearchConfig = {
-  queryKey: "q",
-  throttleMs: 500,
-};
-
 export const talentSearchConfig: SearchConfig = {
   queryKey: "q",
   throttleMs: 500,

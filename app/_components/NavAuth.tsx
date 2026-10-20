@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AuthUserAvatar } from "~/components/profile/auth-user-avatar";
+import { AuthUserMenu } from "~/components/profile/auth-user-menu";
 import { Button } from "~/components/ui/button";
 import { authClient } from "~/lib/auth-client";
 
@@ -13,13 +14,7 @@ export default function NavAuth() {
       {isPending ? (
         <AuthUserAvatar mode="loading" className="size-(--avatar-size)" />
       ) : session ? (
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 transition-opacity hover:opacity-80"
-          aria-label="Go to dashboard"
-        >
-          <AuthUserAvatar className="size-(--avatar-size)" />
-        </Link>
+        <AuthUserMenu className="size-(--avatar-size)" />
       ) : (
         <div className="flex gap-2">
           <Link href="/auth/sign-up">

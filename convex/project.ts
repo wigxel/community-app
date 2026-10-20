@@ -1,4 +1,6 @@
 import {
+  type AnyDataModel,
+  type GenericMutationCtx,
   type GenericQueryCtx,
   type PaginationResult,
   paginationOptsValidator,
@@ -7,6 +9,7 @@ import {
 import { v } from "convex/values";
 import { Either } from "effect";
 import { Result, type ResultShape } from "../lib/result";
+import { MAX_PROJECT_TAGS, MAX_TAG_LENGTH, normalizeTags } from "../lib/tags";
 import type { BasicProject, Project } from "../types/models";
 import { api, internal } from "./_generated/api";
 import type { DataModel, Doc, Id } from "./_generated/dataModel";
@@ -55,14 +58,95 @@ export function isStartAfterEnd(
   return Result.ok(start > end);
 }
 
-function toProject(doc: Doc<"project">): Project {
-  return doc as unknown as Project;
+async function toStandardProject(
+  ctx: GenericQueryCtx<AnyDataModel>,
+  project: Doc<"project">,
+): Promise<BasicProject> {
+  const profile: Doc<"profile"> | null = await ctx.db.get(
+    project?.userId as never,
+  );
+
+  const ownerName =
+    `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim();
+  const username = profile?.username ?? "@anonymous";
+
+  return {
+    ...project,
+    username,
+    ownerName,
+  } as never;
+}
+
+/**
+ * Maintain the denormalized `profile.projectCount` total.
+ *
+ * Keyed by email: `profile.userId` is optional in the schema and legacy rows
+ * may lack it, while email is required — it is the identity `getProfile` and
+ * `createProfile` already look profiles up by.
+ *
+ * Returns false when no profile exists yet (project created before onboarding
+ * completed); `createProfile` seeds the total when the profile arrives.
+ */
+export async function bumpProjectCount(
+  ctx: GenericMutationCtx<DataModel>,
+  email: string,
+  delta: number,
+): Promise<boolean> {
+  const profile = await ctx.db
+    .query("profile")
+    .withIndex("by_email", (q) => q.eq("email", email))
+    .first();
+
+  if (!profile) return false;
+
+  await ctx.db.patch(profile._id, {
+    projectCount: Math.max(0, (profile.projectCount ?? 0) + delta),
+  });
+
+  return true;
+}
+
+/**
+ * Set `projectCount` on a freshly created profile. Projects may already exist
+ * because `/dashboard/projects` is reachable before onboarding completes.
+ * Bounded by one user's projects, run once at profile creation.
+ */
+export async function seedProjectCount(
+  ctx: GenericMutationCtx<DataModel>,
+  profileId: Id<"profile">,
+  userId: string,
+): Promise<void> {
+  let count = 0;
+  for await (const _ of ctx.db
+    .query("project")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))) {
+    count++;
+  }
+
+  await ctx.db.patch(profileId, { projectCount: count });
+}
+
+const project_args = {
+  ...project_schema,
+  tags: v.array(v.string()),
+};
+
+function normalizeProjectTags(tags: readonly string[]): string[] {
+  const normalized = normalizeTags(tags);
+
+  if (normalized.length > MAX_PROJECT_TAGS)
+    throw new Error(`Max of ${MAX_PROJECT_TAGS} tags per project`);
+  if (normalized.some((tag) => tag.length > MAX_TAG_LENGTH))
+    throw new Error(`Tags cannot exceed ${MAX_TAG_LENGTH} characters`);
+
+  return normalized;
 }
 
 export const listProject = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args): Promise<PaginationResult<Project>> => {
     const authUser = await authComponent.getAuthUser(ctx);
+
     if (!authUser) {
       console.error("Not authenticated");
       return { page: [], isDone: true, continueCursor: "" };
@@ -74,19 +158,33 @@ export const listProject = query({
       .order("desc")
       .paginate(args.paginationOpts);
 
-    return { ...result, page: result.page.map(toProject) };
+    return {
+      ...result,
+      page: await Promise.all(
+        result.page.map((doc) => toStandardProject(ctx, doc)),
+      ),
+    };
   },
 });
 
 export const listProjectByUserId = query({
-  args: { userId: v.string() },
-  handler: async (ctx, args): Promise<Project[]> => {
-    const docs = await ctx.db
+  args: { userId: v.string(), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args): Promise<PaginationResult<BasicProject>> => {
+    const result = await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .collect();
+      .order("desc")
+      .paginate({
+        ...args.paginationOpts,
+        numItems: Math.min(50, args.paginationOpts.numItems),
+      });
 
-    return docs.map(toProject);
+    return {
+      ...result,
+      page: await Promise.all(
+        result.page.map((doc) => toStandardProject(ctx, doc)),
+      ),
+    };
   },
 });
 
@@ -102,15 +200,13 @@ export const getProject = query({
       return Result.error("Not found");
     }
 
-    return await enrichProject(ctx, doc).then((enriched) =>
-      Result.ok(toProject(enriched)),
-    );
+    return Result.ok(await toStandardProject(ctx, doc));
   },
 });
 
 export const createProject = mutation({
   args: {
-    project: v.object(project_schema),
+    project: v.object(project_args),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
@@ -122,6 +218,8 @@ export const createProject = mutation({
     const nonOtherLinks = args.project.link.filter((l) => l.tag !== "other");
     if (new Set(nonOtherLinks.map((l) => l.tag)).size !== nonOtherLinks.length)
       throw new Error("Duplicate link types are not allowed");
+
+    const tags = normalizeProjectTags(args.project.tags);
 
     const { ongoing, timeline } = args.project;
     const { start, end } = timeline;
@@ -150,8 +248,11 @@ export const createProject = mutation({
 
     const projectId = await ctx.db.insert("project", {
       ...args.project,
+      tags,
       userId: authUser._id,
     });
+
+    await bumpProjectCount(ctx, authUser.email, 1);
 
     // Schedule blurhash generation for photos
     await ctx.scheduler.runAfter(0, internal.blurhash.generateForProject, {
@@ -165,7 +266,7 @@ export const createProject = mutation({
 export const updateProject = mutation({
   args: {
     project: v.object({
-      ...project_schema,
+      ...project_args,
       _id: v.optional(v.string()),
     }),
   },
@@ -193,6 +294,8 @@ export const updateProject = mutation({
     if (new Set(nonOtherLinks.map((l) => l.tag)).size !== nonOtherLinks.length)
       throw new Error("Duplicate link types are not allowed");
 
+    const tags = normalizeProjectTags(projectData.tags);
+
     const { ongoing, timeline } = projectData;
     const { start, end } = timeline;
 
@@ -218,7 +321,7 @@ export const updateProject = mutation({
       if (result._tag === "Left") return result;
     }
 
-    await ctx.db.patch(existingProject._id, projectData);
+    await ctx.db.patch(existingProject._id, { ...projectData, tags });
 
     // Schedule blurhash generation for photos
     await ctx.scheduler.runAfter(0, internal.blurhash.generateForProject, {
@@ -244,6 +347,8 @@ export const deleteProject = mutation({
       throw new Error("Unauthorized action");
 
     await ctx.db.delete(existingProject._id);
+
+    await bumpProjectCount(ctx, authUser.email, -1);
   },
 });
 
@@ -291,11 +396,55 @@ export const listAll = query({
     return {
       ...records,
       page: await Promise.all(
-        records.page.map((project) => enrichProject(ctx, project)),
+        records.page.map(async (project) => toStandardProject(ctx, project)),
       ),
     };
   },
 });
+
+
+export const search = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    q: v.string(),
+  },
+  handler: async (
+    ctx,
+    { paginationOpts, q },
+  ): Promise<PaginationResult<BasicProject>> => {
+    const trimmed = q.trim();
+
+    // Empty query → return empty page (the /search page handles the prompt state)
+    if (!trimmed) {
+      return { page: [], isDone: true, continueCursor: "" };
+    }
+
+    const records = await ctx.db
+      .query("project")
+      .withSearchIndex("search_title", (s) => s.search("title", trimmed))
+      .paginate({
+        ...paginationOpts,
+        numItems: Math.min(50, paginationOpts.numItems),
+      });
+
+    return {
+      ...records,
+      page: await Promise.all(
+        records.page.map(async (project) => {
+          const profile: Doc<"profile"> = await ctx.db.get(project.userId);
+
+          return {
+            ...project,
+            username: profile?.username ?? "@anonymous",
+            ownerName:
+              `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
+          };
+        }),
+      ),
+    };
+  },
+});
+
 
 async function enrichProject(
   ctx: GenericQueryCtx<DataModel>,

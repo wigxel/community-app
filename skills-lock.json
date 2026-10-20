@@ -223,6 +223,12 @@
       "skillPath": "skills/wg-frontend/SKILL.md",
       "computedHash": "f1b95c6fbb10c608c3c1287d875738441109f83d53bb8c80b5cac782b0c1231e"
     },
+    "instrument-feature-flags": {
+      "source": "posthog/ai-plugin",
+      "sourceType": "github",
+      "skillPath": "skills/instrument-feature-flags/SKILL.md",
+      "computedHash": "ac6cccfd05beeb718f53b425e0543ae9bb140985df00a376713accb6db5f5407"
+    },
     "testing": {
       "source": "wigxel/ai-rules",
       "sourceType": "github",

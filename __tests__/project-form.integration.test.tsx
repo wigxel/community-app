@@ -24,6 +24,9 @@ vi.mock("posthog-js", () => ({
 vi.mock("~/components/forms/project/media-section", () => ({
   MediaSection: () => <div data-testid="media-section" />,
 }));
+vi.mock("~/components/forms/project/taxonomy-section", () => ({
+  TaxonomySection: () => <div data-testid="taxonomy-section" />,
+}));
 vi.mock("motion/react", () => ({
   motion: new Proxy(
     {},

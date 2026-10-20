@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLayoutEffect, useRef } from "react";
 import NavAuth from "~/app/_components/NavAuth";
 import { cn } from "~/lib/utils";
 import { Container } from "./container";
@@ -33,8 +34,35 @@ function NavItem(props: NavItemProps) {
 }
 
 export function Header() {
+  const headerRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+
+    const setHeaderHeight = () => {
+      document.body.style.setProperty(
+        "--header-height",
+        `${el.offsetHeight}px`,
+      );
+    };
+
+    setHeaderHeight();
+
+    const observer = new ResizeObserver(setHeaderHeight);
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+      document.body.style.removeProperty("--header-height");
+    };
+  }, []);
+
   return (
-    <header className="slice-backdrop-effect sticky top-0 z-40 h-18 py-4">
+    <header
+      ref={headerRef}
+      className="slice-backdrop-effect sticky top-0 z-40 h-18 py-4"
+    >
       <Container
         level="max"
         className="flex items-center justify-between gap-2"
