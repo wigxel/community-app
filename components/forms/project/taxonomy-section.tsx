@@ -231,6 +231,7 @@ export function TaxonomySection() {
 
         <p className="text-muted-foreground text-xs">
           Up to {MAX_PROJECT_TAGS} tags, {MAX_TAG_LENGTH} characters each.
+          Spaces become underscores.
         </p>
       </CardContent>
     </Card>
