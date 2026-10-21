@@ -4,10 +4,12 @@ export const metadata: Metadata = {
   title: "Leaderboard",
 };
 
-export default function LeaderboardLayout({
-  children,
-}: {
+export type LeaderboardLayoutProps = {
   children: React.ReactNode;
-}) {
+};
+
+export default function LeaderboardLayout(props: LeaderboardLayoutProps) {
+  const { children } = props;
+
   return children;
 }

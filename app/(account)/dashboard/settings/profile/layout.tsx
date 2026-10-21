@@ -4,10 +4,14 @@ export const metadata: Metadata = {
   title: "Edit Profile",
 };
 
-export default function SettingsProfileLayout({
-  children,
-}: {
+export type SettingsProfileLayoutProps = {
   children: React.ReactNode;
-}) {
+};
+
+export default function SettingsProfileLayout(
+  props: SettingsProfileLayoutProps,
+) {
+  const { children } = props;
+
   return children;
 }

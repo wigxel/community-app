@@ -4,10 +4,12 @@ export const metadata: Metadata = {
   title: "Home",
 };
 
-export default function HomeLayout({
-  children,
-}: {
+export type HomeLayoutProps = {
   children: React.ReactNode;
-}) {
+};
+
+export default function HomeLayout(props: HomeLayoutProps) {
+  const { children } = props;
+
   return children;
 }
