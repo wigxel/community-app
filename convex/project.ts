@@ -62,19 +62,28 @@ async function toStandardProject(
   ctx: GenericQueryCtx<AnyDataModel>,
   project: Doc<"project">,
 ): Promise<BasicProject> {
-  const profile: Doc<"profile"> | null = await ctx.db.get(
-    project?.userId as never,
-  );
+  const DEFAULT_USERNAME = "@anonymous";
 
-  const ownerName =
-    `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim();
-  const username = profile?.username ?? "@anonymous";
+  if (!project?.userId) {
+    // @ts-expect-error @todo: fix typing later
+    return { ...project, username: DEFAULT_USERNAME, ownerName: null };
+  }
 
+  const profile = await ctx.runQuery(api.profiles.getProfileByAuthId, {
+    userId: project.userId,
+  });
+
+  if (!profile) {
+    // @ts-expect-error @todo: fix typing later
+    return { ...project, username: DEFAULT_USERNAME, ownerName: null };
+  }
+
+  // @ts-expect-error @todo: fix typing later
   return {
     ...project,
-    username,
-    ownerName,
-  } as never;
+    username: profile?.username ?? DEFAULT_USERNAME,
+    ownerName: `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
+  };
 }
 
 /**
@@ -379,6 +388,33 @@ export const updateProjectMedia = internalMutation({
   },
 });
 
+/**
+ * One-off: rewrite tags saved before hashtag normalisation (case, spaces,
+ * punctuation). Run per deployment with:
+ *   bunx convex run project:backfillProjectTags
+ */
+export const backfillProjectTags = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    let updated = 0;
+
+    for await (const project of ctx.db.query("project")) {
+      const current = project.tags ?? [];
+      const normalized = normalizeTags(current);
+
+      const changed =
+        normalized.length !== current.length ||
+        normalized.some((tag, index) => tag !== current[index]);
+      if (!changed) continue;
+
+      await ctx.db.patch(project._id, { tags: normalized });
+      updated++;
+    }
+
+    return { updated };
+  },
+});
+
 export const listAll = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (
@@ -401,7 +437,6 @@ export const listAll = query({
     };
   },
 });
-
 
 export const search = query({
   args: {
@@ -444,32 +479,3 @@ export const search = query({
     };
   },
 });
-
-
-async function enrichProject(
-  ctx: GenericQueryCtx<DataModel>,
-  project: Doc<"project">,
-): Promise<BasicProject> {
-  const DEFAULT_USERNAME = "@anonymous";
-
-  if (!project?.userId) {
-    // @ts-expect-error @todo: fix typing later
-    return { ...project, username: DEFAULT_USERNAME, ownerName: null };
-  }
-
-  const profile = await ctx.runQuery(api.profiles.getProfileByAuthId, {
-    userId: project.userId,
-  });
-
-  if (!profile) {
-    // @ts-expect-error @todo: fix typing later
-    return { ...project, username: DEFAULT_USERNAME, ownerName: null };
-  }
-
-  // @ts-expect-error @todo: fix typing later
-  return {
-    ...project,
-    username: profile?.username ?? DEFAULT_USERNAME,
-    ownerName: `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
-  };
-}

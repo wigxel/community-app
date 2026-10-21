@@ -1,7 +1,7 @@
 import { cn } from "~/lib/utils";
 
 const levels = {
-  max: "max-w-[calc(100vsh-2rem)] 2xl:container",
+  max: "w-full max-w-[calc(100vsw-2rem)] 2xl:container",
   inner: "container lg:w-[80svw]",
   article: "container lg:w-[60ch]",
 };

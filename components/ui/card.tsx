@@ -6,15 +6,7 @@ const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    className="bg-card border-foreground/5 rounded-(--app-card-radius) border p-(--app-card-gap)"
-    style={{
-      "--app-card-gap": "0.375rem",
-      "--app-card-radius": "1.5rem",
-      "--app-card-inner-radius":
-        "calc(var(--app-card-radius) - var(--app-card-gap))",
-    }}
-  >
+  <div className="bg-card border-foreground/5 rounded-(--app-card-radius) border p-(--app-card-gap)">
     <div
       ref={ref}
       className={cn(
