@@ -104,6 +104,8 @@ export interface Project extends Doc<"project"> {
   link: ProjectLink[];
 }
 
+export type FullProject = BasicProject;
+
 export type FavouritedProject = Project & {
   favouritedAt: number;
   owner: {
