@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { ProjectForm } from "~/components/forms/project";
 import {
   DBHeader,
   DBHeaderDescription,
   DBHeaderTitle,
 } from "~/components/layouts/dashboard-page-header";
+
+export const metadata: Metadata = {
+  title: "Create Project",
+};
 
 export default function CreateProjectPage() {
   return (

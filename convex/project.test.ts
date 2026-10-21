@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
@@ -243,7 +243,7 @@ describe("project mutations — tag guards", () => {
       paginationOpts: { numItems: 10, cursor: null },
     });
 
-    expect(projects.page[0].tags).toEqual(["UI", "Design"]);
+    expect(projects.page[0].tags).toEqual(["ui", "design"]);
   });
 
   it("normalizes tags before persisting on update", async () => {
@@ -267,7 +267,22 @@ describe("project mutations — tag guards", () => {
       paginationOpts: { numItems: 10, cursor: null },
     });
 
-    expect(updated.page[0].tags).toEqual(["Web", "Mobile"]);
+    expect(updated.page[0].tags).toEqual(["web", "mobile"]);
+  });
+
+  it("backfills legacy tags to hashtag form", async () => {
+    const projectId = await t.run((ctx) =>
+      ctx.db.insert("project", {
+        ...validProject(),
+        tags: ["  UI  Design ", "#React", "C++", "react"],
+      }),
+    );
+
+    await t.mutation(internal.project.backfillProjectTags, {});
+
+    const project = await t.run((ctx) => ctx.db.get(projectId));
+
+    expect(project?.tags).toEqual(["ui_design", "react", "c"]);
   });
 });
 

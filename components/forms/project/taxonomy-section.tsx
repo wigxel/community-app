@@ -6,8 +6,8 @@ import { Tag, X } from "lucide-react";
 import { type KeyboardEvent, useState } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import { AlertBox } from "~/components/molecules/alert-box";
-import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Chip } from "~/components/ui/chip";
 import { Input } from "~/components/ui/input";
 import { api } from "~/convex/_generated/api";
 import {
@@ -137,21 +137,20 @@ export function TaxonomySection() {
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
-              <Badge
+              <Chip
                 key={tag}
-                variant="outline"
-                className="border-brand-primary/40 bg-brand-primary/15 text-foreground gap-1.5 py-1 pr-2 pl-3 text-sm"
-              >
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => removeTag(tag)}
-                  aria-label={`Remove ${tag}`}
-                  className="text-muted-foreground hover:text-foreground rounded-full p-0.5 transition-colors hover:bg-white/10"
-                >
-                  <X size={12} />
-                </button>
-              </Badge>
+                label={tag}
+                icon={
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    aria-label={`Remove ${tag}`}
+                    className="text-muted-foreground hover:text-foreground rounded-full p-0.5 transition-colors hover:bg-white/10"
+                  >
+                    <X size={12} />
+                  </button>
+                }
+              />
             ))}
           </div>
         )}
@@ -232,6 +231,7 @@ export function TaxonomySection() {
 
         <p className="text-muted-foreground text-xs">
           Up to {MAX_PROJECT_TAGS} tags, {MAX_TAG_LENGTH} characters each.
+          Spaces become underscores.
         </p>
       </CardContent>
     </Card>

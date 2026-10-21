@@ -109,6 +109,10 @@ body {
 
   --project-card-media-radius: 1.8em;
   --project-card-media-padding: 0.6em;
+
+  --app-card-gap: 0.375rem;
+  --app-card-radius: 1.5rem;
+  --app-card-inner-radius: calc(var(--app-card-radius) - var(--app-card-gap));
 }
 
 .dark {
