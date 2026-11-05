@@ -1,5 +1,5 @@
 "use client";
-
+import { useQuery } from "convex/react";
 import { Logout } from "iconsax-reactjs";
 import { type LucideProps, Menu, Trophy, X } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +15,7 @@ import {
   TeacherIcon,
 } from "~/components/icons";
 import { Button } from "~/components/ui/button";
+import { api } from "~/convex/_generated/api";
 import { authClient } from "~/lib/auth-client";
 import { cn } from "~/lib/utils";
 
@@ -66,6 +67,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const unreadCount = useQuery(api.notifications.unreadCount);
 
   async function handleSignOut() {
     const { error } = await authClient.signOut();
@@ -86,10 +88,12 @@ export function Sidebar() {
       <nav className="flex flex-1 flex-col gap-1">
         {navigation.map((item) => {
           const active = pathname.startsWith(item.href);
+          const badgeCount =
+            item.name === "Notifications" ? unreadCount : undefined;
 
           return (
             <Link key={item.href} href={item.href} draggable={false}>
-              <NavItem item={item} isActive={active} />
+              <NavItem item={item} isActive={active} badgeCount={badgeCount} />
             </Link>
           );
         })}
@@ -165,10 +169,11 @@ export function Sidebar() {
 type NavItemProps = {
   item: Pick<(typeof navigation)[0], "name" | "icon">;
   isActive?: boolean;
+  badgeCount?: number;
 };
 
 function NavItem(props: NavItemProps) {
-  const { item, isActive } = props;
+  const { item, isActive, badgeCount } = props;
 
   return (
     <li
@@ -183,7 +188,12 @@ function NavItem(props: NavItemProps) {
         size={"1.5rem"}
         className={cn("shrink-0", isActive ? "text-brand-primary" : "")}
       />
-      <span>{item.name}</span>
+      <span className="flex-1">{item.name}</span>
+      {badgeCount !== undefined && badgeCount > 0 && (
+        <span className="bg-brand-primary rounded-full px-2 py-0.5 text-xs font-medium text-white">
+          {badgeCount}
+        </span>
+      )}
     </li>
   );
 }
