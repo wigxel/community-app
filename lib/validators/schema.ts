@@ -1,5 +1,6 @@
 import z from "zod";
 import type { Id } from "~/convex/_generated/dataModel";
+import { MAX_PROJECT_TAGS, MAX_TAG_LENGTH } from "~/lib/tags";
 
 const MONTHS = [
   "January",
@@ -98,6 +99,24 @@ export const projectSchema = z
           return new Set(nonOther.map((l) => l.tag)).size === nonOther.length;
         },
         { message: "Duplicate link types are not allowed" },
+      ),
+    tags: z
+      .array(
+        z
+          .string()
+          .trim()
+          .min(1, { message: "Tags cannot be empty." })
+          .max(MAX_TAG_LENGTH, {
+            message: `Tags cannot exceed ${MAX_TAG_LENGTH} characters.`,
+          }),
+      )
+      .max(MAX_PROJECT_TAGS, {
+        message: `Maximum ${MAX_PROJECT_TAGS} tags per project.`,
+      })
+      .refine(
+        (tags) =>
+          new Set(tags.map((tag) => tag.toLowerCase())).size === tags.length,
+        { message: "Duplicate tags are not allowed." },
       ),
   })
   .superRefine((val, ctx) => {

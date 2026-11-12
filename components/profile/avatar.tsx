@@ -19,9 +19,7 @@ export function ProfileAvatar(props: ProfileAvatarProps) {
     <div className="group relative inline-flex">
       <Avatar className={cn("size-14", className)}>
         <AvatarImage src={src || undefined} />
-        <AvatarFallback
-          className={cn("bg-blue-500/20 text-blue-300", className)}
-        >
+        <AvatarFallback className={cn("bg-[#243257] text-blue-300", className)}>
           {initial}
         </AvatarFallback>
       </Avatar>

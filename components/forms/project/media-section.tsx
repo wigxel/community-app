@@ -99,7 +99,7 @@ export function MediaSection() {
             if (!isMax) appendMedia(EMPTY_MEDIA);
           }}
         >
-          {isMax ? "Maximum of 10" : "Add media"}
+          {isMax ? "Max. of 10" : "Add media"}
         </Button>
       </CardFooter>
     </Card>

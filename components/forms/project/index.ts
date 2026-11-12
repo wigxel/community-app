@@ -9,4 +9,5 @@ export {
 export { MediaSection } from "./media-section";
 export { ProjectForm } from "./project-form";
 export { ProjectFormItem as ProjectCard } from "./project-form-item";
+export { TaxonomySection } from "./taxonomy-section";
 export { default as TimelineSelect } from "./timeline-select";

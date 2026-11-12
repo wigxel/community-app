@@ -505,3 +505,93 @@ export const seedSome = internalMutation({
     return { skills, titles, projects };
   },
 });
+
+const BACKFILL_BATCH = 100;
+
+/**
+ * Backfill `profile.projectCount` from rows already in `project`.
+ *
+ * Pass 1 counts projects per owner in memory; pass 2 patches profiles 100 at a
+ * time and schedules a continuation so no single transaction holds the whole
+ * table. Profiles with no `userId` cannot be joined to their projects, so they
+ * are left untouched and reported as `skippedNoUserId` (they render as 0).
+ *
+ * ponytail: one in-memory pass over `project` — fine at community-app scale;
+ * if `project` outgrows a transaction, move this to a scheduled action that
+ * counts per owner from an index.
+ */
+export const backfillProjectCounts = internalMutation({
+  args: {
+    force: v.optional(v.boolean()),
+    cursor: v.optional(v.string()),
+    counts: v.optional(v.record(v.string(), v.number())),
+    updated: v.optional(v.number()),
+    skippedNoUserId: v.optional(v.number()),
+  },
+  async handler(
+    ctx,
+    { force = false, cursor, counts, updated = 0, skippedNoUserId = 0 },
+  ) {
+    const isContinuation = counts !== undefined;
+
+    if (!isContinuation && !force) {
+      const alreadyRan = await ctx.db
+        .query("migrations")
+        .withIndex("by_name", (q) => q.eq("name", "backfill:projectCounts"))
+        .first();
+      if (alreadyRan) {
+        return { alreadyRan: true, updated: 0, skippedNoUserId: 0 };
+      }
+    }
+
+    let totals = counts;
+    if (totals === undefined) {
+      totals = {};
+      for await (const project of ctx.db.query("project")) {
+        totals[project.userId] = (totals[project.userId] ?? 0) + 1;
+      }
+    }
+
+    const batch =
+      cursor === undefined
+        ? await ctx.db
+            .query("profile")
+            .withIndex("by_username")
+            .take(BACKFILL_BATCH)
+        : await ctx.db
+            .query("profile")
+            .withIndex("by_username", (q) => q.gt("username", cursor))
+            .take(BACKFILL_BATCH);
+
+    for (const profile of batch) {
+      if (!profile.userId) {
+        skippedNoUserId++;
+        continue;
+      }
+      await ctx.db.patch(profile._id, {
+        projectCount: totals[profile.userId] ?? 0,
+      });
+      updated++;
+    }
+
+    const last = batch[batch.length - 1];
+    if (batch.length === BACKFILL_BATCH && last) {
+      await ctx.scheduler.runAfter(0, internal.seeds.backfillProjectCounts, {
+        cursor: last.username,
+        counts: totals,
+        updated,
+        skippedNoUserId,
+      });
+      return { done: false, updated, skippedNoUserId };
+    }
+
+    await ctx.db.insert("migrations", {
+      name: "backfill:projectCounts",
+      type: "backfill",
+      status: "success",
+      executedAt: Date.now(),
+    });
+
+    return { done: true, updated, skippedNoUserId };
+  },
+});

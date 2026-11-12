@@ -32,6 +32,7 @@ function validProject(overrides?: Record<string, unknown>) {
     ongoing: true,
     media: [],
     link: [],
+    tags: [],
     ...overrides,
   };
 }
@@ -141,8 +142,9 @@ describe("project mutations — link guards", () => {
       await t.finishInProgressScheduledFunctions();
       const projects = await t.query(api.project.listProjectByUserId, {
         userId: FAKE_USER._id,
+        paginationOpts: { numItems: 10, cursor: null },
       });
-      projectId = projects[0]._id;
+      projectId = projects.page[0]._id;
     });
 
     it("throws on more than 3 links", async () => {
@@ -195,6 +197,164 @@ describe("project mutations — link guards", () => {
         }),
       ).resolves.toBeDefined();
     });
+  });
+});
+
+describe("project mutations — tag guards", () => {
+  let t: ReturnType<typeof convexTest>;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    t = convexTest(schema, modules);
+    mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("throws when createProject receives more than 8 tags", async () => {
+    await expect(
+      t.mutation(api.project.createProject, {
+        project: validProject({
+          tags: Array.from({ length: 9 }, (_, index) => `tag-${index}`),
+        }),
+      }),
+    ).rejects.toThrow("Max of 8 tags per project");
+  });
+
+  it("throws when a tag exceeds 32 characters", async () => {
+    await expect(
+      t.mutation(api.project.createProject, {
+        project: validProject({ tags: ["a".repeat(33)] }),
+      }),
+    ).rejects.toThrow("Tags cannot exceed 32 characters");
+  });
+
+  it("normalizes tags before persisting on create", async () => {
+    await t.mutation(api.project.createProject, {
+      project: validProject({ tags: ["  UI  ", "ui", "Design"] }),
+    });
+    await t.finishInProgressScheduledFunctions();
+
+    const projects = await t.query(api.project.listProjectByUserId, {
+      userId: FAKE_USER._id,
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    expect(projects.page[0].tags).toEqual(["UI", "Design"]);
+  });
+
+  it("normalizes tags before persisting on update", async () => {
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.finishInProgressScheduledFunctions();
+
+    const created = await t.query(api.project.listProjectByUserId, {
+      userId: FAKE_USER._id,
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    await t.mutation(api.project.updateProject, {
+      project: {
+        ...validProject({ tags: ["Web", "web", " Mobile "] }),
+        _id: created.page[0]._id,
+      },
+    });
+
+    const updated = await t.query(api.project.listProjectByUserId, {
+      userId: FAKE_USER._id,
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+
+    expect(updated.page[0].tags).toEqual(["Web", "Mobile"]);
+  });
+});
+
+describe("project mutations — denormalized projectCount", () => {
+  let t: ReturnType<typeof convexTest>;
+  let profileId: Id<"profile">;
+
+  const readCount = async (id: Id<"profile">) =>
+    t.run((ctx) => ctx.db.get(id)).then((p) => p?.projectCount);
+
+  const insertProfile = (projectCount?: number) =>
+    t.run((ctx) =>
+      ctx.db.insert("profile", {
+        userId: FAKE_USER._id,
+        email: FAKE_USER.email,
+        firstName: "Test",
+        lastName: "User",
+        username: `user${projectCount ?? "x"}${Date.now()}`,
+        phoneNumbers: [],
+        profileImage: null,
+        title: null,
+        ...(projectCount === undefined ? {} : { projectCount }),
+      }),
+    );
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    t = convexTest(schema, modules);
+    mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
+    profileId = await insertProfile();
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("bumps to 1 on create", async () => {
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.finishInProgressScheduledFunctions();
+    expect(await readCount(profileId)).toBe(1);
+  });
+
+  it("bumps to 2 on a second create", async () => {
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.finishInProgressScheduledFunctions();
+    expect(await readCount(profileId)).toBe(2);
+  });
+
+  it("drops back to 1 on delete", async () => {
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.finishInProgressScheduledFunctions();
+    const id = await t.run((ctx) => ctx.db.query("project").first());
+    await t.mutation(api.project.deleteProject, { _id: id!._id });
+    expect(await readCount(profileId)).toBe(1);
+  });
+
+  it("floors at 0 instead of going negative", async () => {
+    // Counter already drifted to 0 while a project row still exists.
+    await t.run((ctx) => ctx.db.insert("project", validProject()));
+    await t.run((ctx) => ctx.db.patch(profileId, { projectCount: 0 }));
+    const id = await t.run((ctx) => ctx.db.query("project").first());
+    await t.mutation(api.project.deleteProject, { _id: id!._id });
+    expect(await readCount(profileId)).toBe(0);
+  });
+
+  it("still creates the project when no profile exists", async () => {
+    await t.run((ctx) => ctx.db.delete(profileId));
+    await expect(
+      t.mutation(api.project.createProject, { project: validProject() }),
+    ).resolves.toBeDefined();
+  });
+
+  it("seeds the count at profile creation for pre-existing projects", async () => {
+    await t.run((ctx) => ctx.db.delete(profileId));
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.finishInProgressScheduledFunctions();
+
+    const freshId = await t.mutation(api.profiles.createProfile, {
+      firstName: "Test",
+      lastName: "User",
+      username: `seeded${Date.now()}`,
+    });
+    expect(await readCount(freshId)).toBe(2);
   });
 });
 

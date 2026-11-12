@@ -7,6 +7,7 @@ import type { Profile, TalentProfile } from "../types/models";
 import type { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authComponent } from "./auth";
+import { seedProjectCount } from "./project";
 
 export const listProfile = query({
   args: {
@@ -192,7 +193,7 @@ export const createProfile = mutation({
 
     if (usernameTaken) throw new ConvexError("Username is already taken");
 
-    return await ctx.db.insert("profile", {
+    const profileId = await ctx.db.insert("profile", {
       userId: authUser._id,
       email: authUser.email,
       firstName: args.firstName,
@@ -208,6 +209,11 @@ export const createProfile = mutation({
       location: { city: "", country: "Nigeria" },
       skills: [],
     });
+
+    // Projects can pre-date the profile; don't start the counter at 0.
+    await seedProjectCount(ctx, profileId, authUser._id);
+
+    return profileId;
   },
 });
 

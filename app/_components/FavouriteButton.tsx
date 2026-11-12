@@ -18,9 +18,19 @@ interface FavouriteButtonProps {
    */
   variant?: "overlay" | "card" | "inline";
   className?: string;
+  ref?: React.Ref<HTMLButtonElement>;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onClickCapture?: React.MouseEventHandler<HTMLButtonElement>;
 }
 export function FavouriteButton(props: FavouriteButtonProps) {
-  const { projectId, variant = "card", className } = props;
+  const {
+    projectId,
+    variant = "card",
+    className,
+    ref,
+    onClick,
+    onClickCapture,
+  } = props;
 
   const data = useQuery(api.favourites.getProjectFavourite, { projectId });
   const toggleFavourite = useMutation(api.favourites.toggle);
@@ -90,7 +100,12 @@ export function FavouriteButton(props: FavouriteButtonProps) {
         aria-label={ariaLabel}
         aria-pressed={optimisticFavourited}
         disabled={isPending}
-        onClick={handleClick}
+        ref={ref}
+        onClickCapture={onClickCapture}
+        onClick={(e) => {
+          onClick?.(e);
+          handleClick(e);
+        }}
         title={title}
         className={cn(
           "relative flex h-11 w-11 items-center justify-center rounded-full",
@@ -128,7 +143,12 @@ export function FavouriteButton(props: FavouriteButtonProps) {
         aria-label={ariaLabel}
         aria-pressed={optimisticFavourited}
         disabled={isPending}
-        onClick={handleClick}
+        ref={ref}
+        onClickCapture={onClickCapture}
+        onClick={(e) => {
+          onClick?.(e);
+          handleClick(e);
+        }}
         title={title}
         className={cn(
           "group/fav flex items-center gap-1 rounded-full px-2.5 py-1",
@@ -165,7 +185,12 @@ export function FavouriteButton(props: FavouriteButtonProps) {
       aria-label={ariaLabel}
       aria-pressed={optimisticFavourited}
       disabled={isPending}
-      onClick={handleClick}
+      ref={ref}
+      onClickCapture={onClickCapture}
+      onClick={(e) => {
+        onClick?.(e);
+        handleClick(e);
+      }}
       title={title}
       className={cn(
         "flex items-center gap-1.5 rounded-full px-3 py-1.5",

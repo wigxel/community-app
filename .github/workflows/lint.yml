@@ -1,4 +1,4 @@
-name: Lint
+name: Lint & Test
 
 on:
   pull_request:
@@ -24,3 +24,6 @@ jobs:
 
       - name: Run lint
         run: bun run lint
+
+      - name: Run tests
+        run: bun run test

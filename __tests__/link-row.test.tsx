@@ -18,6 +18,7 @@ const DEFAULT_PROJECT: ProjectFormValues = {
   ongoing: false,
   media: [],
   link: [],
+  tags: [],
 };
 
 function renderLinkRow(initialTag: ProjectLink["tag"] = "other") {

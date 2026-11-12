@@ -5,9 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { FavouriteButton } from "~/app/_components/FavouriteButton";
+import { RequireAuth } from "~/components/auth/require-auth";
 
 import type { FavouritedProject } from "~/types/models";
 export type FavouritedProjectCardProps = { project: FavouritedProject };
+
 export function FavouritedProjectCard(props: FavouritedProjectCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -90,7 +92,9 @@ export function FavouritedProjectCard(props: FavouritedProjectCardProps) {
               <Eye size={20} />
             </button>
 
-            <FavouriteButton projectId={project._id} variant="overlay" />
+            <RequireAuth>
+              <FavouriteButton projectId={project._id} variant="overlay" />
+            </RequireAuth>
           </div>
 
           {/* ── Gradient + title ── */}

@@ -32,9 +32,11 @@ const defaultValues: Partial<SignInValues> = {
   email: "",
   password: "",
 };
-export type SignInFormProps = { redirectTo: string };
+
+export type SignInFormProps = { redirectTo: string; onSuccess?: () => void };
+
 export default function SignInForm(props: SignInFormProps) {
-  const { redirectTo } = props;
+  const { redirectTo, onSuccess } = props;
 
   const router = useRouter();
 
@@ -59,6 +61,10 @@ export default function SignInForm(props: SignInFormProps) {
       posthog.capture("signed_in");
     }
     toast.success("Welcome back!");
+    if (onSuccess) {
+      onSuccess();
+      return;
+    }
     router.push(redirectTo ? (redirectTo as never) : "/dashboard");
   }
 

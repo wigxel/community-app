@@ -11,6 +11,7 @@ const base = {
   ongoing: false,
   media: [],
   link: [],
+  tags: [],
 } as const;
 
 function parse(data: unknown) {
@@ -340,5 +341,65 @@ describe("projectSchema", () => {
     expect(res.success).toBe(false);
     if (!res.success)
       expect(res.error.issues[0].message).toMatch(/Duplicate link types/);
+  });
+
+  it("passes with the maximum of 8 tags", () => {
+    const res = parse({
+      ...base,
+      ongoing: true,
+      timeline: { start: { year: String(thisYear - 1) }, end: null },
+      tags: [
+        "React",
+        "Next.js",
+        "UI",
+        "Design",
+        "Convex",
+        "Zod",
+        "Vitest",
+        "CSS",
+      ],
+    });
+    expect(res.success).toBe(true);
+  });
+
+  it("fails with more than 8 tags", () => {
+    const res = parse({
+      ...base,
+      tags: Array.from({ length: 9 }, (_, index) => `tag-${index}`),
+    });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(
+        res.error.issues.some((i) => /Maximum 8 tags/.test(i.message)),
+      ).toBe(true);
+  });
+
+  it("fails tags longer than 32 characters", () => {
+    const res = parse({ ...base, tags: ["a".repeat(33)] });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(
+        res.error.issues.some((i) =>
+          /cannot exceed 32 characters/.test(i.message),
+        ),
+      ).toBe(true);
+  });
+
+  it("fails duplicate tags case-insensitively", () => {
+    const res = parse({ ...base, tags: ["React", "react"] });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(
+        res.error.issues.some((i) => /Duplicate tags/.test(i.message)),
+      ).toBe(true);
+  });
+
+  it("fails blank tags", () => {
+    const res = parse({ ...base, tags: ["   "] });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(
+        res.error.issues.some((i) => /cannot be empty/.test(i.message)),
+      ).toBe(true);
   });
 });

@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/react";
 
 // jsdom lacks ResizeObserver (used by Radix/shadcn Card)
 class MockResizeObserver {
@@ -13,14 +14,15 @@ if (typeof globalThis.ResizeObserver === "undefined") {
 
 // jsdom lacks pointer capture methods (used by Radix Select)
 if (!HTMLElement.prototype.hasPointerCapture) {
-  HTMLElement.prototype.hasPointerCapture = function () {
-    return false;
-  };
+  HTMLElement.prototype.hasPointerCapture = () => false;
 }
 
 // jsdom lacks scrollIntoView (used by Radix Select)
 if (!HTMLElement.prototype.scrollIntoView) {
-  HTMLElement.prototype.scrollIntoView = function () {
-    return false;
-  };
+  HTMLElement.prototype.scrollIntoView = () => false;
 }
+
+beforeEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
