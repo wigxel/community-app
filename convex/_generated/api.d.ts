@@ -17,6 +17,7 @@ import type * as favourites from "../favourites.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as leaderboard from "../leaderboard.js";
+import type * as notifications from "../notifications.js";
 import type * as profiles from "../profiles.js";
 import type * as project from "../project.js";
 import type * as seeds from "../seeds.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   files: typeof files;
   http: typeof http;
   leaderboard: typeof leaderboard;
+  notifications: typeof notifications;
   profiles: typeof profiles;
   project: typeof project;
   seeds: typeof seeds;
