@@ -358,6 +358,81 @@ describe("project mutations — denormalized projectCount", () => {
   });
 });
 
+describe("project favourites lifecycle", () => {
+  // Keeps the schema generic so index names inside t.run type-check.
+  const makeTest = () => convexTest(schema, modules);
+  let t: ReturnType<typeof makeTest>;
+
+  const readFavourites = (projectId: Id<"project">) =>
+    t.run((ctx) =>
+      ctx.db
+        .query("projectFavourites")
+        .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
+        .collect(),
+    );
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    t = makeTest();
+    mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  const createOwnedProject = async () => {
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.finishInProgressScheduledFunctions();
+    const projects = await t.query(api.project.listProjectByUserId, {
+      userId: FAKE_USER._id,
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+    return projects.page[0];
+  };
+
+  const readProjectCount = async (projectId: Id<"project">) => {
+    const doc = await t.run((ctx) => ctx.db.get(projectId));
+    return doc?.favouriteCount;
+  };
+
+  it("deleteProject removes its favourite rows instead of orphaning them", async () => {
+    const project = await createOwnedProject();
+    await t.run((ctx) =>
+      ctx.db.insert("projectFavourites", {
+        userId: FAKE_USER._id,
+        projectId: project._id,
+      }),
+    );
+
+    await t.mutation(api.project.deleteProject, { _id: project._id });
+
+    expect(await readFavourites(project._id)).toHaveLength(0);
+  });
+
+  it("toggle keeps the denormalized favouriteCount in sync", async () => {
+    const project = await createOwnedProject();
+
+    await t.mutation(api.favourites.toggle, { projectId: project._id });
+    expect(await readProjectCount(project._id)).toBe(1);
+
+    await t.mutation(api.favourites.toggle, { projectId: project._id });
+    expect(await readProjectCount(project._id)).toBe(0);
+  });
+
+  it("getProjectFavourite reads the denormalized count", async () => {
+    const project = await createOwnedProject();
+    await t.mutation(api.favourites.toggle, { projectId: project._id });
+
+    const data = await t.query(api.favourites.getProjectFavourite, {
+      projectId: project._id,
+    });
+
+    expect(data).toEqual({ count: 1, isFavourited: true });
+  });
+});
+
 describe("project search", () => {
   let t: ReturnType<typeof convexTest>;
   let profileId: Id<"profile">;

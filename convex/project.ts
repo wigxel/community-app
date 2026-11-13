@@ -348,6 +348,15 @@ export const deleteProject = mutation({
 
     await ctx.db.delete(existingProject._id);
 
+    // Delete matching favourite rows — they'd otherwise orphan forever.
+    for await (const fav of ctx.db
+      .query("projectFavourites")
+      .withIndex("by_projectId", (q) =>
+        q.eq("projectId", existingProject._id),
+      )) {
+      await ctx.db.delete(fav._id);
+    }
+
     await bumpProjectCount(ctx, authUser.email, -1);
   },
 });
