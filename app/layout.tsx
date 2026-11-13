@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { PropsWithChildren } from "react";
+import { APP_NAME } from "~/config/constants";
 import { getToken } from "~/lib/auth-server";
 import { bodyFont } from "~/styles/font";
 import "./globals.css";
@@ -8,8 +9,8 @@ import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "Reveer",
-    template: "%s | Reveer",
+    default: APP_NAME,
+    template: `%s | ${APP_NAME}`,
   },
   description: "Connect Local Businesses with Students for Internship",
 };

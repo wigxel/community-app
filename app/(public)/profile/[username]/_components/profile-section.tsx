@@ -68,7 +68,7 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
             </div>
           )}
 
-          <div className="text-muted-foreground mx-auto -mb-4 flex items-center justify-start gap-1 text-sm">
+          <div className="text-muted-foreground mx-auto -mb-4 flex items-center justify-center gap-1 text-sm">
             <MapPin size={"1.2em"} />
             &nbsp;
             {LocationImpl.basic(profile.location)}

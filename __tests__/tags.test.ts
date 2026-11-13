@@ -12,14 +12,20 @@ describe("tag helpers", () => {
     expect(MAX_TAG_LENGTH).toBe(32);
   });
 
-  it("trims and collapses whitespace", () => {
-    expect(normalizeTag("  ui   design ")).toBe("ui design");
+  it("normalises tags to lowercase hashtags", () => {
+    expect(normalizeTag("  UI   Design ")).toBe("ui_design");
+    expect(normalizeTag("#React")).toBe("react");
+    expect(normalizeTag("UI/UX")).toBe("ui_ux");
+    expect(normalizeTag("Node.js 20")).toBe("node_js_20");
+    expect(normalizeTag("R&D")).toBe("r_d");
+    expect(normalizeTag("C++")).toBe("c");
+    expect(normalizeTag("###")).toBe("");
   });
 
-  it("drops blanks and case-insensitive duplicates while preserving order", () => {
+  it("drops blanks and duplicates while preserving order", () => {
     expect(normalizeTags([" React ", "react", "", "   ", "CSS"])).toEqual([
-      "React",
-      "CSS",
+      "react",
+      "css",
     ]);
   });
 

@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Work history",
+};
+
 export type ProfileCardProps = {
   params: Promise<{ username: string }>;
 };

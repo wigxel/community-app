@@ -1,9 +1,14 @@
 import { fetchQuery } from "convex/nextjs";
+import type { Metadata } from "next";
 import { api } from "~/convex/_generated/api";
 import PublicProjectsCatalog from "../_components/ProjectFeed";
 import { LandingHero } from "./_components/landing-page-hero";
 
 export const revalidate = 30;
+
+export const metadata: Metadata = {
+  title: "Discover Projects",
+};
 
 const SSR_PAGE_SIZE = 12;
 

@@ -22,6 +22,7 @@ interface FavouriteButtonProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   onClickCapture?: React.MouseEventHandler<HTMLButtonElement>;
 }
+
 export function FavouriteButton(props: FavouriteButtonProps) {
   const {
     projectId,
@@ -114,7 +115,7 @@ export function FavouriteButton(props: FavouriteButtonProps) {
           optimisticFavourited
             ? "border-rose-400/50 bg-rose-500/30 text-rose-300"
             : "border-white/25 bg-white/15 text-white hover:border-rose-400/50 hover:bg-rose-500/25 hover:text-rose-300",
-          isUnauthenticated && "cursor-default opacity-50 hover:scale-100",
+          isUnauthenticated && "cursor-default hover:scale-100",
           className,
         )}
       >
@@ -198,7 +199,7 @@ export function FavouriteButton(props: FavouriteButtonProps) {
         optimisticFavourited
           ? "border-rose-400/40 bg-rose-500/15 text-rose-300"
           : "border-white/15 bg-white/5 text-white/50 hover:border-rose-400/30 hover:bg-rose-500/10 hover:text-rose-300",
-        isUnauthenticated && "cursor-default opacity-50",
+        isUnauthenticated && "cursor-default",
         className,
       )}
     >
