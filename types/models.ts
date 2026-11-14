@@ -5,6 +5,13 @@ export interface ProfileLocation {
   country: string;
 }
 
+/** Owner-private rate; public consumers only ever see `rateBand`. */
+export interface ProfileRate {
+  amount: number;
+  /** ISO 4217 code, defaults to NGN. */
+  currency?: string;
+}
+
 export interface Profile {
   userId?: string;
   firstName: string;
@@ -24,6 +31,10 @@ export interface Profile {
   skills?: string[];
   verified: boolean;
   projectCount?: number;
+  /** Exact rate — owner-only. Public profile queries omit this. */
+  rate?: ProfileRate | null;
+  /** Public affordability indicator (₦ / ₦₦ / ₦₦₦ / ₦₦₦₦). */
+  rateBand?: string | null;
 }
 
 export interface ProfileWorkExperience {

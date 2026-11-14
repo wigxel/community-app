@@ -1,6 +1,7 @@
 import { queryGeneric as query } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { ProfileImpl } from "../lib/factories/profile";
+import { rateBand } from "../lib/rate-band";
 import { Result } from "../lib/result";
 import { validateUsernameFormat } from "../lib/username";
 import type { Profile, TalentProfile } from "../types/models";
@@ -59,11 +60,13 @@ export const listProfile = query({
           totalYearsOfExperience,
           // @todo: Implement seniority feature — derive from leaderboard score or user input
           seniority: "none",
+          rateBand: user.rate ? rateBand(user.rate.amount) : null,
         };
       }),
     );
 
-    return enrichedUsers;
+    // Talent listing is public: never expose exact rates.
+    return enrichedUsers.map(({ rate: _rate, ...user }) => user);
   },
 });
 
@@ -80,7 +83,13 @@ export const getProfileByUsername = query({
     if (!user) return null;
 
     const title = user.title ? await ctx.db.get(user.title) : null;
-    return { ...user, title };
+    // Public profile: exact rate is owner-only; expose the band instead.
+    const { rate, ...publicUser } = user;
+    return {
+      ...publicUser,
+      title,
+      rateBand: rate ? rateBand(rate.amount) : null,
+    };
   },
 });
 
@@ -243,6 +252,15 @@ export const updateProfile = mutation({
       }),
     ),
     skills: v.optional(v.array(v.id("skills"))),
+    rate: v.optional(
+      v.union(
+        v.null(),
+        v.object({
+          amount: v.number(),
+          currency: v.optional(v.string()),
+        }),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
@@ -271,6 +289,7 @@ export const updateProfile = mutation({
       ...(args.location !== undefined && { location: args.location }),
       ...(args.links !== undefined && { links: args.links }),
       ...(args.skills !== undefined && { skills: args.skills }),
+      ...(args.rate !== undefined && { rate: args.rate }),
     });
 
     return profile._id;
