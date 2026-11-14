@@ -258,6 +258,13 @@ const formSchema = z.object({
     .array(linkSchema)
     .max(3, { message: "You can add at most 3 links." }),
   skills: z.array(z.string()).optional(), // array of skill IDs
+  rateAmount: z
+    .string()
+    .optional()
+    .refine(
+      (value) => value === "" || value === undefined || Number.isFinite(Number(value)),
+      { message: "Enter a valid amount." },
+    ),
 });
 
 const EMPTY_WORK_EXPERIENCE: z.infer<typeof workExperienceSchema> = {
@@ -335,6 +342,8 @@ export default function Profile() {
               success: (data) => data?.map((s) => s._id) ?? [],
               error: () => [],
             }),
+            rateAmount:
+              profile.rate?.amount != null ? String(profile.rate.amount) : "",
           }}
         />
       ) : (
@@ -506,6 +515,10 @@ export function ProfileForm(props: ProfileFormProps) {
         location: values.location || undefined,
         links: normalizedLinks,
         skills: (values.skills || []) as Id<"skills">[],
+        rate:
+          values.rateAmount === "" || values.rateAmount === undefined
+            ? null
+            : { amount: Number(values.rateAmount) },
       });
 
       if (
@@ -519,6 +532,7 @@ export function ProfileForm(props: ProfileFormProps) {
           link_count: normalizedLinks.length,
           skill_count: values.skills?.length ?? 0,
           work_experience_count: values.workExperience?.length ?? 0,
+          has_rate: Boolean(values.rateAmount),
         });
       }
 
@@ -596,6 +610,24 @@ export function ProfileForm(props: ProfileFormProps) {
                       <FormControl>
                         <Input placeholder="Doe" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="rateAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rate (NGN)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min={0} placeholder="e.g., 150000" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        What you charge per engagement. Shown publicly only as a
+                        ₦ band (₦ / ₦₦ / ₦₦₦ / ₦₦₦₦) — the exact amount stays
+                        private.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
