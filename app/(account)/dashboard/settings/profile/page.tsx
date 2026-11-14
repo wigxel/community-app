@@ -262,7 +262,8 @@ const formSchema = z.object({
     .string()
     .optional()
     .refine(
-      (value) => value === "" || value === undefined || Number.isFinite(Number(value)),
+      (value) =>
+        value === "" || value === undefined || Number.isFinite(Number(value)),
       { message: "Enter a valid amount." },
     ),
 });
@@ -621,7 +622,12 @@ export function ProfileForm(props: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>Rate (NGN)</FormLabel>
                       <FormControl>
-                        <Input type="number" min={0} placeholder="e.g., 150000" {...field} />
+                        <Input
+                          type="number"
+                          min={0}
+                          placeholder="e.g., 150000"
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
                         What you charge per engagement. Shown publicly only as a

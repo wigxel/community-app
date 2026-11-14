@@ -25,9 +25,12 @@ describe("profile cost rating", () => {
     const t = convexTest(schema, modules);
 
     await t.run(async (ctx) => {
-      await ctx.db.insert("profile", profileRow({
-        rate: { amount: 250_000 },
-      }));
+      await ctx.db.insert(
+        "profile",
+        profileRow({
+          rate: { amount: 250_000 },
+        }),
+      );
     });
 
     const publicProfile = await t.query(api.profiles.getProfileByUsername, {
@@ -57,9 +60,12 @@ describe("profile cost rating", () => {
     const t = convexTest(schema, modules);
 
     const id = await t.run(async (ctx) => {
-      return ctx.db.insert("profile", profileRow({
-        rate: { amount: 75_000, currency: "NGN" },
-      }));
+      return ctx.db.insert(
+        "profile",
+        profileRow({
+          rate: { amount: 75_000, currency: "NGN" },
+        }),
+      );
     });
 
     const stored = await t.run(async (ctx) => {
