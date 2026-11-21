@@ -1,5 +1,6 @@
 import z from "zod";
 import type { Id } from "~/convex/_generated/dataModel";
+import { countWords, MAX_PROJECT_DESCRIPTION_WORDS } from "~/lib/markdown";
 import { MAX_PROJECT_TAGS, MAX_TAG_LENGTH } from "~/lib/tags";
 
 const MONTHS = [
@@ -82,6 +83,12 @@ export const projectSchema = z
     description: z
       .string()
       .max(300, { message: "Description cannot exceed 300 characters." }),
+    longDescription: z
+      .string()
+      .refine((value) => countWords(value) <= MAX_PROJECT_DESCRIPTION_WORDS, {
+        message: `Description cannot exceed ${MAX_PROJECT_DESCRIPTION_WORDS} words.`,
+      })
+      .optional(),
     timeline: z.object({
       start: timelineDate,
       end: timelineDate,

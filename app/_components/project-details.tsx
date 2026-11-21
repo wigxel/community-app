@@ -3,15 +3,19 @@ import { Calendar } from "iconsax-reactjs";
 import { FileText } from "lucide-react";
 import React, { useRef } from "react";
 import { RequireAuth } from "~/components/auth/require-auth";
+import { MarkdownRenderer } from "~/components/markdown/markdown-renderer";
 import { ProjectImpl } from "~/lib/factories/project";
 import type { BasicProject } from "~/types/models";
 import { FavouriteButton } from "./FavouriteButton";
 import { MediaThumb } from "./MediaThumb";
 
-type ProjectDetailsProps = { project: BasicProject };
+type ProjectDetailsProps = {
+  project: BasicProject;
+  longDescription?: string | null;
+};
 
 export function ProjectDetails(props: ProjectDetailsProps) {
-  const { project } = props;
+  const { project, longDescription } = props;
 
   const [activeIndex, setActiveIndex] = React.useState(0);
 
@@ -136,6 +140,17 @@ export function ProjectDetails(props: ProjectDetailsProps) {
           <p className="text-sm leading-relaxed whitespace-pre-line text-neutral-400">
             {project.description}
           </p>
+        )}
+
+        {longDescription && (
+          <div className="border-t border-white/10 pt-5">
+            <h3 className="mb-2 text-xs font-medium tracking-widest text-neutral-500 uppercase">
+              Full description
+            </h3>
+            <MarkdownRenderer className="text-sm leading-relaxed text-neutral-400">
+              {longDescription}
+            </MarkdownRenderer>
+          </div>
         )}
       </div>
     </>

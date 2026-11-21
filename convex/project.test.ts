@@ -469,3 +469,114 @@ describe("project search", () => {
     expect(result.page[0]?.ownerName).toBe("");
   });
 });
+
+describe("long-form project descriptions (projectDescription table)", () => {
+  let t: ReturnType<typeof convexTest>;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    t = convexTest(schema, modules);
+    mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  async function createWithDescription(markdown?: string) {
+    await t.mutation(api.project.createProject, {
+      project: validProject(),
+      ...(markdown === undefined ? {} : { longDescription: markdown }),
+    });
+    const project = await t.run((ctx) => ctx.db.query("project").first());
+    return project!._id;
+  }
+
+  it("stores the markdown in a separate row on create", async () => {
+    const projectId = await createWithDescription("# Built with Convex");
+    expect(
+      await t.query(api.projectDescription.getProjectDescription, {
+        projectId,
+      }),
+    ).toBe("# Built with Convex");
+  });
+
+  it("returns null for legacy projects with no description row", async () => {
+    const projectId = await createWithDescription();
+    expect(
+      await t.query(api.projectDescription.getProjectDescription, {
+        projectId,
+      }),
+    ).toBeNull();
+  });
+
+  it("rejects descriptions over the 5000-word limit", async () => {
+    const tooLong = Array.from({ length: 5001 }, (_, i) => `word${i}`).join(
+      " ",
+    );
+
+    await expect(
+      t.mutation(api.project.createProject, {
+        project: validProject(),
+        longDescription: tooLong,
+      }),
+    ).rejects.toThrow(/5000 words/);
+  });
+
+  it("replaces the row on update", async () => {
+    const projectId = await createWithDescription("first draft");
+
+    await t.mutation(api.project.updateProject, {
+      project: validProject({ _id: projectId }),
+      longDescription: "second draft",
+    });
+
+    expect(
+      await t.query(api.projectDescription.getProjectDescription, {
+        projectId,
+      }),
+    ).toBe("second draft");
+  });
+
+  it("deletes the row when the description is cleared on update", async () => {
+    const projectId = await createWithDescription("first draft");
+
+    await t.mutation(api.project.updateProject, {
+      project: validProject({ _id: projectId }),
+      longDescription: "  ",
+    });
+
+    expect(
+      await t.query(api.projectDescription.getProjectDescription, {
+        projectId,
+      }),
+    ).toBeNull();
+  });
+
+  it("leaves the row untouched when longDescription is omitted on update", async () => {
+    const projectId = await createWithDescription("kept");
+
+    await t.mutation(api.project.updateProject, {
+      project: validProject({ _id: projectId }),
+    });
+
+    expect(
+      await t.query(api.projectDescription.getProjectDescription, {
+        projectId,
+      }),
+    ).toBe("kept");
+  });
+
+  it("removes the row when the project is deleted", async () => {
+    const projectId = await createWithDescription("to be deleted");
+
+    await t.mutation(api.project.deleteProject, { _id: projectId });
+
+    expect(
+      await t.query(api.projectDescription.getProjectDescription, {
+        projectId,
+      }),
+    ).toBeNull();
+  });
+});
