@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ProjectDetails } from "~/app/_components/project-details";
 import { Container } from "~/components/layouts/container";
 import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
 import { Result } from "~/lib/result";
 import type { BasicProject } from "~/types/models";
 
@@ -17,6 +18,12 @@ export default async function ProjectsPage({ params }: PageProps) {
     id: projectId,
   }).catch(() => null);
 
+  // Legacy projects have no long-form row; fetchQuery returns null then.
+  const longDescription = await fetchQuery(
+    api.projectDescription.getProjectDescription,
+    { projectId: projectId as Id<"project"> },
+  ).catch(() => null);
+
   return Result.match(project_response, {
     error: () => {
       return notFound();
@@ -24,7 +31,10 @@ export default async function ProjectsPage({ params }: PageProps) {
     success: (project) => {
       return (
         <Container level={"max"}>
-          <ProjectDetails project={project as BasicProject} />
+          <ProjectDetails
+            project={project as BasicProject}
+            longDescription={longDescription}
+          />
         </Container>
       );
     },

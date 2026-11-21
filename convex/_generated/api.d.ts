@@ -20,6 +20,7 @@ import type * as leaderboard from "../leaderboard.js";
 import type * as notifications from "../notifications.js";
 import type * as profiles from "../profiles.js";
 import type * as project from "../project.js";
+import type * as projectDescription from "../projectDescription.js";
 import type * as seeds from "../seeds.js";
 import type * as skills from "../skills.js";
 import type * as titles from "../titles.js";
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   profiles: typeof profiles;
   project: typeof project;
+  projectDescription: typeof projectDescription;
   seeds: typeof seeds;
   skills: typeof skills;
   titles: typeof titles;
