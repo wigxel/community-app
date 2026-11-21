@@ -70,10 +70,9 @@ const LINE_PREFIXES: Record<string, string> = {
   quote: "> ",
 };
 
-export function MarkdownEditor({
-  name,
-  label = "Full description",
-}: MarkdownEditorProps) {
+export function MarkdownEditor(props: MarkdownEditorProps) {
+  const { name, label = "Full description" } = props;
+
   const { field, fieldState } = useController({ name });
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
