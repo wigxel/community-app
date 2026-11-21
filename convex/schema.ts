@@ -136,6 +136,18 @@ const schema = defineSchema({
     interests: v.optional(v.array(v.string())),
     location: v.optional(profile_location_schema),
     skills: v.optional(v.array(v.id("skills"))),
+    // Owner-private rate. Public queries strip this and expose only
+    // `rateBand` (see lib/rate-band.ts).
+    rate: v.optional(
+      v.union(
+        v.null(),
+        v.object({
+          amount: v.number(),
+          // ISO 4217 code; defaults to NGN when absent.
+          currency: v.optional(v.string()),
+        }),
+      ),
+    ),
     // Denormalized running total of `project` rows for this user.
     // Maintained by project.createProject / project.deleteProject;
     // backfilled by seeds.backfillProjectCounts.

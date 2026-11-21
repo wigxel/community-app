@@ -52,6 +52,12 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
               <div className="text-2xl font-semibold">{seniority}</div>
             </div>
             <div>
+              <div className="text-muted-foreground text-sm">Rate</div>
+              <div className="text-2xl font-semibold">
+                {profile.rateBand ?? "—"}
+              </div>
+            </div>
+            <div>
               <div className="text-muted-foreground text-sm">Projects</div>
               <div className="text-2xl font-semibold">
                 {profile.projectCount ?? 0}
