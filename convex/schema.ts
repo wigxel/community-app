@@ -56,6 +56,7 @@ const project_link_schema = v.object({
 
 export const project_schema = {
   userId: v.string(),
+  lastUpdatedAt: v.optional(v.number()),
   title: v.string(),
   tags: v.optional(v.array(v.string())),
   timeline: v.object({
