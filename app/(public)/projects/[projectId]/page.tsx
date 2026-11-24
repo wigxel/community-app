@@ -134,13 +134,13 @@ export async function generateMetadata({
 export default async function ProjectsPage({ params }: PageProps) {
   const { projectId } = await params;
 
-  const project_response = await getProject(projectId);
-
-  // Legacy projects have no long-form row; fetchQuery returns null then.
-  const longDescription = await fetchQuery(
-    api.projectDescription.getProjectDescription,
-    { projectId: projectId as Id<"project"> },
-  ).catch(() => null);
+  const [project_response, longDescription] = await Promise.all([
+    getProject(projectId),
+    // Legacy projects have no long-form row (null); invalid ids throw → null.
+    fetchQuery(api.projectDescription.getProjectDescription, {
+      projectId: projectId as Id<"project">,
+    }).catch(() => null),
+  ]);
 
   return Result.match(project_response, {
     error: () => notFound(),
