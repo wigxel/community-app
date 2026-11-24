@@ -4,10 +4,12 @@ export const metadata: Metadata = {
   title: "Mentors",
 };
 
-export default function MentorsLayout({
-  children,
-}: {
+export type MentorsLayoutProps = {
   children: React.ReactNode;
-}) {
+};
+
+export default function MentorsLayout(props: MentorsLayoutProps) {
+  const { children } = props;
+
   return children;
 }

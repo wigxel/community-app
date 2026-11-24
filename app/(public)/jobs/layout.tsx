@@ -4,10 +4,12 @@ export const metadata: Metadata = {
   title: "Jobs",
 };
 
-export default function JobsLayout({
-  children,
-}: {
+export type JobsLayoutProps = {
   children: React.ReactNode;
-}) {
+};
+
+export default function JobsLayout(props: JobsLayoutProps) {
+  const { children } = props;
+
   return children;
 }
