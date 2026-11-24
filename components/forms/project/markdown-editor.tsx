@@ -166,7 +166,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
     {
       icon: Image,
       title: "Image",
-      onClick: () => insert("![alt text](https://)"),
+      onClick: () => insert("![", "](https://)"),
     },
   ];
 
