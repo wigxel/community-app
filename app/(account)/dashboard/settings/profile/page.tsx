@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/select";
 import { ProjectLinkIcon } from "~/components/atoms";
 import { NavigationFocus } from "~/components/molecules/navigation-focus";
-import { CoverImageUpload } from "~/components/profile/cover-image-upload";
-import { ImageUpload } from "~/components/profile/image-upload";
 import { ProfileImagesEditor } from "~/components/profile/profile-images-editor";
 import { SkillsSelect } from "~/components/profile/skills-select";
 import { Button } from "~/components/ui/button";
@@ -262,7 +260,8 @@ const formSchema = z.object({
     .string()
     .optional()
     .refine(
-      (value) => value === "" || value === undefined || Number.isFinite(Number(value)),
+      (value) =>
+        value === "" || value === undefined || Number.isFinite(Number(value)),
       { message: "Enter a valid amount." },
     ),
 });
@@ -361,6 +360,8 @@ export function ProfileForm(props: ProfileFormProps) {
   const { titles } = useTitles();
   const skills = useQuery(api.skills.listSkills);
   const updateProfile = useMutation(api.profiles.updateProfile);
+  const updateProfileImages = useMutation(api.profiles.updateProfileImages);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createWorkExp = useMutation(api.workExperience.create);
@@ -388,6 +389,50 @@ export function ProfileForm(props: ProfileFormProps) {
     control: form.control,
     name: "workExperience",
   });
+
+  // Persists a profile/cover image immediately: renders from the local data
+  // URL, uploads to Convex storage in the background, then patches the storage
+  // id into the profile. Empty value clears the field. Reverts on failure.
+  function persistImage(field: "profileImage" | "coverImage", value: string) {
+    const previous = form.getValues(field);
+    form.setValue(field, value);
+
+    void (async () => {
+      try {
+        let storageId: Id<"_storage"> | null = null;
+        if (value) {
+          const blob = await (await fetch(value)).blob();
+          const uploadUrl = await generateUploadUrl({});
+          const res = await fetch(uploadUrl, {
+            method: "POST",
+            headers: { "Content-Type": blob.type || "image/jpeg" },
+            body: blob,
+          });
+          if (!res.ok) throw new Error("Image upload failed");
+          ({ storageId } = (await res.json()) as {
+            storageId: Id<"_storage">;
+          });
+          // Stale guard: skip this patch if the user picked another image
+          // while this upload was in flight.
+          if (form.getValues(field) !== value) return;
+        }
+        if (field === "profileImage") {
+          await updateProfileImages({ profileImage: storageId });
+        } else {
+          await updateProfileImages({ coverImage: storageId });
+        }
+      } catch (error) {
+        console.error(`Failed to save ${field}:`, error);
+        if (form.getValues(field) === value) {
+          form.setValue(field, previous);
+        }
+        toast.error("Failed to save image", {
+          description: "Your change was reverted. Please try again.",
+          duration: Infinity,
+        });
+      }
+    })();
+  }
 
   const didAppendForFocus = useRef(false);
   useEffect(() => {
@@ -509,8 +554,6 @@ export function ProfileForm(props: ProfileFormProps) {
         phoneNumbers,
         title: values.title ? (values.title as Id<"titles">) : null,
         shortBio: values.shortBio || "",
-        profileImage: values.profileImage || null,
-        coverImage: values.coverImage || null,
         interests,
         location: values.location || undefined,
         links: normalizedLinks,
@@ -568,8 +611,12 @@ export function ProfileForm(props: ProfileFormProps) {
                     <ProfileImagesEditor
                       profileImage={avatar.value}
                       coverImage={cover.value}
-                      onProfileImageChange={avatar.onChange}
-                      onCoverImageChange={cover.onChange}
+                      onProfileImageChange={(image) =>
+                        persistImage("profileImage", image)
+                      }
+                      onCoverImageChange={(image) =>
+                        persistImage("coverImage", image)
+                      }
                       fallbackInitial={form.watch("firstname")?.[0]}
                     />
                     <FormMessage />
@@ -580,11 +627,9 @@ export function ProfileForm(props: ProfileFormProps) {
           />
 
           {/* ── Basic Information ─────────────────────────────────────────── */}
-          <Card className="border-white/10 bg-blue-500/10">
+          <Card className="">
             <CardHeader>
-              <CardTitle className="text-xl text-white">
-                Basic Information
-              </CardTitle>
+              <CardTitle>Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -621,7 +666,12 @@ export function ProfileForm(props: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>Rate (NGN)</FormLabel>
                       <FormControl>
-                        <Input type="number" min={0} placeholder="e.g., 150000" {...field} />
+                        <Input
+                          type="number"
+                          min={0}
+                          placeholder="e.g., 150000"
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
                         What you charge per engagement. Shown publicly only as a
@@ -758,7 +808,7 @@ export function ProfileForm(props: ProfileFormProps) {
           </Card>
 
           {/* ── Profile Links ─────────────────────────────────────────────── */}
-          <Card className="border-white/10 bg-blue-500/10">
+          <Card className="">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-xl text-white">
                 Profile Links
@@ -835,7 +885,7 @@ export function ProfileForm(props: ProfileFormProps) {
           </Card>
 
           {/* ── Work Experience ───────────────────────────────────────────── */}
-          <Card className="border-white/10 bg-blue-500/10">
+          <Card className="">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-xl text-white">
                 Work Experience
@@ -1059,9 +1109,9 @@ export function ProfileForm(props: ProfileFormProps) {
           </Card>
 
           {/*── Skills ─────────────────────────────────────────────────── */}
-          <Card className="border-white/10 bg-blue-500/10">
+          <Card className="">
             <CardHeader>
-              <CardTitle className="text-xl text-white">Skills</CardTitle>
+              <CardTitle>Skills</CardTitle>
             </CardHeader>
             <CardContent>
               <FormField
@@ -1088,9 +1138,9 @@ export function ProfileForm(props: ProfileFormProps) {
           </Card>
 
           {/* ── Interests ─────────────────────────────────────────────────── */}
-          <Card className="border-white/10 bg-blue-500/10">
+          <Card className="">
             <CardHeader>
-              <CardTitle className="text-xl text-white">Interests</CardTitle>
+              <CardTitle>Interests</CardTitle>
             </CardHeader>
             <CardContent>
               <FormField

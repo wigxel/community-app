@@ -6,7 +6,7 @@ import { Result } from "../lib/result";
 import { validateUsernameFormat } from "../lib/username";
 import type { Profile, TalentProfile } from "../types/models";
 import type { Id } from "./_generated/dataModel";
-import { mutation } from "./_generated/server";
+import { mutation, type QueryCtx } from "./_generated/server";
 import { authComponent } from "./auth";
 import { seedProjectCount } from "./project";
 
@@ -70,6 +70,18 @@ export const listProfile = query({
   },
 });
 
+// Resolves a stored image value to a display URL: storage ids → signed URL,
+// legacy string URLs / data URLs pass through unchanged.
+// ponytail: prefix heuristic to tell ids from URLs; add a kind field if that ever breaks
+async function imageUrl(
+  ctx: Pick<QueryCtx, "storage">,
+  value: Id<"_storage"> | string | null | undefined,
+): Promise<string | null> {
+  if (!value) return null;
+  if (/^(https?:|data:)/.test(value)) return value;
+  return await ctx.storage.getUrl(value as Id<"_storage">);
+}
+
 export const getProfileByUsername = query({
   args: { username: v.string() },
   async handler(ctx, args) {
@@ -85,8 +97,14 @@ export const getProfileByUsername = query({
     const title = user.title ? await ctx.db.get(user.title) : null;
     // Public profile: exact rate is owner-only; expose the band instead.
     const { rate, ...publicUser } = user;
+    const [profileImage, coverImage] = await Promise.all([
+      imageUrl(ctx, user.profileImage),
+      imageUrl(ctx, user.coverImage),
+    ]);
     return {
       ...publicUser,
+      profileImage,
+      coverImage,
       title,
       rateBand: rate ? rateBand(rate.amount) : null,
     };
@@ -131,7 +149,11 @@ export const getProfile = query({
       if (!user) return null;
 
       const title = user.title ? await ctx.db.get(user.title) : null;
-      return { ...user, title };
+      const [profileImage, coverImage] = await Promise.all([
+        imageUrl(ctx, user.profileImage),
+        imageUrl(ctx, user.coverImage),
+      ]);
+      return { ...user, profileImage, coverImage, title };
     } catch {
       // If authentication fails, return null instead of throwing
       return null;
@@ -293,5 +315,34 @@ export const updateProfile = mutation({
     });
 
     return profile._id;
+  },
+});
+
+// Immediate persistence for profile/cover images: stores Convex storage ids
+// (null clears the field). Legacy string values are only read, never written.
+export const updateProfileImages = mutation({
+  args: {
+    profileImage: v.optional(v.union(v.id("_storage"), v.null())),
+    coverImage: v.optional(v.union(v.id("_storage"), v.null())),
+  },
+  handler: async (ctx, args) => {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) throw new ConvexError("Not authenticated");
+
+    const profile = await ctx.db
+      .query("profile")
+      .withIndex("by_email", (q) => q.eq("email", authUser.email))
+      .unique();
+
+    if (!profile) throw new ConvexError("Profile not found");
+
+    await ctx.db.patch(profile._id, {
+      ...(args.profileImage !== undefined && {
+        profileImage: args.profileImage,
+      }),
+      ...(args.coverImage !== undefined && {
+        coverImage: args.coverImage,
+      }),
+    });
   },
 });
