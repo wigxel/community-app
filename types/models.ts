@@ -89,8 +89,8 @@ export type TimelineDate =
   | { month: string; year: string };
 
 export type BasicProject = Project & {
-  ownerName: string;
-  username: string;
+  ownerName: string | null;
+  username: string | null;
   lastUpdatedAt?: number;
 };
 
@@ -104,6 +104,8 @@ export interface Project extends Doc<"project"> {
   media: Media[];
   link: ProjectLink[];
 }
+
+export type FullProject = BasicProject;
 
 export type FavouritedProject = Project & {
   favouritedAt: number;

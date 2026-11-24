@@ -1,6 +1,6 @@
 import z from "zod";
 import type { Id } from "~/convex/_generated/dataModel";
-import { MAX_PROJECT_TAGS, MAX_TAG_LENGTH } from "~/lib/tags";
+import { MAX_PROJECT_TAGS, MAX_TAG_LENGTH, normalizeTag } from "~/lib/tags";
 
 const MONTHS = [
   "January",
@@ -22,6 +22,15 @@ const BLOCKED_MIMES = new Set([
   "image/gif",
   "image/svg+xml",
 ]);
+
+const isHostPath = (value: string) => {
+  try {
+    new URL(`https://${value}`);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 export const timelineDate = z.union([
   z.null(),
@@ -66,7 +75,14 @@ export const projectLinkSchema = z.discriminatedUnion("tag", [
   }),
   z.object({
     tag: z.literal("other"),
-    value: z.url({ message: "Please enter a valid URL." }),
+    value: z
+      .string()
+      .trim()
+      .min(1, { message: "Please provide a link." })
+      .refine((value) => !/^https?:\/\//i.test(value), {
+        message: "Leave out the https:// prefix.",
+      })
+      .refine(isHostPath, { message: "Please enter a valid URL." }),
   }),
 ]);
 
@@ -104,20 +120,20 @@ export const projectSchema = z
       .array(
         z
           .string()
-          .trim()
-          .min(1, { message: "Tags cannot be empty." })
-          .max(MAX_TAG_LENGTH, {
+          .transform(normalizeTag)
+          .refine((tag) => tag.length > 0, {
+            message: "Tags cannot be empty.",
+          })
+          .refine((tag) => tag.length <= MAX_TAG_LENGTH, {
             message: `Tags cannot exceed ${MAX_TAG_LENGTH} characters.`,
           }),
       )
       .max(MAX_PROJECT_TAGS, {
         message: `Maximum ${MAX_PROJECT_TAGS} tags per project.`,
       })
-      .refine(
-        (tags) =>
-          new Set(tags.map((tag) => tag.toLowerCase())).size === tags.length,
-        { message: "Duplicate tags are not allowed." },
-      ),
+      .refine((tags) => new Set(tags).size === tags.length, {
+        message: "Duplicate tags are not allowed.",
+      }),
   })
   .superRefine((val, ctx) => {
     // media: block new pdf/gif/svg (allow read of old pdf but reject on validate)

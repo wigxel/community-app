@@ -1,35 +1,73 @@
 import { fetchQuery } from "convex/nextjs";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { ProjectDetails } from "~/app/_components/project-details";
 import { Container } from "~/components/layouts/container";
+import { DiscoverMoreProjects } from "~/components/organism/discover-more-projects";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
 import type { BasicProject } from "~/types/models";
+
+export const revalidate = 30;
 
 type PageProps = {
   params: Promise<{ projectId: string }>;
 };
 
+const getProject = cache(async (id: string) => {
+  return await fetchQuery(api.project.getProject, { id }).catch(() => null);
+});
+
+const baseUrl = (
+  process.env.NEXT_PUBLIC_APP_URL || "https://community-app-wigxel.vercel.app"
+).replace(/\/+$/, "");
+
+const getProjectUrl = (projectId: string) => `${baseUrl}/projects/${projectId}`;
+
+function getProjectJsonLd({
+  project,
+  url,
+}: {
+  project: BasicProject;
+  url: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.title,
+    description: project.description,
+    url,
+    author: {
+      "@type": "Person",
+      name: project.ownerName,
+      alternateName: project.username,
+    },
+    dateCreated: new Date(project._creationTime).toISOString(),
+    dateModified: project.lastUpdatedAt
+      ? new Date(project.lastUpdatedAt).toISOString()
+      : undefined,
+    keywords: project.tags ?? [],
+  };
+}
+
+function JsonLd({ data }: { data: Record<string, unknown> }) {
+  return (
+    <script
+      type="application/ld+json"
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD is serialized and escapes HTML-sensitive characters.
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(data).replace(/</g, "\\u003c"),
+      }}
+    />
+  );
+}
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { projectId } = await params;
-
-  const project_response = await fetchQuery(api.project.getProject, {
-    id: projectId,
-  }).catch(() => null);
-
-  if (!project_response) {
-    return {
-      title: "Project Not Found",
-      description: "The requested project could not be found.",
-      robots: {
-        index: false,
-        follow: false,
-      },
-    };
-  }
+  const project_response = await getProject(projectId);
 
   const project = Result.match(project_response, {
     error: () => null,
@@ -51,11 +89,7 @@ export async function generateMetadata({
   const description =
     project.description || `Explore ${project.title} on Reveer.`;
 
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_APP_URL || "https://community-app-wigxel.vercel.app"
-  ).replace(/\/+$/, "");
-
-  const projectUrl = `${baseUrl}/projects/${projectId}`;
+  const projectUrl = getProjectUrl(projectId);
 
   const firstPhoto = project.media.find((media) => media.type === "photo");
 
@@ -77,13 +111,13 @@ export async function generateMetadata({
       type: "website",
       ...(ogImageUrl
         ? {
-            images: [
-              {
-                url: ogImageUrl,
-                alt: `${title} project preview`,
-              },
-            ],
-          }
+          images: [
+            {
+              url: ogImageUrl,
+              alt: `${title} project preview`,
+            },
+          ],
+        }
         : {}),
     },
 
@@ -99,52 +133,23 @@ export async function generateMetadata({
 export default async function ProjectsPage({ params }: PageProps) {
   const { projectId } = await params;
 
-  const project_response = await fetchQuery(api.project.getProject, {
-    id: projectId,
-  }).catch(() => null);
+  const project_response = await getProject(projectId);
 
   return Result.match(project_response, {
-    error: () => {
-      return notFound();
-    },
+    error: () => notFound(),
     success: (project) => {
       const basicProject = project as BasicProject;
 
-      const baseUrl = (
-        process.env.NEXT_PUBLIC_APP_URL ||
-        "https://community-app-wigxel.vercel.app"
-      ).replace(/\/+$/, "");
-
-      const projectUrl = `${baseUrl}/projects/${projectId}`;
-
-      const jsonLd = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        name: basicProject.title,
-        description: basicProject.description,
-        url: projectUrl,
-        author: {
-          "@type": "Person",
-          name: basicProject.ownerName,
-          alternateName: basicProject.username,
-        },
-        dateCreated: new Date(basicProject._creationTime).toISOString(),
-        dateModified: basicProject.lastUpdatedAt
-          ? new Date(basicProject.lastUpdatedAt).toISOString()
-          : undefined,
-        keywords: basicProject.tags ?? [],
-      };
-
       return (
         <Container level={"max"}>
-          <script
-            type="application/ld+json"
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD is serialized and escapes HTML-sensitive characters.
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
-            }}
+          <JsonLd
+            data={getProjectJsonLd({
+              project: basicProject,
+              url: getProjectUrl(projectId),
+            })}
           />
           <ProjectDetails project={basicProject} />
+          <DiscoverMoreProjects />
         </Container>
       );
     },

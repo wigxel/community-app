@@ -196,6 +196,7 @@ export function PrivateProjectCardLegacy(project: Project) {
               <div className="h-0.5 w-6 rounded-full bg-white/40" />
               Project Links
             </h4>
+
             <div className="flex flex-wrap gap-3">
               {project.link.map(({ tag, value: url }) => {
                 return (
