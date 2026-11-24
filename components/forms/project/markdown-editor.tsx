@@ -75,6 +75,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 
   const { field, fieldState } = useController({ name });
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const [tab, setTab] = React.useState<"write" | "preview">("write");
 
   const apply = (
     transform: (
@@ -173,7 +174,10 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-muted-foreground text-sm font-medium">{label}</span>
-      <Tabs defaultValue="write">
+      <Tabs
+        value={tab}
+        onValueChange={(next) => setTab(next as "write" | "preview")}
+      >
         <div className="flex items-center justify-between border-b border-white/10">
           <TabsList className="h-auto bg-transparent p-0">
             <TabsTrigger
@@ -200,6 +204,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
                 title={title}
                 aria-label={title}
                 className="text-foreground/60 hover:text-foreground h-7 w-7"
+                disabled={tab !== "write"}
                 onClick={onClick}
               >
                 <Icon size={14} />
