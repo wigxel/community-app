@@ -30,7 +30,7 @@ const LINK_TAGS = [
     placeholder: "project-id",
   },
   {
-    prefix: "behance.com/",
+    prefix: "behance.net/",
     value: "behance",
     label: "Behance",
     icon: <Behance size={"1em"} />,
@@ -45,11 +45,7 @@ const LINK_TAGS = [
   },
 ] as const;
 
-const normalizeUrl = (val: string) => {
-  if (!val) return val;
-  if (val.startsWith("www.")) return `https://${val}`;
-  return val;
-};
+const stripScheme = (val: string) => val.replace(/^https?:\/\//i, "");
 
 const MATCHABLE_HOSTS = ["github.com", "figma.com", "behance.net"];
 
@@ -72,7 +68,8 @@ export function detectTagFromUrl(
 }
 
 export function stripToPath(url: string, tag: string): string {
-  if (tag === "other" || !url.startsWith("http")) return url;
+  if (tag === "other") return stripScheme(url);
+  if (!url.startsWith("http")) return url;
   try {
     const { pathname, search, hash } = new URL(url);
     const path = pathname.replace(/^\//, "");
@@ -83,11 +80,12 @@ export function stripToPath(url: string, tag: string): string {
 }
 
 export function buildLinkUrl(tag: string, value: string): string {
-  if (tag === "other" || value.startsWith("http")) return value;
+  if (value.startsWith("http")) return value;
   const prefixMap: Record<string, string> = {
     github: "https://github.com/",
     figma: "https://figma.com/",
     behance: "https://behance.net/",
+    other: "https://",
   };
   return (prefixMap[tag] ?? "") + value;
 }
@@ -164,13 +162,17 @@ export default function LinkRow(props: LinkRowProps) {
 
             <Input
               aria-label={`Link ${linkIndex + 1} value`}
+              ref={field.ref}
               value={field.value?.value ?? ""}
               placeholder={match?.placeholder}
               className="text-foreground bg-muted placeholder:text-muted-foreground w-full text-sm"
               onChange={(e) => {
                 return field.onChange({
                   ...field.value,
-                  value: normalizeUrl(e.target.value),
+                  value:
+                    tag === "other"
+                      ? stripScheme(e.target.value)
+                      : e.target.value,
                 });
               }}
               onPaste={(e) => {

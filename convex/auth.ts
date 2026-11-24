@@ -29,6 +29,21 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
+
+      onPasswordReset: async ({ user }) => {
+        await requireRunMutationCtx(ctx).scheduler.runAfter(
+          0,
+          internal.notifications.create,
+          {
+            userId: user.id,
+            type: "security",
+            title: "Password changed",
+            body: "Your account password was recently changed. If this wasn't you, please contact support immediately.",
+            href: "/dashboard/notifications",
+          },
+        );
+      },
+
       sendResetPassword: async ({ user, url }) => {
         await requireRunMutationCtx(ctx).scheduler.runAfter(
           0,
@@ -53,6 +68,40 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
                 name: user.name,
               },
             );
+
+            await requireRunMutationCtx(ctx).scheduler.runAfter(
+              0,
+              internal.notifications.create,
+              {
+                userId: user.id,
+                type: "welcome",
+                title: "Welcome to the community!",
+                body: "We're glad you're here. Start by exploring projects or setting up your profile.",
+                href: "/dashboard",
+              },
+            );
+          },
+        },
+      },
+      session: {
+        create: {
+          after: async (session) => {
+            const isNewUser =
+              Date.now() - new Date(session.createdAt).getTime() < 60000;
+
+            if (!isNewUser) {
+              await requireRunMutationCtx(ctx).scheduler.runAfter(
+                0,
+                internal.notifications.create,
+                {
+                  userId: session.userId,
+                  type: "security",
+                  title: "New sign-in detected",
+                  body: "Your account was just signed into from a new session.",
+                  href: "/dashboard/notifications",
+                },
+              );
+            }
           },
         },
       },

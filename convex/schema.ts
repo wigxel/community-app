@@ -199,6 +199,17 @@ const schema = defineSchema({
     status: v.union(v.literal("success"), v.literal("failed")),
     executedAt: v.number(),
   }).index("by_name", ["name"]),
+
+  notifications: defineTable({
+    userId: v.string(),
+    type: v.union(v.literal("welcome"), v.literal("security")),
+    title: v.string(),
+    body: v.optional(v.string()),
+    href: v.string(),
+    readAt: v.optional(v.number()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_userId_readAt", ["userId", "readAt"]),
 });
 
 export default schema;

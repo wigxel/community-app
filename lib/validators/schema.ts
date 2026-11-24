@@ -23,6 +23,15 @@ const BLOCKED_MIMES = new Set([
   "image/svg+xml",
 ]);
 
+const isHostPath = (value: string) => {
+  try {
+    new URL(`https://${value}`);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const timelineDate = z.union([
   z.null(),
   z.object({ year: z.string() }).strict(),
@@ -66,7 +75,14 @@ export const projectLinkSchema = z.discriminatedUnion("tag", [
   }),
   z.object({
     tag: z.literal("other"),
-    value: z.url({ message: "Please enter a valid URL." }),
+    value: z
+      .string()
+      .trim()
+      .min(1, { message: "Please provide a link." })
+      .refine((value) => !/^https?:\/\//i.test(value), {
+        message: "Leave out the https:// prefix.",
+      })
+      .refine(isHostPath, { message: "Please enter a valid URL." }),
   }),
 ]);
 

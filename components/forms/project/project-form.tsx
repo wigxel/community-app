@@ -11,6 +11,7 @@ import { useUnsavedChangesGuard } from "~/components/providers/navigation-protec
 import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
+import { useFormDebug } from "~/hooks/useFormDebug";
 import { Result } from "~/lib/result";
 import { toast } from "~/lib/toast";
 import { projectSchema as projectFormSchema } from "~/lib/validators/schema";
@@ -84,6 +85,8 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
     reset,
     formState: { isDirty },
   } = form;
+
+  useFormDebug(form);
 
   const { ConfirmationDialog, navigate } = useUnsavedChangesGuard({
     isDirty,
