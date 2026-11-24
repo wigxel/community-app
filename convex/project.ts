@@ -259,6 +259,7 @@ export const createProject = mutation({
       ...args.project,
       tags,
       userId: authUser._id,
+      lastUpdatedAt: Date.now(),
     });
 
     await bumpProjectCount(ctx, authUser.email, 1);
@@ -330,7 +331,11 @@ export const updateProject = mutation({
       if (result._tag === "Left") return result;
     }
 
-    await ctx.db.patch(existingProject._id, { ...projectData, tags });
+    await ctx.db.patch(existingProject._id, {
+      ...projectData,
+      tags,
+      lastUpdatedAt: Date.now(),
+    });
 
     // Schedule blurhash generation for photos
     await ctx.scheduler.runAfter(0, internal.blurhash.generateForProject, {

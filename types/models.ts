@@ -91,6 +91,7 @@ export type TimelineDate =
 export type BasicProject = Project & {
   ownerName: string | null;
   username: string | null;
+  lastUpdatedAt?: number;
 };
 
 export interface Project extends Doc<"project"> {
