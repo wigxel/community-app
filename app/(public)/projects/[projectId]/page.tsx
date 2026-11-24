@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { ProjectDetails } from "~/app/_components/project-details";
 import { Container } from "~/components/layouts/container";
+import { DiscoverMoreProjects } from "~/components/organism/discover-more-projects";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
 import type { BasicProject } from "~/types/models";
@@ -45,6 +46,7 @@ export default async function ProjectsPage({ params }: PageProps) {
       return (
         <Container level={"max"}>
           <ProjectDetails project={project as BasicProject} />
+          <DiscoverMoreProjects />
         </Container>
       );
     },

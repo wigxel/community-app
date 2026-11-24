@@ -54,30 +54,32 @@ export function ProjectDetails(props: ProjectDetailsProps) {
         </div>
       </Container>
 
-      <Container
-        level="max"
-        className="mt-12 flex flex-col gap-2 overflow-x-auto px-6 pt-4"
-      >
-        {media.map((item, i) => (
-          <div
-            key={item.metadata.storageId}
-            className="corner-shape relative aspect-video overflow-hidden rounded-xl md:rounded-3xl"
-          >
-            <MediaThumb
-              item={item}
-              alt={`${project.title} media ${i + 1}`}
-              className="object-cover"
-            />
-          </div>
-        ))}
-      </Container>
+      {media.length > 0 ? (
+        <Container
+          level="max"
+          className="mt-12 flex flex-col gap-2 overflow-x-auto px-6 pt-4"
+        >
+          {media.map((item, i) => (
+            <div
+              key={item.metadata.storageId}
+              className="corner-shape relative aspect-video overflow-hidden rounded-xl md:rounded-3xl"
+            >
+              <MediaThumb
+                item={item}
+                alt={`${project.title} media ${i + 1}`}
+                className="object-cover"
+              />
+            </div>
+          ))}
+        </Container>
+      ) : null}
 
       <Container
         level="inner"
         className="md:flex-rows mt-12 flex flex-col items-start gap-8 md:justify-between"
       >
-        <div className="flex flex-col gap-8 md:flex-row">
-          <article className="flex-1">
+        <div className="flex w-full flex-col items-start gap-8 md:flex-row">
+          <article className="flex-1 basis-8/12">
             {project.description && (
               <div className="order-1 w-full text-base md:text-xl">
                 <p className="text-foreground leading-relaxed whitespace-pre-line">
@@ -87,9 +89,9 @@ export function ProjectDetails(props: ProjectDetailsProps) {
             )}
           </article>
 
-          <aside className="basis-4/12">
+          <aside className="sticky top-(--header-height) basis-4/12">
             {(links.length > 0 || tags.length > 0) && (
-              <div className="sticky top-(--header-height) flex flex-col gap-6">
+              <div className="sticky top-(--header-height) flex flex-col gap-12">
                 {links.length > 0 && (
                   <div className="flex flex-col gap-4">
                     <h4 className="text-muted-foreground text-sm tracking-widest uppercase">
@@ -111,7 +113,7 @@ export function ProjectDetails(props: ProjectDetailsProps) {
                                 className="text-foreground"
                               />
                               <span className="inline-flex items-center gap-1">
-                                <span className="text-foreground inline-block">
+                                <span className="text-foreground inline-block capitalize">
                                   {link.label}
                                 </span>
                                 <ArrowUpRight strokeWidth={0.5} />
@@ -126,7 +128,7 @@ export function ProjectDetails(props: ProjectDetailsProps) {
 
                 {tags.length > 0 && (
                   <div className="flex flex-col gap-4">
-                    <h4 className="text-muted-foreground text-sm tracking-widest uppercase">
+                    <h4 className="text-muted-foreground sr-only text-sm tracking-widest uppercase">
                       Tags
                     </h4>
                     <div className="flex flex-wrap gap-x-3 gap-y-1">
