@@ -178,7 +178,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
         value={tab}
         onValueChange={(next) => setTab(next as "write" | "preview")}
       >
-        <div className="flex items-center justify-between border-b border-white/10">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 border-b border-white/10">
           <TabsList className="h-auto bg-transparent p-0">
             <TabsTrigger
               value="write"
@@ -194,7 +194,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
             </TabsTrigger>
           </TabsList>
 
-          <div className="flex items-center gap-0.5 pb-1">
+          <div className="flex flex-wrap items-center gap-0.5 pb-1">
             {toolbar.map(({ icon: Icon, title, onClick }) => (
               <Button
                 key={title}
