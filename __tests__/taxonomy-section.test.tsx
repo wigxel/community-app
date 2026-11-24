@@ -67,7 +67,7 @@ describe("TaxonomySection", () => {
 
     await user.type(getTagInput(), "UI Design{Enter}");
 
-    expect(screen.getByTestId("tags")).toHaveTextContent("UI Design");
+    expect(screen.getByTestId("tags")).toHaveTextContent("ui_design");
     expect(getTagInput()).toHaveValue("");
   });
 
@@ -76,7 +76,23 @@ describe("TaxonomySection", () => {
 
     await user.type(getTagInput(), "React,");
 
-    expect(screen.getByTestId("tags")).toHaveTextContent("React");
+    expect(screen.getByTestId("tags")).toHaveTextContent("react");
+  });
+
+  it("splits comma-separated input into separate tags", async () => {
+    const { user } = renderSection();
+
+    await user.type(getTagInput(), "Ruby, Rails{Enter}");
+
+    expect(screen.getByTestId("tags")).toHaveTextContent("ruby,rails");
+  });
+
+  it("replaces spaces and special characters with underscores", async () => {
+    const { user } = renderSection();
+
+    await user.type(getTagInput(), "Node.js 20 / R&D{Enter}");
+
+    expect(screen.getByTestId("tags")).toHaveTextContent("node_js_20_r_d");
   });
 
   it("shows skill suggestions and adds the selected one", async () => {
@@ -88,7 +104,7 @@ describe("TaxonomySection", () => {
     const option = await screen.findByRole("option", { name: "React" });
     await user.click(option);
 
-    expect(screen.getByTestId("tags")).toHaveTextContent("React");
+    expect(screen.getByTestId("tags")).toHaveTextContent("react");
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ q: "re" }),

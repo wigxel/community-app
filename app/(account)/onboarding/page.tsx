@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery } from "~/lib/auth-server";
 import OnboardingForm from "./form";
+
+export const metadata: Metadata = {
+  title: "Onboarding",
+};
 
 export type OnboardingPageProps = {
   searchParams: Promise<{ redirect?: string }>;
