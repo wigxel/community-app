@@ -247,7 +247,7 @@ describe("projectSchema", () => {
       link: [
         { tag: "github", value: "https://github.com/a" },
         { tag: "figma", value: "https://figma.com/b" },
-        { tag: "other", value: "https://example.com" },
+        { tag: "other", value: "example.com" },
       ],
     });
     expect(res.success).toBe(true);
@@ -265,7 +265,7 @@ describe("projectSchema", () => {
         { tag: "github", value: "https://github.com/a" },
         { tag: "figma", value: "https://figma.com/b" },
         { tag: "behance", value: "https://behance.net/c" },
-        { tag: "other", value: "https://example.com" },
+        { tag: "other", value: "example.com" },
       ],
     });
     expect(res.success).toBe(false);
@@ -299,9 +299,9 @@ describe("projectSchema", () => {
         end: null,
       },
       link: [
-        { tag: "other", value: "https://one.com" },
-        { tag: "other", value: "https://two.com" },
-        { tag: "other", value: "https://three.com" },
+        { tag: "other", value: "one.com" },
+        { tag: "other", value: "two.com" },
+        { tag: "other", value: "three.com" },
       ],
     });
     expect(res.success).toBe(true);
@@ -317,8 +317,8 @@ describe("projectSchema", () => {
       },
       link: [
         { tag: "github", value: "https://github.com/a" },
-        { tag: "other", value: "https://one.com" },
-        { tag: "other", value: "https://two.com" },
+        { tag: "other", value: "one.com" },
+        { tag: "other", value: "two.com" },
       ],
     });
     expect(res.success).toBe(true);
@@ -335,7 +335,7 @@ describe("projectSchema", () => {
       link: [
         { tag: "github", value: "https://github.com/a" },
         { tag: "github", value: "https://github.com/b" },
-        { tag: "other", value: "https://one.com" },
+        { tag: "other", value: "one.com" },
       ],
     });
     expect(res.success).toBe(false);

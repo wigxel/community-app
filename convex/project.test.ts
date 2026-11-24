@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
@@ -243,7 +243,7 @@ describe("project mutations — tag guards", () => {
       paginationOpts: { numItems: 10, cursor: null },
     });
 
-    expect(projects.page[0].tags).toEqual(["UI", "Design"]);
+    expect(projects.page[0].tags).toEqual(["ui", "design"]);
   });
 
   it("normalizes tags before persisting on update", async () => {
@@ -267,7 +267,22 @@ describe("project mutations — tag guards", () => {
       paginationOpts: { numItems: 10, cursor: null },
     });
 
-    expect(updated.page[0].tags).toEqual(["Web", "Mobile"]);
+    expect(updated.page[0].tags).toEqual(["web", "mobile"]);
+  });
+
+  it("backfills legacy tags to hashtag form", async () => {
+    const projectId = await t.run((ctx) =>
+      ctx.db.insert("project", {
+        ...validProject(),
+        tags: ["  UI  Design ", "#React", "C++", "react"],
+      }),
+    );
+
+    await t.mutation(internal.project.backfillProjectTags, {});
+
+    const project = await t.run((ctx) => ctx.db.get(projectId));
+
+    expect(project?.tags).toEqual(["ui_design", "react", "c"]);
   });
 });
 
@@ -355,6 +370,81 @@ describe("project mutations — denormalized projectCount", () => {
       username: `seeded${Date.now()}`,
     });
     expect(await readCount(freshId)).toBe(2);
+  });
+});
+
+describe("project favourites lifecycle", () => {
+  // Keeps the schema generic so index names inside t.run type-check.
+  const makeTest = () => convexTest(schema, modules);
+  let t: ReturnType<typeof makeTest>;
+
+  const readFavourites = (projectId: Id<"project">) =>
+    t.run((ctx) =>
+      ctx.db
+        .query("projectFavourites")
+        .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
+        .collect(),
+    );
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    t = makeTest();
+    mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  const createOwnedProject = async () => {
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.finishInProgressScheduledFunctions();
+    const projects = await t.query(api.project.listProjectByUserId, {
+      userId: FAKE_USER._id,
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+    return projects.page[0];
+  };
+
+  const readProjectCount = async (projectId: Id<"project">) => {
+    const doc = await t.run((ctx) => ctx.db.get(projectId));
+    return doc?.favouriteCount;
+  };
+
+  it("deleteProject removes its favourite rows instead of orphaning them", async () => {
+    const project = await createOwnedProject();
+    await t.run((ctx) =>
+      ctx.db.insert("projectFavourites", {
+        userId: FAKE_USER._id,
+        projectId: project._id,
+      }),
+    );
+
+    await t.mutation(api.project.deleteProject, { _id: project._id });
+
+    expect(await readFavourites(project._id)).toHaveLength(0);
+  });
+
+  it("toggle keeps the denormalized favouriteCount in sync", async () => {
+    const project = await createOwnedProject();
+
+    await t.mutation(api.favourites.toggle, { projectId: project._id });
+    expect(await readProjectCount(project._id)).toBe(1);
+
+    await t.mutation(api.favourites.toggle, { projectId: project._id });
+    expect(await readProjectCount(project._id)).toBe(0);
+  });
+
+  it("getProjectFavourite reads the denormalized count", async () => {
+    const project = await createOwnedProject();
+    await t.mutation(api.favourites.toggle, { projectId: project._id });
+
+    const data = await t.query(api.favourites.getProjectFavourite, {
+      projectId: project._id,
+    });
+
+    expect(data).toEqual({ count: 1, isFavourited: true });
   });
 });
 

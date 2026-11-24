@@ -8,6 +8,118 @@ Convex agent skills for common tasks can be installed by running `npx convex ai-
 
 <!-- convex-ai-end -->
 
+## Pull requests
+
+Never push to `main`. Every change lands through a PR against `main`.
+
+### Branch
+
+Branch from a fresh `origin/main`, one concern per branch, named
+`<type>/<bead-id>-<slug>`:
+
+    fix/community-app-92o-zeptomail
+    feat/community-app-t4r-todoist-mirror
+
+`type` is one of `fix`, `feat`, `chore`, `refactor`, `perf`, `test`, `docs`.
+Use the full bead id (`community-app-<hash>`), never the bare `bd-<hash>`
+short form — `bd show bd-92o` fails, so a branch carrying it cannot be traced
+back to its bead. PR-feedback branches use `pr-comment/<pr-number>` instead.
+
+### Gates before you open
+
+- `bunx vitest run <changed test files>`
+- `bun run lint` — Biome and tsc.
+
+The husky pre-push hook runs lint and build, so a clean push means the gates
+passed. Never skip the gates themselves.
+
+### Title
+
+Conventional Commits, 72 characters at most, scope optional:
+
+    fix(display-qr): handle failed QR refresh instead of leaving a dead code
+
+### Body
+
+Keep these sections, in this order. `## In plain words` is required on every
+PR; delete the others when they do not apply:
+
+1. `## In plain words` — the problem and the fix in language a smart
+   nine-year-old could follow.
+2. `## Issue` — bead id or GitHub issue number, error text, page, occurrences.
+3. `## Evidence` — the code path and why it fails; quote the lines that matter.
+4. `## What changed` — one bullet per file, naming the behaviour change.
+5. `## Tests` — the exact commands and their results, so a reviewer knows
+   what you did and did not run.
+6. `## Notes` or `## Not changed here` — migrations, follow-ups, related issues
+   you ruled out and why.
+
+#### `## In plain words`
+
+Two short paragraphs, 120 words at most:
+
+- What was broken, as the person using the product felt it. Name the screen and
+  the symptom: "the customers page stopped at 50 people, so Next went grey and
+  everyone past #50 was invisible."
+- What now happens instead, in the same terms.
+
+Rules:
+
+- No file paths, function names, error codes, or jargon (index, cursor,
+  aggregate, race, idempotent, payload). If a nine-year-old would not know the
+  word, define it in passing or drop it.
+- Say what the user sees, not how the code works. "The list keeps loading" —
+  not "the cursor is threaded through paginationOpts".
+- An analogy is fine when it makes the mechanism obvious, one sentence, and it
+  must not soften the consequence.
+- Never claim more than `## Evidence` supports. If the fix is partial, say
+  which part is still wrong.
+- No filler: "the system now works correctly" says nothing and is rejected.
+
+Example:
+
+    ## In plain words
+
+    The customers page only ever showed the first 50 people. If you kept
+    clicking Next it turned grey while hundreds more customers were still
+    waiting behind it, so anyone past #50 could not be found, edited or
+    checked.
+
+    The page now fetches the next batch each time you reach the end of what
+    it has, so Next keeps working until the last customer.
+
+Open with:
+
+    gh pr create --repo wigxel/community-app --base main \
+      --title "fix(scope): …" --body-file -
+
+Pipe the body in on stdin; never leave a placeholder section.
+
+### Draft or ready
+
+Open ready only when the gates above ran and the diff is complete. Use `--draft`
+when a gate could not run or the work is a first pass. Do not flip a draft to
+ready without running the gates.
+
+### Link the work
+
+- Put `Bead: <id>` in the body, and mention the issue's assignee as the
+  reviewer when the bead came from a GitHub issue.
+- Never write "Fixes #<n>" or any other closing keyword: the merge reconciler
+  closes the issue itself after posting a thank-you comment.
+- Comment the PR URL back on the bead: `bd comment <id> "PR: <url>"`.
+- Leave the bead open until the PR merges.
+
+### Review comments
+
+Address feedback in a new commit on the same branch — never force-push a branch
+someone has reviewed. Reply on the PR with what changed and the commit sha.
+
+### Never
+
+merge, deploy, push to `main`, close someone else's PR, or rewrite a shared
+branch's history.
+
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:970c3bf2 -->
 
 ## Beads Issue Tracker

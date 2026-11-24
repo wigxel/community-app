@@ -8,14 +8,13 @@ import { EmptyState } from "~/components/layouts/empty-state";
 import { FullscreenLoader } from "~/components/layouts/loader";
 import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
-import type { Project } from "~/types/models";
+import type { FullProject } from "~/types/models";
 import { ProjectDetailsPopup } from "./project-details-popup";
 
 const EMPTY_VALUE = "unset";
 const snapPoints = ["148px", "355px", 1];
 
 export function ProjectModal() {
-  // const [open, setOpen] = useState(false);
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [snap, setSnap] = useState<number | string | null>(snapPoints[0]);
 
@@ -81,7 +80,7 @@ export function ProjectModal() {
               return <FullscreenLoader />;
             },
             success: (project) => {
-              return <ProjectDetailsPopup project={project as Project} />;
+              return <ProjectDetailsPopup project={project as FullProject} />;
             },
             error: () => {
               return (

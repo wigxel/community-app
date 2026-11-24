@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut, Settings, UserRound } from "lucide-react";
+import { Logout } from "iconsax-reactjs";
+import { UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
@@ -13,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { authClient } from "~/lib/auth-client";
+import { SettingsIcon } from "../icons";
 
 type AuthUserMenuProps = {
   className?: string;
@@ -53,28 +55,28 @@ export function AuthUserMenu({ className }: AuthUserMenuProps) {
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem asChild>
           <Link href="/dashboard">
-            <UserRound />
-            <span>Account</span>
+            <UserIcon className="text-muted-foreground" />
+            <span className="text-base">Account</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <Link href="/dashboard/settings/profile">
-            <Settings />
-            <span>Settings</span>
+            <SettingsIcon className="text-muted-foreground" />
+            <span className="text-base">Settings</span>
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="mx-2" />
 
         <DropdownMenuItem
           onSelect={() => {
             void handleSignOut();
           }}
-          className="text-destructive focus:text-destructive"
+          className="hover:text-destructive focus:text-destructive"
         >
-          <LogOut />
-          <span>Logout</span>
+          <Logout className="text-muted-foreground" />
+          <span className="text-base">Logout</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

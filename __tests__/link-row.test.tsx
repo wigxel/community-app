@@ -164,9 +164,9 @@ describe("stripToPath", () => {
     ).toBe("user/repo?tab=readme#install");
   });
 
-  it("returns as-is for other tag", () => {
+  it("drops the scheme for other tag", () => {
     expect(stripToPath("https://example.com/page", "other")).toBe(
-      "https://example.com/page",
+      "example.com/page",
     );
   });
 
@@ -194,9 +194,9 @@ describe("buildLinkUrl", () => {
     );
   });
 
-  it("returns as-is for other tag", () => {
-    expect(buildLinkUrl("other", "https://example.com")).toBe(
-      "https://example.com",
+  it("adds the https:// prefix for other tag", () => {
+    expect(buildLinkUrl("other", "example.com/page")).toBe(
+      "https://example.com/page",
     );
   });
 
@@ -258,6 +258,16 @@ describe("LinkRow paste interaction", () => {
       preventDefault,
     });
     expect(preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("strips a typed https:// scheme from an other link", () => {
+    const { form } = renderLinkRow("other");
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    fireEvent.change(input, {
+      target: { value: "https://example.com/page" },
+    });
+    expect(input.value).toBe("example.com/page");
+    expect(form.current?.getValues("link.0.value")).toBe("example.com/page");
   });
 });
 
