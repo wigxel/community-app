@@ -2,7 +2,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@hyperbridge/ui";
 import { useMutation, useQuery } from "convex/react";
-import { Trash2 } from "lucide-react";
+import {
+  BriefcaseIcon,
+  HeartIcon,
+  Trash2,
+  UserIcon,
+  WrenchIcon,
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -441,7 +447,12 @@ export function ProfileForm(props: ProfileFormProps) {
           {/* ── Basic Information ─────────────────────────────────────────── */}
           <Card className="">
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <div className="flex flex-1 items-center gap-3 text-left">
+                <div className="text-brand-primary bg-brand-black-450 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl">
+                  <UserIcon size={15} />
+                </div>
+                <CardTitle>Basic Information</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -605,9 +616,14 @@ export function ProfileForm(props: ProfileFormProps) {
           {/* ── Work Experience ───────────────────────────────────────────── */}
           <Card className="">
             <CardHeader>
-              <CardTitle className="text-xl text-white">
-                Work Experience
-              </CardTitle>
+              <div className="flex flex-1 items-center gap-3 text-left">
+                <div className="text-brand-primary bg-brand-black-450 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl">
+                  <BriefcaseIcon size={15} />
+                </div>
+                <CardTitle className="text-xl text-white">
+                  Work Experience
+                </CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
               {workFields.length === 0 ? (
@@ -827,7 +843,12 @@ export function ProfileForm(props: ProfileFormProps) {
           {/*── Skills ─────────────────────────────────────────────────── */}
           <Card className="">
             <CardHeader>
-              <CardTitle>Skills</CardTitle>
+              <div className="flex flex-1 items-center gap-3 text-left">
+                <div className="text-brand-primary bg-brand-black-450 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl">
+                  <WrenchIcon size={15} />
+                </div>
+                <CardTitle>Skills</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
               <FormField
@@ -856,7 +877,12 @@ export function ProfileForm(props: ProfileFormProps) {
           {/* ── Interests ─────────────────────────────────────────────────── */}
           <Card className="">
             <CardHeader>
-              <CardTitle>Interests</CardTitle>
+              <div className="flex flex-1 items-center gap-3 text-left">
+                <div className="text-brand-primary bg-brand-black-450 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl">
+                  <HeartIcon size={15} />
+                </div>
+                <CardTitle>Interests</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
               <FormField

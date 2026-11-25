@@ -1,5 +1,6 @@
 "use client";
 
+import { BanknoteIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -55,7 +56,12 @@ export function RateSection({ rate }: RateSectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Rate &amp; placement</CardTitle>
+        <div className="flex flex-1 items-center gap-3 text-left">
+          <div className="text-brand-primary bg-brand-black-450 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl">
+            <BanknoteIcon size={15} />
+          </div>
+          <CardTitle>Rate &amp; placement</CardTitle>
+        </div>
         <CardDescription>
           Help the right clients find you at the right budget.
         </CardDescription>
