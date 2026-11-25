@@ -19,10 +19,13 @@ export function ProjectLinkIcon(props: ProjectLinkIconProps) {
  * Renders the affordability band as a 4-slot rating: filled ₦ for the active
  * level, muted placeholders for the rest ("₦₦" → 1,1,0,0).
  */
-export function RateBandDisplay(props: {
+
+export type RateBandDisplayProps = {
   band: string | null | undefined;
   className?: string;
-}) {
+};
+
+export function RateBandDisplay(props: RateBandDisplayProps) {
   const { band, className } = props;
   const filled = band?.length ?? 0;
 

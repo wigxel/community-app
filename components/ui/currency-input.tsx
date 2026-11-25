@@ -20,12 +20,9 @@ interface CurrencyInputProps
   onValueChange: (digits: string) => void;
 }
 
-export function CurrencyInput({
-  value,
-  onValueChange,
-  className,
-  ...props
-}: CurrencyInputProps) {
+export function CurrencyInput(props: CurrencyInputProps) {
+  const { value, onValueChange, className, ...restProps } = props;
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     onValueChange(e.target.value.replace(/[^\d]/g, ""));
   }
@@ -46,7 +43,7 @@ export function CurrencyInput({
           value ? new Intl.NumberFormat("en-NG").format(Number(value)) : ""
         }
         onChange={handleChange}
-        {...props}
+        {...restProps}
       />
     </div>
   );
