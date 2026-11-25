@@ -2,7 +2,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
 import { GoogleSignInButton } from "~/components/auth/google-sign-in-button";
@@ -18,6 +17,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
+import { captureEvent } from "~/lib/analytics";
 import { authClient } from "~/lib/auth-client";
 import { toast } from "~/lib/toast";
 
@@ -54,12 +54,7 @@ export default function SignInForm(props: SignInFormProps) {
       return;
     }
 
-    if (
-      process.env.NEXT_PUBLIC_POSTHOG_KEY &&
-      process.env.NEXT_PUBLIC_POSTHOG_HOST
-    ) {
-      posthog.capture("signed_in");
-    }
+    captureEvent("signed_in");
     toast.success("Welcome back!");
     if (onSuccess) {
       onSuccess();

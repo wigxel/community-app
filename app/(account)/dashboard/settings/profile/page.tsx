@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@hyperbridge/ui";
 import { useMutation, useQuery } from "convex/react";
 import { Trash2 } from "lucide-react";
-import posthog from "posthog-js";
 import { useEffect, useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -42,6 +41,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { useTitles } from "~/hooks/useTitles";
+import { captureEvent } from "~/lib/analytics";
 import { safeArray } from "~/lib/data.helpers";
 import { Result } from "~/lib/result";
 import { toast } from "~/lib/toast";
@@ -384,19 +384,14 @@ export function ProfileForm(props: ProfileFormProps) {
         skills: (values.skills || []) as Id<"skills">[],
       });
 
-      if (
-        process.env.NEXT_PUBLIC_POSTHOG_KEY &&
-        process.env.NEXT_PUBLIC_POSTHOG_HOST
-      ) {
-        posthog.capture("profile_updated", {
-          has_cover_image: Boolean(values.coverImage),
-          has_profile_image: Boolean(values.profileImage),
-          interest_count: interests.length,
-          link_count: normalizedLinks.length,
-          skill_count: values.skills?.length ?? 0,
-          work_experience_count: values.workExperience?.length ?? 0,
-        });
-      }
+      captureEvent("profile_updated", {
+        has_cover_image: Boolean(values.coverImage),
+        has_profile_image: Boolean(values.profileImage),
+        interest_count: interests.length,
+        link_count: normalizedLinks.length,
+        skill_count: values.skills?.length ?? 0,
+        work_experience_count: values.workExperience?.length ?? 0,
+      });
 
       form.reset({ ...values, workExperience: savedWorkExperience });
       toast.success("Profile updated successfully!");

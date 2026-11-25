@@ -5,7 +5,6 @@ import { useMutation as useTMutation } from "@tanstack/react-query";
 import { useMutation, useQuery } from "convex/react";
 import { pipe, String as Str } from "effect";
 import { useRouter } from "next/navigation";
-import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
@@ -13,6 +12,7 @@ import { Form } from "~/components/ui/form";
 import { SegmentProgressBar } from "~/components/ui/segmented-gradient-progress";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
+import { captureEvent } from "~/lib/analytics";
 import { authClient } from "~/lib/auth-client";
 import { safeArray, safeStr } from "~/lib/data.helpers";
 import { getErrorMessage } from "~/lib/error.helpers";
@@ -110,16 +110,11 @@ export default function OnboardingForm(props: OnboardingFormProps) {
         interests: values.interests,
       });
 
-      if (
-        process.env.NEXT_PUBLIC_POSTHOG_KEY &&
-        process.env.NEXT_PUBLIC_POSTHOG_HOST
-      ) {
-        posthog.capture("onboarding_completed", {
-          has_profile_image: Boolean(values.profileImage),
-          has_title: Boolean(values.title),
-          interest_count: values.interests.length,
-        });
-      }
+      captureEvent("onboarding_completed", {
+        has_profile_image: Boolean(values.profileImage),
+        has_title: Boolean(values.title),
+        interest_count: values.interests.length,
+      });
       toast.success("Profile created!", {
         description: "Redirecting to dashboard...",
       });

@@ -10,7 +10,6 @@ import {
   DialogTrigger,
 } from "@hyperbridge/ui";
 import { useMutation } from "convex/react";
-import posthog from "posthog-js";
 import { type ReactNode, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -30,6 +29,7 @@ import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { api } from "~/convex/_generated/api";
 import type { Doc } from "~/convex/_generated/dataModel";
+import { captureEvent } from "~/lib/analytics";
 import { monthlyEquivalent, type RateUnit, rateBand } from "~/lib/rate-band";
 import { toast } from "~/lib/toast";
 import { cn } from "~/lib/utils";
@@ -141,16 +141,11 @@ export function RateWizardDialog({ rate, children }: RateWizardDialogProps) {
           }),
         },
       });
-      if (
-        process.env.NEXT_PUBLIC_POSTHOG_KEY &&
-        process.env.NEXT_PUBLIC_POSTHOG_HOST
-      ) {
-        posthog.capture("rate_updated", {
-          unit: values.unit,
-          band,
-          monthly_equivalent: monthly,
-        });
-      }
+      captureEvent("rate_updated", {
+        unit: values.unit,
+        band,
+        monthly_equivalent: monthly,
+      });
       toast.success("Rate saved", {
         description: `This places you in ${band}. You can update it again in 6 months.`,
       });

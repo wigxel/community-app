@@ -2,7 +2,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import posthog from "posthog-js";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -12,6 +11,7 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { useFormDebug } from "~/hooks/useFormDebug";
+import { captureEvent } from "~/lib/analytics";
 import { Result } from "~/lib/result";
 import { toast } from "~/lib/toast";
 import { projectSchema as projectFormSchema } from "~/lib/validators/schema";
@@ -188,16 +188,11 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
         }
       }
 
-      if (
-        process.env.NEXT_PUBLIC_POSTHOG_KEY &&
-        process.env.NEXT_PUBLIC_POSTHOG_HOST
-      ) {
-        posthog.capture("project_saved", {
-          mode,
-          has_media: cleanedProject.media.length > 0,
-          has_links: cleanedProject.link.length > 0,
-        });
-      }
+      captureEvent("project_saved", {
+        mode,
+        has_media: cleanedProject.media.length > 0,
+        has_links: cleanedProject.link.length > 0,
+      });
 
       toast.success(
         mode === "create"
