@@ -1,16 +1,10 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
-import { GripVertical, Plus, Trash2 } from "lucide-react";
-import { Reorder, useDragControls } from "motion/react";
+import { Plus, Trash2 } from "lucide-react";
 import posthog from "posthog-js";
-import { useEffect, useRef, useState } from "react";
-import {
-  type FieldArrayWithId,
-  type UseFormReturn,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
+import { useEffect, useRef } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ProjectLinkIcon } from "~/components/atoms";
 import { NavigationFocus } from "~/components/molecules/navigation-focus";
 import { ProfileImagesEditor } from "~/components/profile/profile-images-editor";
 import { SkillsSelect } from "~/components/profile/skills-select";
@@ -42,142 +35,27 @@ import { useTitles } from "~/hooks/useTitles";
 import { safeArray } from "~/lib/data.helpers";
 import { Result } from "~/lib/result";
 import { toast } from "~/lib/toast";
+import { HoveringFormActions } from "~/components/forms/shared/hovering-form-action";
+import { LinksSection } from "~/components/forms/project/links-section";
+import { buildLinkUrl, stripToPath } from "~/components/forms/project/link-row";
+import { projectLinkSchema } from "~/lib/validators/schema";
 
-// ─── Link types ────────────────────────────────────────────────────────────────
+// ─── Link mapping ──────────────────────────────────────────────────────────────
 
-const LINK_TYPES = [
-  {
-    tag: "github",
-    title: "GitHub",
-    prefix: "github.com/",
-    placeholder: "username/project",
-  },
-  {
-    tag: "portfolio",
-    title: "Personal Website",
-    prefix: null,
-    placeholder: "https://yourwebsite.com",
-  },
-] as const;
-
-type LinkTag = (typeof LINK_TYPES)[number]["tag"];
-
-const usernameOnlyRegex = /^(?!.*(http|https|www\.|\/)).+$/i;
-
-const normalizeLinkForEdit = (link: {
-  tag: string;
-  title: string;
-  value: string;
-}): { tag: LinkTag; title: string; value: string } => {
-  const normalizedTag: LinkTag =
-    link.tag === "website" ? "portfolio" : (link.tag as LinkTag);
-
-  if (normalizedTag === "github") {
-    const match = link.value.match(
-      /(?:https?:\/\/)?(?:www\.)?github\.com\/([^/?#]+)/i,
-    );
-    return {
-      ...link,
-      tag: normalizedTag,
-      value: match ? match[1] : link.value,
-    };
-  }
-
-  return {
-    ...link,
-    tag: normalizedTag,
-  };
+const TITLE_BY_TAG: Record<string, string> = {
+  github: "GitHub",
+  figma: "Figma",
+  behance: "Behance",
+  linkedin: "LinkedIn",
+  other: "Other",
 };
 
-type LinkField = FieldArrayWithId<z.infer<typeof formSchema>, "links", "id">;
-type DraggableLinkItemProps = {
-  field: LinkField;
-  index: number;
-  form: UseFormReturn<z.infer<typeof formSchema>>;
-  removeLink: (index: number) => void;
-  constraintsRef: React.RefObject<HTMLDivElement | null>;
+/** Legacy stored links ("website"/"portfolio" tags, full URLs) → form shape. */
+const normalizeStoredLink = (link: { tag: string; value: string }) => {
+  const tag =
+    link.tag === "website" || link.tag === "portfolio" ? "other" : link.tag;
+  return { tag, value: stripToPath(link.value, tag) };
 };
-function DraggableLinkItem(props: DraggableLinkItemProps) {
-  const { field, index, form, removeLink, constraintsRef } = props;
-
-  const dragControls = useDragControls();
-  const typeConfig =
-    LINK_TYPES.find((t) => t.tag === field.tag) ?? LINK_TYPES[0];
-
-  return (
-    <Reorder.Item
-      key={field.id}
-      value={field.id}
-      drag="y"
-      dragListener={false}
-      dragControls={dragControls}
-      dragConstraints={constraintsRef}
-      className="cursor-grab"
-    >
-      <div key={field.id} className="flex items-start gap-3">
-        <div
-          className="bg-muted mt-6 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border"
-          title="Drag to reorder"
-          onPointerDown={(event) => dragControls.start(event)}
-        >
-          <GripVertical className="text-muted-foreground h-4 w-4" />
-        </div>
-
-        <div className="bg-muted mt-6.25 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border">
-          <ProjectLinkIcon
-            tag={field.tag}
-            className="text-muted-foreground h-4 w-4"
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name={`links.${index}.value`}
-          render={({ field: inputField }) => (
-            <FormItem className="flex-1">
-              <FormLabel className="select-none">{typeConfig.title}</FormLabel>
-              <FormControl>
-                {typeConfig.prefix ? (
-                  <div className="focus-within:ring-ring flex items-center overflow-hidden rounded-md border focus-within:ring-1">
-                    <span className="text-muted-foreground bg-muted shrink-0 border-r px-3 py-2 text-sm select-none">
-                      {typeConfig.prefix}
-                    </span>
-                    <Input
-                      className="rounded-none border-0 shadow-none focus-visible:ring-0"
-                      placeholder={typeConfig.placeholder}
-                      {...inputField}
-                      onChange={(e) => {
-                        inputField.onChange(e);
-                        form.clearErrors(`links.${index}.value`);
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <Input placeholder={typeConfig.placeholder} {...inputField} />
-                )}
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-destructive mt-6.25"
-          onClick={() => {
-            form.clearErrors(`links.${index}`);
-            removeLink(index);
-          }}
-          aria-label={`Remove ${typeConfig.title} link`}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-    </Reorder.Item>
-  );
-}
 
 // ─── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -200,34 +78,6 @@ const _projectSchema = z.object({
   endDate: z.string().min(1, "End date is required"),
   links: z.string().optional(), // comma-separated links
 });
-
-const linkSchema = z
-  .object({
-    tag: z.enum(["github", "portfolio"]),
-
-    title: z.string().min(1),
-
-    value: z.string().min(1, {
-      message: "This field is required.",
-    }),
-  })
-  .superRefine((data, ctx) => {
-    if (data.tag === "github" && !usernameOnlyRegex.test(data.value)) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["value"],
-        message: "Enter only your username, not a full URL.",
-      });
-    }
-
-    if (data.tag === "portfolio" && !z.url().safeParse(data.value).success) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["value"],
-        message: "Please enter a valid URL.",
-      });
-    }
-  });
 
 const formSchema = z.object({
   firstname: z.string().min(2, {
@@ -252,9 +102,16 @@ const formSchema = z.object({
       country: z.string().min(1, "Country is required"),
     })
     .optional(),
-  links: z
-    .array(linkSchema)
-    .max(3, { message: "You can add at most 3 links." }),
+  link: z
+    .array(projectLinkSchema)
+    .max(3, { message: "Max of 3 links per profile" })
+    .refine(
+      (links) => {
+        const nonOther = links.filter((l) => l.tag !== "other");
+        return new Set(nonOther.map((l) => l.tag)).size === nonOther.length;
+      },
+      { message: "Duplicate link types are not allowed" },
+    ),
   skills: z.array(z.string()).optional(), // array of skill IDs
   rateAmount: z
     .string()
@@ -276,6 +133,8 @@ const EMPTY_WORK_EXPERIENCE: z.infer<typeof workExperienceSchema> = {
   type: "full-time",
   isCurrent: false,
 };
+
+export type ProfileFormValues = z.infer<typeof formSchema>;
 
 // ─── Page component ────────────────────────────────────────────────────────────
 
@@ -334,8 +193,7 @@ export default function Profile() {
             interests: profile.interests?.join(", ") || "",
             location: profile.location,
             workExperience: mappedWorkExperience,
-            links:
-              profile.links?.map((link) => normalizeLinkForEdit(link)) ?? [],
+            link: profile.links ?? [],
             skills: Result.match(skills, {
               loading: () => [],
               success: (data) => data?.map((s) => s._id) ?? [],
@@ -352,7 +210,10 @@ export default function Profile() {
   );
 }
 export type ProfileFormProps = {
-  initialData: Partial<z.infer<typeof formSchema>>;
+  initialData: Omit<Partial<z.infer<typeof formSchema>>, "link"> & {
+    /** Stored link shape (legacy tags included); normalized into the form schema on load. */
+    link?: { tag: string; value: string }[];
+  };
 };
 export function ProfileForm(props: ProfileFormProps) {
   const { initialData = {} } = props;
@@ -362,20 +223,21 @@ export function ProfileForm(props: ProfileFormProps) {
   const updateProfile = useMutation(api.profiles.updateProfile);
   const updateProfileImages = useMutation(api.profiles.updateProfileImages);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createWorkExp = useMutation(api.workExperience.create);
   const updateWorkExp = useMutation(api.workExperience.update);
   const removeWorkExp = useMutation(api.workExperience.remove);
   const profile = useQuery(api.profiles.getProfile);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<ProfileFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       ...initialData,
       workExperience: initialData.workExperience || [],
       location: initialData.location || { city: "", country: "Nigeria" },
-      links: initialData.links || [],
+      link: (initialData.link ?? []).map(
+        normalizeStoredLink,
+      ) as ProfileFormValues["link"],
       skills: initialData.skills || [],
     },
   });
@@ -447,48 +309,13 @@ export function ProfileForm(props: ProfileFormProps) {
     }
   }, [form, appendWork]);
 
-  // Links field array
-  const {
-    fields: linkFields,
-    append: appendLink,
-    remove: removeLink,
-    move: moveLink,
-  } = useFieldArray({
-    control: form.control,
-    name: "links",
-  });
-
-  const linkConstraintsRef = useRef<HTMLDivElement>(null);
-  const watchedLinks = form.watch("links") ?? [];
-  const linkFieldIds = linkFields.map((field) => field.id);
-
-  const usedTags = watchedLinks.map((f) => f.tag);
-  const availableLinkTypes = LINK_TYPES.filter(
-    (t) => !usedTags.includes(t.tag),
-  );
-
-  function addLink(tag: LinkTag) {
-    const type = LINK_TYPES.find((t) => t.tag === tag);
-    if (!type) return;
-    appendLink({ tag, title: type.title, value: "" });
-  }
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-
+  async function onSubmit(values: ProfileFormValues) {
     try {
-      const normalizedLinks = values.links.map((link) => {
-        const type = LINK_TYPES.find((t) => t.tag === link.tag);
-        if (!type) {
-          return link;
-        }
-        return {
-          ...link,
-          value: type.prefix
-            ? `https://${type.prefix}${link.value}`
-            : link.value,
-        };
-      });
+      const normalizedLinks = (values.link ?? []).map((l) => ({
+        tag: l.tag,
+        title: TITLE_BY_TAG[l.tag] ?? l.tag,
+        value: buildLinkUrl(l.tag, l.value),
+      }));
 
       const phoneNumbers = values.phonenumbers
         ? values.phonenumbers
@@ -586,8 +413,6 @@ export function ProfileForm(props: ProfileFormProps) {
       toast.error("Failed to update profile", {
         description: "Please try again.",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -808,81 +633,7 @@ export function ProfileForm(props: ProfileFormProps) {
           </Card>
 
           {/* ── Profile Links ─────────────────────────────────────────────── */}
-          <Card className="">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-xl text-white">
-                Profile Links
-                {availableLinkTypes.length > 0 && (
-                  <Select onValueChange={(val) => addLink(val as LinkTag)}>
-                    <SelectTrigger className="w-40">
-                      <div className="flex items-center gap-2">
-                        <Plus className="h-4 w-4" />
-                        <span>Add Link</span>
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent align="end">
-                      {availableLinkTypes.map((type) => {
-                        return (
-                          <SelectItem key={type.tag} value={type.tag}>
-                            <span className="flex items-center gap-2">
-                              <ProjectLinkIcon
-                                tag={type.tag}
-                                className="h-4 w-4"
-                              />
-                              {type.title}
-                            </span>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {linkFields.length === 0 && (
-                <p className="text-muted-foreground rounded-md border border-dashed py-4 text-center text-sm">
-                  No links added yet.
-                </p>
-              )}
-
-              <div className="space-y-4" ref={linkConstraintsRef}>
-                <Reorder.Group
-                  axis="y"
-                  values={linkFieldIds}
-                  onReorder={(newOrder) => {
-                    const movedId = newOrder.find(
-                      (id, index) => id !== linkFieldIds[index],
-                    );
-                    if (!movedId) return;
-
-                    const oldIndex = linkFieldIds.indexOf(movedId);
-                    const newIndex = newOrder.indexOf(movedId);
-                    if (
-                      oldIndex !== -1 &&
-                      newIndex !== -1 &&
-                      oldIndex !== newIndex
-                    ) {
-                      moveLink(oldIndex, newIndex);
-                    }
-                  }}
-                  className="space-y-4"
-                  style={{ position: "relative" }}
-                >
-                  {linkFields.map((field, index) => (
-                    <DraggableLinkItem
-                      key={field.id}
-                      field={field}
-                      index={index}
-                      form={form}
-                      removeLink={removeLink}
-                      constraintsRef={linkConstraintsRef}
-                    />
-                  ))}
-                </Reorder.Group>
-              </div>
-            </CardContent>
-          </Card>
+          <LinksSection title="Profile links" />
 
           {/* ── Work Experience ───────────────────────────────────────────── */}
           <Card className="">
@@ -1167,9 +918,7 @@ export function ProfileForm(props: ProfileFormProps) {
             </CardContent>
           </Card>
 
-          <Button type="submit" disabled={isSubmitting} size="lg">
-            {isSubmitting ? "Saving..." : "Save changes"}
-          </Button>
+          <HoveringFormActions mode="edit" onCancel={() => form.reset()} />
         </form>
       </Form>
     </div>

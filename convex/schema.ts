@@ -49,6 +49,7 @@ const project_link_schema = v.object({
     v.literal("github"),
     v.literal("figma"),
     v.literal("behance"),
+    v.literal("linkedin"),
     v.literal("other"),
   ),
   value: v.string(),

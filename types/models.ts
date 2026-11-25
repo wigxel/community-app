@@ -64,7 +64,7 @@ export interface Link {
 }
 
 export interface ProjectLink {
-  tag: "github" | "figma" | "behance" | "other";
+  tag: "github" | "figma" | "behance" | "linkedin" | "other";
   value: string;
 }
 

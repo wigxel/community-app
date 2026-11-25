@@ -1,5 +1,5 @@
 import { GlobeIcon } from "lucide-react";
-import { Behance, Figma, Github } from "~/components/icons";
+import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
 
 export type ProjectLinkIconProps = {
   tag: string;
@@ -25,6 +25,7 @@ export const getLinkIcon = (tag: string) => {
     github: Github,
     figma: Figma,
     behance: Behance,
+    linkedin: LinkedIn,
   };
 
   return iconMap[tag.toLowerCase()] || GlobeIcon;

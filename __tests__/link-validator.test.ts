@@ -68,7 +68,7 @@ describe("projectLinkSchema", () => {
 
   it("rejects invalid tag", () => {
     const result = projectLinkSchema.safeParse({
-      tag: "linkedin",
+      tag: "twitter",
       value: "user",
     });
     expect(result.success).toBe(false);

@@ -65,6 +65,10 @@ export const projectLinkSchema = z.discriminatedUnion("tag", [
       .min(1, { message: "Please provide link to Behance project." }),
   }),
   z.object({
+    tag: z.literal("linkedin"),
+    value: z.string().min(1, { message: "Please provide link to LinkedIn." }),
+  }),
+  z.object({
     tag: z.literal("other"),
     value: z.url({ message: "Please enter a valid URL." }),
   }),
