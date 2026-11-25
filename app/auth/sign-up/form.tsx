@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
 import { GoogleSignInButton } from "~/components/auth/google-sign-in-button";
@@ -20,6 +19,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { SegmentProgressBar } from "~/components/ui/segmented-gradient-progress";
 import { Separator } from "~/components/ui/separator";
+import { captureEvent } from "~/lib/analytics";
 import { authClient } from "~/lib/auth-client";
 import { toast } from "~/lib/toast";
 
@@ -106,12 +106,7 @@ export default function SignUpForm(props: SignUpFormProps) {
       return;
     }
 
-    if (
-      process.env.NEXT_PUBLIC_POSTHOG_KEY &&
-      process.env.NEXT_PUBLIC_POSTHOG_HOST
-    ) {
-      posthog.capture("account_registered");
-    }
+    captureEvent("account_registered");
     toast.success("Account created!", {
       description: "Redirecting to onboarding...",
     });

@@ -56,7 +56,7 @@ export function AvatarStep(props: AvatarStepProps) {
                       </p>
                       <p className="text-muted-foreground text-xs">
                         Tap the camera to {field.value ? "change" : "upload"}{" "}
-                        it. Max 5MB — JPG, PNG, GIF.
+                        it. <br /> Max 5MB — JPG, PNG, GIF.
                       </p>
                     </div>
                   </div>

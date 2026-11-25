@@ -51,7 +51,11 @@ function getProjectJsonLd({
   };
 }
 
-function JsonLd({ data }: { data: Record<string, unknown> }) {
+type JsonLdProps = { data: Record<string, unknown> };
+
+function JsonLd(props: JsonLdProps) {
+  const { data } = props;
+
   return (
     <script
       type="application/ld+json"
@@ -111,13 +115,13 @@ export async function generateMetadata({
       type: "website",
       ...(ogImageUrl
         ? {
-          images: [
-            {
-              url: ogImageUrl,
-              alt: `${title} project preview`,
-            },
-          ],
-        }
+            images: [
+              {
+                url: ogImageUrl,
+                alt: `${title} project preview`,
+              },
+            ],
+          }
         : {}),
     },
 

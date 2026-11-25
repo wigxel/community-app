@@ -41,6 +41,15 @@ vi.mock("motion/react", () => ({
     },
   ),
   AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+  Reorder: {
+    Group: ({ children }: { children?: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+    Item: ({ children }: { children?: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+  },
+  useDragControls: () => ({ start: vi.fn() }),
 }));
 
 vi.mock("convex/react", () => ({

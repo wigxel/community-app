@@ -188,7 +188,7 @@ function NavItem(props: NavItemProps) {
         size={"1.5rem"}
         className={cn("shrink-0", isActive ? "text-brand-primary" : "")}
       />
-      <span className="flex-1">{item.name}</span>
+      <span className="flex-1 text-start">{item.name}</span>
       {badgeCount !== undefined && badgeCount > 0 && (
         <span className="bg-brand-primary rounded-full px-2 py-0.5 text-xs font-medium text-white">
           {badgeCount}

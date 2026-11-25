@@ -2,7 +2,7 @@
 import { MapPin } from "lucide-react";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
-import { ProjectLinkIcon } from "~/components/atoms";
+import { ProjectLinkIcon, RateBandDisplay } from "~/components/atoms";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { SectionCard } from "~/components/layouts/section-card";
 import { ProfileAvatar } from "~/components/profile/avatar";
@@ -50,6 +50,13 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
             <div>
               <div className="text-muted-foreground text-sm">Ranking</div>
               <div className="text-2xl font-semibold">{seniority}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-sm">Rate</div>
+              <RateBandDisplay
+                band={profile.rateBand}
+                className="text-2xl font-semibold"
+              />
             </div>
             <div>
               <div className="text-muted-foreground text-sm">Projects</div>
