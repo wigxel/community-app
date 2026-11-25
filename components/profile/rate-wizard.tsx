@@ -10,9 +10,10 @@ import {
   DialogTrigger,
 } from "@hyperbridge/ui";
 import { useMutation } from "convex/react";
-import { type ReactNode, useState } from "react";
-import { useForm } from "react-hook-form";
+import { type ReactNode, useRef, useState } from "react";
+import { type Resolver, useForm } from "react-hook-form";
 import { z } from "zod";
+import { RateBandDisplay } from "~/components/atoms";
 import { AlertBox } from "~/components/molecules/alert-box";
 import { Button } from "~/components/ui/button";
 import { CurrencyInput } from "~/components/ui/currency-input";
@@ -52,6 +53,15 @@ const wizardSchema = z
 
 type WizardValues = z.infer<typeof wizardSchema>;
 
+// Step 1 validates only the unit; steps 2–3 validate the full schema, so
+// Next can't demand the amount field before the user has reached it.
+const unitOnlySchema = z.object({
+  unit: z.enum(["hour", "day", "week", "month", "project"]),
+  // ponytail: partial on purpose — the amount fields don't exist yet on step 1
+}) as unknown as typeof wizardSchema;
+
+const stepSchemas = [unitOnlySchema, wizardSchema, wizardSchema];
+
 const UNIT_OPTIONS = [
   { value: "hour", label: "Per hour" },
   { value: "day", label: "Per day" },
@@ -87,10 +97,19 @@ export function RateWizardDialog({ rate, children }: RateWizardDialogProps) {
   const updateProfileRate = useMutation(api.profiles.updateProfileRate);
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
+  // The resolver reads the step through a ref so validation always matches
+  // the step being submitted, whatever closure it was invoked from.
+  const stepRef = useRef(step);
+  stepRef.current = step;
 
   const form = useForm<WizardValues>({
-    resolver: zodResolver(wizardSchema),
     defaultValues: { unit: "month", rawAmount: "", projectDays: "" },
+    resolver: ((values, context, options) =>
+      zodResolver(stepSchemas[stepRef.current - 1])(
+        values,
+        context,
+        options,
+      )) as Resolver<WizardValues>,
   });
 
   const unit = form.watch("unit");
@@ -116,20 +135,13 @@ export function RateWizardDialog({ rate, children }: RateWizardDialogProps) {
     setIsOpen(next);
   }
 
-  async function handleNext() {
-    if (step === 2) {
-      const fields =
-        unit === "project"
-          ? (["rawAmount", "projectDays"] as const)
-          : (["rawAmount"] as const);
-      if (!(await form.trigger([...fields]))) return;
+  async function handleSubmit(values: WizardValues) {
+    // One submit handler for all steps: validates via the resolver, then
+    // advances the wizard — and only saves once the preview is confirmed.
+    if (step < 3) {
+      setStep(step + 1);
+      return;
     }
-    setStep(step + 1);
-  }
-
-  async function handleSave(values: WizardValues) {
-    // Enter in a step-2 input would submit the form before reaching step 3.
-    if (step !== 3) return;
 
     try {
       await updateProfileRate({
@@ -193,7 +205,10 @@ export function RateWizardDialog({ rate, children }: RateWizardDialogProps) {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
             {step === 1 && (
               <FormField
                 control={form.control}
@@ -273,7 +288,10 @@ export function RateWizardDialog({ rate, children }: RateWizardDialogProps) {
             {step === 3 && (
               <div className="space-y-3 py-4 text-start text-sm">
                 <p className="text-muted-foreground">This places you in</p>
-                <p className="text-4xl font-semibold">{band}</p>
+                <RateBandDisplay
+                  band={band}
+                  className="text-foreground text-4xl font-semibold"
+                />
                 <p className="text-muted-foreground text-lg">
                   ≈ {formatNaira(monthly)} per month
                 </p>
@@ -299,11 +317,7 @@ export function RateWizardDialog({ rate, children }: RateWizardDialogProps) {
                 {step === 1 ? "Cancel" : "Back"}
               </Button>
               {step < 3 ? (
-                <Button
-                  type="button"
-                  className="basis-[70%]"
-                  onClick={handleNext}
-                >
+                <Button type="submit" className="basis-[70%]">
                   Next
                 </Button>
               ) : (
