@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, type LucideIcon } from "lucide-react";
+import { Camera, type LucideIcon, PlusIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
@@ -9,10 +9,17 @@ interface ImageActionButtonProps {
   label: string;
   icon?: LucideIcon;
   className?: string;
+  size?: "default" | "icon";
 }
 
 export function ImageActionButton(props: ImageActionButtonProps) {
-  const { onClick, label, icon: Icon = Camera, className } = props;
+  const {
+    onClick,
+    label,
+    icon: Icon = Camera,
+    className,
+    size = "icon",
+  } = props;
 
   return (
     <button
@@ -21,11 +28,14 @@ export function ImageActionButton(props: ImageActionButtonProps) {
       aria-label={label}
       data-image-action
       className={cn(
-        "relative z-10 flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/30 text-white/80 transition-colors hover:bg-black/60 hover:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none",
+        "relative z-10 flex cursor-pointer items-center justify-center rounded-full bg-black/30 text-white/80 backdrop-blur-xs transition-colors hover:bg-black/60 hover:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none",
+        size === "icon" && "size-8",
+        size === "default" && "px-3 py-1 text-sm",
         className,
       )}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className={cn(size === "icon" ? "h-4 w-4" : "mr-2 h-4 w-4")} />
+      {size === "default" ? label : null}
     </button>
   );
 }
@@ -67,6 +77,7 @@ export function EditableAvatar(props: EditableAvatarProps) {
       <ImageHoverOverlay className="inset-1 rounded-full" />
       <ImageActionButton
         onClick={onClick}
+        icon={PlusIcon}
         label={image ? "Change profile image" : "Upload profile image"}
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
       />

@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { RATE_UNIT_SCHEMA } from "../lib/rate-band";
 
 const link_schema = v.array(
   v.object({
@@ -49,6 +50,7 @@ const project_link_schema = v.object({
     v.literal("github"),
     v.literal("figma"),
     v.literal("behance"),
+    v.literal("linkedin"),
     v.literal("other"),
   ),
   value: v.string(),
@@ -128,8 +130,8 @@ const schema = defineSchema({
     firstName: v.string(),
     lastName: v.string(),
     email: v.string(),
-    profileImage: v.nullable(v.string()),
-    coverImage: v.optional(v.nullable(v.string())),
+    profileImage: v.nullable(v.union(v.id("_storage"), v.string())),
+    coverImage: v.optional(v.nullable(v.union(v.id("_storage"), v.string()))),
     phoneNumbers: v.array(v.string()),
     username: v.string(),
     title: v.nullable(v.id("titles")),
@@ -140,6 +142,25 @@ const schema = defineSchema({
     interests: v.optional(v.array(v.string())),
     location: v.optional(profile_location_schema),
     skills: v.optional(v.array(v.id("skills"))),
+    // Owner-private rate. Public queries strip this and expose only
+    // `rateBand` (see lib/rate-band.ts).
+    rate: v.optional(
+      v.union(
+        v.null(),
+        v.object({
+          // Monthly-equivalent figure; bands derive from this.
+          amount: v.number(),
+          // ISO 4217 code; defaults to NGN when absent.
+          currency: v.optional(v.string()),
+          // What the user entered in the rate wizard, for pre-filling.
+          unit: v.optional(RATE_UNIT_SCHEMA),
+          rawAmount: v.optional(v.number()),
+          projectDays: v.optional(v.number()),
+          // ms epoch of the wizard save; locks updates for 6 months.
+          confirmedAt: v.optional(v.number()),
+        }),
+      ),
+    ),
     // Denormalized running total of `project` rows for this user.
     // Maintained by project.createProject / project.deleteProject;
     // backfilled by seeds.backfillProjectCounts.

@@ -1,6 +1,19 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("motion/react", () => ({
+  Reorder: {
+    Group: ({ children }: { children?: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+    Item: ({ children }: { children?: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+  },
+  useDragControls: () => ({ start: vi.fn() }),
+}));
+
 import LinkRow, {
   buildLinkUrl,
   detectTagFromUrl,
@@ -38,6 +51,7 @@ function renderLinkRow(initialTag: ProjectLink["tag"] = "other") {
       <FormProvider {...form}>
         <LinkRow
           linkIndex={0}
+          value="field-0"
           control={form.control}
           remove={vi.fn()}
           error={undefined}
@@ -108,6 +122,12 @@ describe("extractLinkValue", () => {
     );
   });
 
+  it("returns full LinkedIn URL", () => {
+    expect(extractLinkValue("https://www.linkedin.com/in/ada")).toBe(
+      "https://www.linkedin.com/in/ada",
+    );
+  });
+
   it("handles URLs without protocol", () => {
     expect(extractLinkValue("github.com/user/repo")).toBeNull();
   });
@@ -128,6 +148,13 @@ describe("detectTagFromUrl", () => {
 
   it("detects behance", () => {
     expect(detectTagFromUrl("https://behance.net/gallery/1")).toBe("behance");
+  });
+
+  it("detects linkedin (with and without www)", () => {
+    expect(detectTagFromUrl("https://www.linkedin.com/in/ada")).toBe(
+      "linkedin",
+    );
+    expect(detectTagFromUrl("https://linkedin.com/in/ada")).toBe("linkedin");
   });
 
   it("returns null for unrecognized host", () => {
@@ -164,6 +191,12 @@ describe("stripToPath", () => {
     ).toBe("user/repo?tab=readme#install");
   });
 
+  it("strips LinkedIn URL to path", () => {
+    expect(stripToPath("https://www.linkedin.com/in/ada", "linkedin")).toBe(
+      "in/ada",
+    );
+  });
+
   it("drops the scheme for other tag", () => {
     expect(stripToPath("https://example.com/page", "other")).toBe(
       "example.com/page",
@@ -191,6 +224,12 @@ describe("buildLinkUrl", () => {
   it("reconstructs Behance URL", () => {
     expect(buildLinkUrl("behance", "gallery/1")).toBe(
       "https://behance.net/gallery/1",
+    );
+  });
+
+  it("reconstructs LinkedIn URL", () => {
+    expect(buildLinkUrl("linkedin", "in/ada")).toBe(
+      "https://www.linkedin.com/in/ada",
     );
   });
 

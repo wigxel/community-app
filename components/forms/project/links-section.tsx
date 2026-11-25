@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@hyperbridge/ui";
 import { Link2, LinkIcon } from "lucide-react";
+import { Reorder } from "motion/react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { AlertBox } from "~/components/molecules/alert-box";
 import {
@@ -20,7 +21,11 @@ const EMPTY_LINK: ProjectLink = {
   value: "",
 };
 
-export function LinksSection() {
+type LinksSectionProps = {
+  title?: string;
+};
+
+export function LinksSection(props: LinksSectionProps) {
   const {
     control,
     formState: { errors },
@@ -30,7 +35,10 @@ export function LinksSection() {
     fields: linkFields,
     append: appendLink,
     remove: removeLink,
+    move: moveLink,
   } = useFieldArray({ control, name: "link" });
+
+  const linkFieldIds = linkFields.map((field) => field.id);
 
   const isMax = linkFields.length >= 3;
 
@@ -43,7 +51,7 @@ export function LinksSection() {
           </div>
 
           <CardTitle className="text-foreground truncate text-base">
-            Links{" "}
+            {props.title ?? "Links"}{" "}
             {linkFields.length ? (
               <span className="text-muted-foreground font-thin">
                 — {serialNo(linkFields.length)}
@@ -66,17 +74,35 @@ export function LinksSection() {
         )}
 
         {linkFields.length > 0 && (
-          <div className="flex flex-col gap-2">
+          <Reorder.Group
+            as="div"
+            axis="y"
+            values={linkFieldIds}
+            onReorder={(newOrder) => {
+              const movedId = newOrder.find(
+                (id, index) => id !== linkFieldIds[index],
+              );
+              if (!movedId) return;
+
+              const oldIndex = linkFieldIds.indexOf(movedId);
+              const newIndex = newOrder.indexOf(movedId);
+              if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+                moveLink(oldIndex, newIndex);
+              }
+            }}
+            className="flex flex-col gap-2"
+          >
             {linkFields.map((field, lIdx) => (
               <LinkRow
                 key={field.id}
                 linkIndex={lIdx}
+                value={field.id}
                 control={control}
                 remove={removeLink}
                 error={errors.link?.[lIdx]?.value?.message}
               />
             ))}
-          </div>
+          </Reorder.Group>
         )}
       </CardContent>
 
