@@ -1,14 +1,9 @@
 "use client";
 
 import { BanknoteIcon } from "lucide-react";
+import { RateBandDisplay } from "~/components/atoms";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import type { Doc } from "~/convex/_generated/dataModel";
 import {
   formatDate,
@@ -62,14 +57,16 @@ export function RateSection({ rate }: RateSectionProps) {
           </div>
           <CardTitle>Rate &amp; placement</CardTitle>
         </div>
-        <CardDescription>
-          Help the right clients find you at the right budget.
-        </CardDescription>
       </CardHeader>
+
       <CardContent className="space-y-4">
+        Help the right clients find you at the right budget.
         {rate ? (
           <div className="space-y-1">
-            <p className="text-2xl font-semibold">{rateBand(rate.amount)}</p>
+            <RateBandDisplay
+              band={rateBand(rate.amount)}
+              className="text-2xl font-semibold"
+            />
             <p className="text-base">
               ≈ {formatNaira(rate.amount)}/month&nbsp;
               <span className="text-muted-foreground">
@@ -83,7 +80,6 @@ export function RateSection({ rate }: RateSectionProps) {
             place you in a band.
           </p>
         )}
-
         <div>
           <RateWizardDialog rate={rate}>
             <Button type="button" disabled={isLocked}>
