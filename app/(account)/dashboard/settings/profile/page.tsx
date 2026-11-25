@@ -1,14 +1,16 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@hyperbridge/ui";
+import { Button, IconButton } from "@hyperbridge/ui";
 import { useMutation, useQuery } from "convex/react";
 import {
   BriefcaseIcon,
+  EyeIcon,
   HeartIcon,
   Trash2,
   UserIcon,
   WrenchIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -177,7 +179,20 @@ export default function Profile() {
 
   return (
     <div className="px-2 md:px-4">
-      <h1 className="mb-8 text-4xl font-semibold">Edit Profile</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-4xl font-semibold">Edit Profile</h1>
+        {profile?.username && (
+          <IconButton asChild variant="level_2">
+            <Link
+              href={`/profile/${profile.username}`}
+              target="_blank"
+              aria-label="View profile"
+            >
+              <EyeIcon className="size-4" />
+            </Link>
+          </IconButton>
+        )}
+      </div>
 
       {profile === null ? (
         <div className="text-muted-foreground text-center">
