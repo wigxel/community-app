@@ -1,15 +1,16 @@
-import { ExternalLink, Figma, Github } from "~/components/icons";
+import { Globe2Icon, GlobeIcon } from "lucide-react";
+import { Figma, Github } from "~/components/icons";
 import type { Media, Project } from "~/types/models";
 import { safeArray } from "../data.helpers";
 
 const LINK_META: Record<string, { label: string; Icon: React.ElementType }> = {
-  live: { label: "Live Site", Icon: ExternalLink },
+  live: { label: "Live Site", Icon: GlobeIcon },
   github: { label: "GitHub", Icon: Github },
   figma: { label: "Figma", Icon: Figma },
 };
 
 function getLinkMeta(tag: string) {
-  return LINK_META[tag] ?? { label: tag, Icon: ExternalLink };
+  return LINK_META[tag] ?? { label: tag, Icon: Globe2Icon };
 }
 
 type MaybeProject = Project | null | undefined;

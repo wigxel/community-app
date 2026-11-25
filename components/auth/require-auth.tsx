@@ -1,4 +1,5 @@
 "use client";
+import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import React from "react";
 import { LoaderSimple } from "~/components/layouts/loader";
@@ -28,10 +29,15 @@ export function RequireAuth(props: RequireAuthProps) {
       <span className="contents" onClickCapture={intercept}>
         {children}
       </span>
+
       <Dialog open={open} onOpenChange={setOpen}>
-        {open ? (
-          <LazyRequireAuthDialog onSignedIn={() => setOpen(false)} />
-        ) : null}
+        <DialogContent className={"aspect-[2/2.3]"}>
+          <AnimatePresence>
+            {open ? (
+              <LazyRequireAuthDialog onSignedIn={() => setOpen(false)} />
+            ) : null}
+          </AnimatePresence>
+        </DialogContent>
       </Dialog>
     </>
   );
@@ -40,10 +46,11 @@ export function RequireAuth(props: RequireAuthProps) {
 const LazyRequireAuthDialog = dynamic(() => import("./require-auth-dialog"), {
   ssr: false,
   loading: () => (
-    <DialogContent>
-      <div className="flex items-center justify-center py-8">
-        <LoaderSimple />
-      </div>
-    </DialogContent>
+    <motion.div
+      exit={{ y: "-20%" }}
+      className="flex items-center justify-center py-8"
+    >
+      <LoaderSimple />
+    </motion.div>
   ),
 });

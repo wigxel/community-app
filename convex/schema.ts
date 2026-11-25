@@ -57,7 +57,11 @@ const project_link_schema = v.object({
 
 export const project_schema = {
   userId: v.string(),
+  lastUpdatedAt: v.optional(v.number()),
   title: v.string(),
+  // Denormalized running total of `projectFavourites` rows for this project.
+  // Maintained by favourites.toggle; legacy projects read as 0.
+  favouriteCount: v.optional(v.number()),
   tags: v.optional(v.array(v.string())),
   timeline: v.object({
     start: v.union(
