@@ -1,7 +1,14 @@
 import { queryGeneric as query } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { ProfileImpl } from "../lib/factories/profile";
-import { rateBand } from "../lib/rate-band";
+import {
+  formatDate,
+  monthlyEquivalent,
+  RATE_LOCK_MS,
+  RATE_UNIT_SCHEMA,
+  rateBand,
+  rateUnlocksAt,
+} from "../lib/rate-band";
 import { Result } from "../lib/result";
 import { validateUsernameFormat } from "../lib/username";
 import type { Profile, TalentProfile } from "../types/models";
@@ -359,6 +366,68 @@ export const updateProfileImages = mutation({
       ...(args.coverImage !== undefined && {
         coverImage: args.coverImage,
       }),
+    });
+  },
+});
+
+// Saves the rate wizard's answers. The server derives the monthly-equivalent
+// `amount` from unit/rawAmount (so clients can't send mismatched figures) and
+// stamps `confirmedAt`, which freezes the rate for 6 months.
+export const updateProfileRate = mutation({
+  args: {
+    rate: v.union(
+      v.null(),
+      v.object({
+        unit: RATE_UNIT_SCHEMA,
+        rawAmount: v.number(),
+        projectDays: v.optional(v.number()),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) throw new ConvexError("Not authenticated");
+
+    const profile = await ctx.db
+      .query("profile")
+      .withIndex("by_email", (q) => q.eq("email", authUser.email))
+      .unique();
+
+    if (!profile) throw new ConvexError("Profile not found");
+
+    const now = Date.now();
+    if (
+      profile.rate?.confirmedAt &&
+      now - profile.rate.confirmedAt < RATE_LOCK_MS
+    ) {
+      throw new ConvexError(
+        `Your rate is locked. You can update it again on ${formatDate(
+          rateUnlocksAt(profile.rate.confirmedAt),
+        )}.`,
+      );
+    }
+
+    if (!args.rate) {
+      await ctx.db.patch(profile._id, { rate: null });
+      return;
+    }
+
+    const { unit, rawAmount, projectDays } = args.rate;
+    if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
+      throw new ConvexError("Rate must be a positive number");
+    }
+    if (unit === "project" && (!projectDays || projectDays <= 0)) {
+      throw new ConvexError("Project duration must be at least one day");
+    }
+
+    await ctx.db.patch(profile._id, {
+      rate: {
+        amount: monthlyEquivalent(unit, rawAmount, projectDays),
+        unit,
+        rawAmount,
+        ...(unit === "project" && { projectDays }),
+        confirmedAt: now,
+      },
     });
   },
 });

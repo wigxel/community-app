@@ -1,7 +1,8 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@hyperbridge/ui";
 import { useMutation, useQuery } from "convex/react";
-import { Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import posthog from "posthog-js";
 import { useEffect, useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -14,11 +15,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { buildLinkUrl, stripToPath } from "~/components/forms/project/link-row";
+import { LinksSection } from "~/components/forms/project/links-section";
+import { HoveringFormActions } from "~/components/forms/shared/hovering-form-action";
 import { NavigationFocus } from "~/components/molecules/navigation-focus";
 import { ProfileImagesEditor } from "~/components/profile/profile-images-editor";
+import { RateSection } from "~/components/profile/rate-section";
 import { SkillsSelect } from "~/components/profile/skills-select";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import {
   Form,
   FormControl,
@@ -35,9 +45,6 @@ import { useTitles } from "~/hooks/useTitles";
 import { safeArray } from "~/lib/data.helpers";
 import { Result } from "~/lib/result";
 import { toast } from "~/lib/toast";
-import { HoveringFormActions } from "~/components/forms/shared/hovering-form-action";
-import { LinksSection } from "~/components/forms/project/links-section";
-import { buildLinkUrl, stripToPath } from "~/components/forms/project/link-row";
 import { projectLinkSchema } from "~/lib/validators/schema";
 
 // ─── Link mapping ──────────────────────────────────────────────────────────────
@@ -113,14 +120,6 @@ const formSchema = z.object({
       { message: "Duplicate link types are not allowed" },
     ),
   skills: z.array(z.string()).optional(), // array of skill IDs
-  rateAmount: z
-    .string()
-    .optional()
-    .refine(
-      (value) =>
-        value === "" || value === undefined || Number.isFinite(Number(value)),
-      { message: "Enter a valid amount." },
-    ),
 });
 
 const EMPTY_WORK_EXPERIENCE: z.infer<typeof workExperienceSchema> = {
@@ -199,8 +198,6 @@ export default function Profile() {
               success: (data) => data?.map((s) => s._id) ?? [],
               error: () => [],
             }),
-            rateAmount:
-              profile.rate?.amount != null ? String(profile.rate.amount) : "",
           }}
         />
       ) : (
@@ -385,10 +382,6 @@ export function ProfileForm(props: ProfileFormProps) {
         location: values.location || undefined,
         links: normalizedLinks,
         skills: (values.skills || []) as Id<"skills">[],
-        rate:
-          values.rateAmount === "" || values.rateAmount === undefined
-            ? null
-            : { amount: Number(values.rateAmount) },
       });
 
       if (
@@ -402,7 +395,6 @@ export function ProfileForm(props: ProfileFormProps) {
           link_count: normalizedLinks.length,
           skill_count: values.skills?.length ?? 0,
           work_experience_count: values.workExperience?.length ?? 0,
-          has_rate: Boolean(values.rateAmount),
         });
       }
 
@@ -480,29 +472,6 @@ export function ProfileForm(props: ProfileFormProps) {
                       <FormControl>
                         <Input placeholder="Doe" {...field} />
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="rateAmount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rate (NGN)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          placeholder="e.g., 150000"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        What you charge per engagement. Shown publicly only as a
-                        ₦ band (₦ / ₦₦ / ₦₦₦ / ₦₦₦₦) — the exact amount stays
-                        private.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -632,26 +601,17 @@ export function ProfileForm(props: ProfileFormProps) {
             </CardContent>
           </Card>
 
+          {/* ── Rate & Placement ──────────────────────────────────────────── */}
+          <RateSection rate={profile?.rate} />
+
           {/* ── Profile Links ─────────────────────────────────────────────── */}
           <LinksSection title="Profile links" />
 
           {/* ── Work Experience ───────────────────────────────────────────── */}
           <Card className="">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-xl text-white">
+              <CardTitle className="text-xl text-white">
                 Work Experience
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => appendWork(EMPTY_WORK_EXPERIENCE)}
-                  className="group flex items-center border-gray-300 bg-white"
-                >
-                  <Plus className="h-4 w-4 shrink-0 text-gray-900 transition-all group-hover:mr-2" />
-                  <span className="max-w-0 overflow-hidden whitespace-nowrap text-gray-900 transition-all duration-300 ease-in-out group-hover:max-w-xs">
-                    Add Experience
-                  </span>
-                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -857,6 +817,16 @@ export function ProfileForm(props: ProfileFormProps) {
                 ))
               )}
             </CardContent>
+            <CardFooter>
+              <Button
+                type="button"
+                className="w-full"
+                size="lg"
+                onClick={() => appendWork(EMPTY_WORK_EXPERIENCE)}
+              >
+                Add experience
+              </Button>
+            </CardFooter>
           </Card>
 
           {/*── Skills ─────────────────────────────────────────────────── */}

@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { RATE_UNIT_SCHEMA } from "../lib/rate-band";
 
 const link_schema = v.array(
   v.object({
@@ -147,9 +148,16 @@ const schema = defineSchema({
       v.union(
         v.null(),
         v.object({
+          // Monthly-equivalent figure; bands derive from this.
           amount: v.number(),
           // ISO 4217 code; defaults to NGN when absent.
           currency: v.optional(v.string()),
+          // What the user entered in the rate wizard, for pre-filling.
+          unit: v.optional(RATE_UNIT_SCHEMA),
+          rawAmount: v.optional(v.number()),
+          projectDays: v.optional(v.number()),
+          // ms epoch of the wizard save; locks updates for 6 months.
+          confirmedAt: v.optional(v.number()),
         }),
       ),
     ),

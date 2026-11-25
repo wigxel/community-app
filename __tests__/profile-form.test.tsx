@@ -241,12 +241,10 @@ describe("ProfileForm links (standard section)", () => {
     return { user };
   }
 
-  it("loads a legacy 'website' link as 'other' with the full URL", () => {
+  it("loads a legacy 'website' link as 'other' with the scheme stripped", () => {
     renderWithLink({ tag: "website", value: "https://example.com" });
 
-    expect(screen.getByLabelText("Link 1 value")).toHaveValue(
-      "https://example.com",
-    );
+    expect(screen.getByLabelText("Link 1 value")).toHaveValue("example.com");
   });
 
   it("strips a full GitHub URL to its path on load", () => {
@@ -380,7 +378,8 @@ describe("ProfileForm links (standard section)", () => {
     });
   });
 
-  it("reorders links through the drag group", async () => {    const { updateProfile } = setupMocks();
+  it("reorders links through the drag group", async () => {
+    const { updateProfile } = setupMocks();
     const user = userEvent.setup();
     render(
       <ProfileForm
@@ -530,7 +529,7 @@ describe("ProfileForm interests and rate on submit", () => {
     vi.clearAllMocks();
   });
 
-  it("splits interests on commas, trims, drops empties; empty rate becomes null", async () => {
+  it("splits interests on commas, trims, drops empties; rate is not sent from the form", async () => {
     const { updateProfile } = setupMocks();
     const user = userEvent.setup();
     render(
@@ -553,6 +552,7 @@ describe("ProfileForm interests and rate on submit", () => {
       "ML",
       "Photography",
     ]);
-    expect(updateProfile.mock.calls[0][0].rate).toBeNull();
+    // Rate is owned by the rate wizard (with its 6-month lock), not the form.
+    expect(updateProfile.mock.calls[0][0].rate).toBeUndefined();
   });
 });
