@@ -16,6 +16,7 @@ import { Result } from "~/lib/result";
 import { toast } from "~/lib/toast";
 import { projectSchema as projectFormSchema } from "~/lib/validators/schema";
 import { HoveringFormActions } from "../shared/hovering-form-action";
+import { DescriptionSection } from "./description-section";
 import { buildLinkUrl, stripToPath } from "./link-row";
 import { LinksSection } from "./links-section";
 import { pendingFiles } from "./media-row";
@@ -260,6 +261,9 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mx-auto mt-16 flex max-w-3xl flex-col gap-8">
           <ProjectFormItem />
+
+          {/* Full Description Section */}
+          <DescriptionSection />
 
           {/* Media Section */}
           <MediaSection />

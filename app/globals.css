@@ -2,9 +2,9 @@
 @import "tw-animate-css";
 @import "@hyperbridge/ui/styles/base";
 
-@layer base, components, ui, external, system;
+@plugin "@tailwindcss/typography";
 
-/*@plugin "tailwindcss-animate";*/
+@layer base, components, ui, external, system;
 
 @custom-variant dark (&:is(.dark *));
 

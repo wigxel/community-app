@@ -173,7 +173,11 @@ export function MarkdownEditor({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-muted-foreground text-sm font-medium">{label}</span>
+      {label && (
+        <span className="text-muted-foreground text-sm font-medium">
+          {label}
+        </span>
+      )}
       <Tabs defaultValue="write">
         <div className="flex items-center justify-between border-b border-white/10">
           <TabsList className="h-auto bg-transparent p-0">

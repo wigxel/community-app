@@ -13,7 +13,6 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { DescriptionField } from "../fields/description-field";
-import { MarkdownEditor } from "./markdown-editor";
 import type { ProjectFormValues } from "./project-form";
 import TimelineSelect from "./timeline-select";
 
@@ -62,8 +61,6 @@ export function ProjectFormItem() {
           />
 
           <DescriptionField name="description" label="Short description" />
-
-          <MarkdownEditor name="longDescription" />
         </div>
 
         {/* Timeline */}
