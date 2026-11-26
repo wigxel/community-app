@@ -407,15 +407,6 @@ export const deleteProject = mutation({
 
     await ctx.db.delete(existingProject._id);
 
-    // Remove the long-form description row so it can't orphan.
-    for await (const row of ctx.db
-      .query("projectDescription")
-      .withIndex("by_projectId", (q) =>
-        q.eq("projectId", existingProject._id),
-      )) {
-      await ctx.db.delete("projectDescription", row._id);
-    }
-
     // Delete matching favourite rows — they'd otherwise orphan forever.
     for await (const fav of ctx.db
       .query("projectFavourites")
@@ -423,6 +414,15 @@ export const deleteProject = mutation({
         q.eq("projectId", existingProject._id),
       )) {
       await ctx.db.delete(fav._id);
+    }
+
+    // Remove the long-form description row so it can't orphan.
+    for await (const row of ctx.db
+      .query("projectDescription")
+      .withIndex("by_projectId", (q) =>
+        q.eq("projectId", existingProject._id),
+      )) {
+      await ctx.db.delete("projectDescription", row._id);
     }
 
     await bumpProjectCount(ctx, authUser.email, -1);
