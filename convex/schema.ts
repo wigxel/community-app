@@ -80,6 +80,11 @@ export const project_schema = {
   description: v.string(),
   media: v.array(project_media_schema),
   link: v.array(project_link_schema),
+  // Publication state. `false` hides the project from every public surface —
+  // the detail page 404s and profile/home/search listings exclude it — so
+  // search engines never see it. Undefined reads as published, so legacy
+  // rows need no migration.
+  published: v.optional(v.boolean()),
 };
 
 const profile_location_schema = v.object({
