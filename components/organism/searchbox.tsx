@@ -8,14 +8,14 @@ type SearchBoxProps = {
   config: SearchConfig;
   popularTags?: string[];
   onSearch: (value: string) => void;
-  placeholder?: string;
+  placeholder?: string | string[];
 };
 
 type SearchBoxSubmitProps = {
   defaultValue?: string;
   popularTags?: string[];
   onSubmit: (value: string) => void;
-  placeholder?: string;
+  placeholder?: string | string[];
 };
 
 const DEFAULT_TAGS = ["Web3", "E-commerce", "Blog", "Fintech"];

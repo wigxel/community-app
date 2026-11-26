@@ -13,6 +13,7 @@ import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { StandardGrid } from "~/components/layouts/grids";
 import { SearchBoxSubmit } from "~/components/organism/searchbox";
 import { api } from "~/convex/_generated/api";
+import { projectSearchPlaceholders } from "~/lib/search-config";
 import type { BasicProject } from "~/types/models";
 
 const PAGE_SIZE = 12;
@@ -142,7 +143,7 @@ export default function SearchProjectsCatalog(
       <SearchBoxSubmit
         defaultValue={searchQuery}
         onSubmit={handleSearch}
-        placeholder="What you looking for?"
+        placeholder={projectSearchPlaceholders}
       />
     </div>
   );

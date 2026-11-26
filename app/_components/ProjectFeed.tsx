@@ -11,6 +11,7 @@ import { StandardGridSkeleton } from "~/components/layouts/grid-skeleton";
 import { StandardGrid } from "~/components/layouts/grids";
 import { SearchBoxSubmit } from "~/components/organism/searchbox";
 import { api } from "~/convex/_generated/api";
+import { projectSearchPlaceholders } from "~/lib/search-config";
 import type { BasicProject } from "~/types/models";
 import LandingProjectCard from "./landing-project-card";
 import { ProjectModal } from "./ProjectModal";
@@ -149,7 +150,7 @@ export default function PublicProjectsCatalog(
     <SearchBoxSubmit
       defaultValue={searchQuery}
       onSubmit={handleSearch}
-      placeholder="What you looking for?"
+      placeholder={projectSearchPlaceholders}
     />
   );
 

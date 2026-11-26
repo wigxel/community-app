@@ -10,7 +10,10 @@ import { api } from "~/convex/_generated/api";
 import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeArray } from "~/lib/data.helpers";
 import { ProfileImpl } from "~/lib/factories/profile";
-import { talentSearchConfig } from "~/lib/search-config";
+import {
+  talentSearchConfig,
+  talentSearchPlaceholders,
+} from "~/lib/search-config";
 import { cn } from "~/lib/utils";
 import type { TalentProfile } from "~/types/models";
 import { searchParamsCache } from "./search-params";
@@ -68,7 +71,7 @@ async function TalentsCatalog({ searchParams }: PageProps) {
           <QueryBasedSearchInput
             className="w-full"
             config={talentSearchConfig}
-            placeholder="What you looking for?"
+            placeholder={talentSearchPlaceholders}
           />
 
           {/*<RoleFiltersDropdown />*/}
