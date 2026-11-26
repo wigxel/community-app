@@ -588,6 +588,20 @@ describe("publication status", () => {
     expect(doc?.published).toBe(true);
   });
 
+  it("honors published: false on create", async () => {
+    await t.mutation(api.project.createProject, {
+      project: validProject({ title: "Hidden Project", published: false }),
+    });
+
+    const hidden = await t.run((ctx) =>
+      ctx.db
+        .query("project")
+        .filter((q) => q.eq(q.field("title"), "Hidden Project"))
+        .first(),
+    );
+    expect(hidden?.published).toBe(false);
+  });
+
   it("lets the owner unpublish and publish again", async () => {
     await t.mutation(api.project.setProjectPublished, {
       _id: projectId,
@@ -633,8 +647,28 @@ describe("publication status", () => {
       published: false,
     });
 
-    const fetched = await t.query(api.project.getProject, { id: projectId });
-    expect(fetched).toHaveProperty("left");
+    // Public visitors get the same "Not found" as a missing id…
+    mockGetAuthUser.mockResolvedValue(null);
+    const visitorFetch = await t.query(api.project.getProject, {
+      id: projectId,
+    });
+    expect(visitorFetch).toHaveProperty("left");
+
+    // …and so do authenticated non-owners.
+    mockGetAuthUser.mockResolvedValue({
+      ...FAKE_USER,
+      _id: "user_other_456",
+    } as any);
+    const otherFetch = await t.query(api.project.getProject, {
+      id: projectId,
+    });
+    expect(otherFetch).toHaveProperty("left");
+
+    // …but the owner still gets the doc, so the edit page can load it.
+    mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
+    const ownerFetch = await t.query(api.project.getProject, { id: projectId });
+    expect(ownerFetch).toHaveProperty("right");
+
     expect(
       (
         await t.query(api.project.listProjectByUserId, {

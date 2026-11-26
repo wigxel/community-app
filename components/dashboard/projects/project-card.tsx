@@ -26,6 +26,7 @@ import {
   EyeOff,
   FileText,
   Globe,
+  Loader2,
   PencilIcon,
   Video,
 } from "lucide-react";
@@ -249,8 +250,10 @@ export function PrivateProjectCard(project: Project) {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const setProjectPublished = useMutation(api.project.setProjectPublished);
   const isUnpublished = project.published === false;
+  const [isToggling, setIsToggling] = React.useState(false);
 
   const togglePublished = async () => {
+    setIsToggling(true);
     try {
       await setProjectPublished({
         _id: project._id,
@@ -258,11 +261,16 @@ export function PrivateProjectCard(project: Project) {
       });
       toast.success(
         isUnpublished
-          ? "Project published"
-          : "Project unpublished — it is now hidden from the public site",
+          ? "It is now visible on the public site"
+          : "It is now hidden from the public site",
+        {
+          heading: isUnpublished ? "Project published" : "Project unpublished",
+        },
       );
     } catch {
       toast.error("Failed to update project");
+    } finally {
+      setIsToggling(false);
     }
   };
 
@@ -271,15 +279,7 @@ export function PrivateProjectCard(project: Project) {
       <Link href={editLink} className="relative flex flex-col">
         <ProjectCardRoot project={project}>
           <PreventPropagation>
-            <div className="absolute inset-x-0 z-20 flex justify-between px-3 pt-1">
-              {isUnpublished ? (
-                <span className="bg-brand-black-450/50 rounded-full border border-amber-400/30 px-2.5 py-0.5 text-xs font-medium text-amber-200 backdrop-blur-md">
-                  Unpublished
-                </span>
-              ) : (
-                <div className="filler" />
-              )}
-
+            <div className="absolute inset-x-0 z-20 flex justify-end px-3 pt-1">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <IconButton
@@ -297,8 +297,15 @@ export function PrivateProjectCard(project: Project) {
                       Preview project
                     </DropdownMenuItem>
                   </Link>
-                  <DropdownMenuItem onClick={() => void togglePublished()}>
-                    {isUnpublished ? (
+                  <DropdownMenuItem
+                    disabled={isToggling}
+                    // Keep the menu open while the toggle is in flight.
+                    onSelect={(event) => event.preventDefault()}
+                    onClick={() => void togglePublished()}
+                  >
+                    {isToggling ? (
+                      <Loader2 className="text-muted-foreground animate-spin" />
+                    ) : isUnpublished ? (
                       <Globe className="text-muted-foreground" />
                     ) : (
                       <EyeOff className="text-muted-foreground" />
@@ -324,7 +331,16 @@ export function PrivateProjectCard(project: Project) {
             </div>
           </PreventPropagation>
 
-          <ProjectCardMedia />
+          <div className="relative overflow-hidden rounded-b-[calc(var(--project-card-media-radius)-calc(var(--project-card-media-padding)*0.5))]">
+            {isUnpublished ? (
+              <span className="bg-brand-black-450/50 absolute inset-x-0 bottom-0 z-20 flex items-center px-2.5 py-2 text-xs font-medium backdrop-blur-md">
+                Unpublished
+              </span>
+            ) : null}
+
+            <ProjectCardMedia />
+          </div>
+
           <ProjectCardContent className="justify-start">
             <Text
               variant={"body1"}

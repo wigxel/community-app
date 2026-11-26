@@ -207,12 +207,15 @@ export const getProject = query({
       .filter((q) => q.eq(q.field("_id"), args.id))
       .first();
 
-    // Unpublished projects are not publicly accessible: the caller gets the
+    if (doc == null) return Result.error("Not found");
+
+    // Unpublished projects are not publicly accessible: callers get the
     // same "Not found" result as a missing id, so the public detail page
-    // renders its not-found state (already noindex). The owner still sees
-    // the project on their dashboard, which reads through `listProject`.
-    if (doc == null || doc.published === false) {
-      return Result.error("Not found");
+    // renders its not-found state (already noindex). The owner still gets
+    // the doc so the dashboard edit page can load and publish it.
+    if (doc.published === false) {
+      const authUser = await authComponent.getAuthUser(ctx);
+      if (authUser?._id !== doc.userId) return Result.error("Not found");
     }
 
     return Result.ok(await toStandardProject(ctx, doc));
@@ -298,7 +301,7 @@ export const createProject = mutation({
       ...args.project,
       tags,
       userId: authUser._id,
-      published: true,
+      published: args.project.published ?? true,
       lastUpdatedAt: Date.now(),
     });
 

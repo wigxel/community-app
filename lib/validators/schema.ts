@@ -114,6 +114,9 @@ export const projectSchema = z
       end: timelineDate,
     }),
     ongoing: z.boolean(),
+    // Absent reads as published (legacy rows); the form coerces to a
+    // concrete boolean on reset.
+    published: z.boolean().optional(),
     media: z
       .array(mediaSchema)
       .max(10, { message: "Maximum 10 media per project." }),
