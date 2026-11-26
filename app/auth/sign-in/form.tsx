@@ -77,6 +77,7 @@ export default function SignInForm(props: SignInFormProps) {
 
         <Form {...form}>
           <form
+            method="post"
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >

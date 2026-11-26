@@ -3,6 +3,7 @@ import { ArrowUpRight } from "@hyperbridge/ui/icons";
 import Link from "next/link";
 import { RequireAuth } from "~/components/auth/require-auth";
 import { Container } from "~/components/layouts/container";
+import { MarkdownRenderer } from "~/components/markdown/markdown-renderer";
 import { ProfileAvatar } from "~/components/profile/avatar";
 import { ProjectImpl } from "~/lib/factories/project";
 import type { BasicProject } from "~/types/models";
@@ -10,10 +11,13 @@ import { FavouriteButton } from "./FavouriteButton";
 import { MediaThumb } from "./MediaThumb";
 import { SaveButton } from "./save-button";
 
-type ProjectDetailsProps = { project: BasicProject };
+type ProjectDetailsProps = {
+  project: BasicProject;
+  longDescription?: string | null;
+};
 
 export function ProjectDetails(props: ProjectDetailsProps) {
-  const { project } = props;
+  const { project, longDescription } = props;
 
   const links = ProjectImpl.links(project);
   const media = ProjectImpl.listMedia(project);
@@ -79,12 +83,10 @@ export function ProjectDetails(props: ProjectDetailsProps) {
         className="md:flex-rows mt-12 flex flex-col items-start gap-8 md:justify-between"
       >
         <div className="flex w-full flex-col items-start gap-8 md:flex-row">
-          <article className="flex-1 basis-8/12">
-            {project.description && (
-              <div className="order-1 w-full text-base md:text-xl">
-                <p className="text-foreground leading-relaxed whitespace-pre-line">
-                  {project.description}
-                </p>
+          <article className="max-w-full flex-1 basis-8/12 md:max-w-[auto]">
+            {longDescription && (
+              <div className="mt-8">
+                <MarkdownRenderer>{longDescription}</MarkdownRenderer>
               </div>
             )}
           </article>

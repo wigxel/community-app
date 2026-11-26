@@ -8,6 +8,7 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import { Either } from "effect";
+import { countWords, MAX_PROJECT_DESCRIPTION_WORDS } from "../lib/markdown";
 import { Result, type ResultShape } from "../lib/result";
 import { MAX_PROJECT_TAGS, MAX_TAG_LENGTH, normalizeTags } from "../lib/tags";
 import type { BasicProject, Project } from "../types/models";
@@ -213,9 +214,42 @@ export const getProject = query({
   },
 });
 
+/**
+ * Insert, replace, or remove the long-form Markdown row for a project.
+ * Empty/whitespace markdown removes the row so cleared fields don't leave
+ * orphaned content behind.
+ */
+async function writeProjectDescription(
+  ctx: GenericMutationCtx<DataModel>,
+  projectId: Id<"project">,
+  markdown: string,
+): Promise<void> {
+  if (countWords(markdown) > MAX_PROJECT_DESCRIPTION_WORDS)
+    throw new Error(
+      `Description cannot exceed ${MAX_PROJECT_DESCRIPTION_WORDS} words.`,
+    );
+
+  const existing = await ctx.db
+    .query("projectDescription")
+    .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
+    .first();
+
+  if (markdown.trim() === "") {
+    if (existing) await ctx.db.delete("projectDescription", existing._id);
+    return;
+  }
+
+  if (existing) {
+    await ctx.db.patch("projectDescription", existing._id, { markdown });
+  } else {
+    await ctx.db.insert("projectDescription", { projectId, markdown });
+  }
+}
+
 export const createProject = mutation({
   args: {
     project: v.object(project_args),
+    longDescription: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
@@ -264,6 +298,9 @@ export const createProject = mutation({
 
     await bumpProjectCount(ctx, authUser.email, 1);
 
+    if (args.longDescription !== undefined)
+      await writeProjectDescription(ctx, projectId, args.longDescription);
+
     // Schedule blurhash generation for photos
     await ctx.scheduler.runAfter(0, internal.blurhash.generateForProject, {
       projectId,
@@ -279,6 +316,7 @@ export const updateProject = mutation({
       ...project_args,
       _id: v.optional(v.string()),
     }),
+    longDescription: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
@@ -337,6 +375,13 @@ export const updateProject = mutation({
       lastUpdatedAt: Date.now(),
     });
 
+    if (args.longDescription !== undefined)
+      await writeProjectDescription(
+        ctx,
+        existingProject._id,
+        args.longDescription,
+      );
+
     // Schedule blurhash generation for photos
     await ctx.scheduler.runAfter(0, internal.blurhash.generateForProject, {
       projectId: existingProject._id,
@@ -369,6 +414,15 @@ export const deleteProject = mutation({
         q.eq("projectId", existingProject._id),
       )) {
       await ctx.db.delete(fav._id);
+    }
+
+    // Remove the long-form description row so it can't orphan.
+    for await (const row of ctx.db
+      .query("projectDescription")
+      .withIndex("by_projectId", (q) =>
+        q.eq("projectId", existingProject._id),
+      )) {
+      await ctx.db.delete("projectDescription", row._id);
     }
 
     await bumpProjectCount(ctx, authUser.email, -1);

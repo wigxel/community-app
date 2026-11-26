@@ -175,6 +175,13 @@ const schema = defineSchema({
     .index("by_userId", ["userId"])
     .searchIndex("search_title", { searchField: "title" }),
 
+  // Long-form Markdown description, kept off `project` so feed/list payloads
+  // stay small. One row per project; legacy projects have no row.
+  projectDescription: defineTable({
+    projectId: v.id("project"),
+    markdown: v.string(),
+  }).index("by_projectId", ["projectId"]),
+
   workExperience: defineTable(work_experience_schema).index("by_userId", [
     "userId",
   ]),

@@ -6,6 +6,7 @@ import { ProjectDetails } from "~/app/_components/project-details";
 import { Container } from "~/components/layouts/container";
 import { DiscoverMoreProjects } from "~/components/organism/discover-more-projects";
 import { api } from "~/convex/_generated/api";
+import type { Id } from "~/convex/_generated/dataModel";
 import { Result } from "~/lib/result";
 import type { BasicProject } from "~/types/models";
 
@@ -137,7 +138,13 @@ export async function generateMetadata({
 export default async function ProjectsPage({ params }: PageProps) {
   const { projectId } = await params;
 
-  const project_response = await getProject(projectId);
+  const [project_response, longDescription] = await Promise.all([
+    getProject(projectId),
+    // Legacy projects have no long-form row (null); invalid ids throw → null.
+    fetchQuery(api.projectDescription.getProjectDescription, {
+      projectId: projectId as Id<"project">,
+    }).catch(() => null),
+  ]);
 
   return Result.match(project_response, {
     error: () => notFound(),
@@ -152,7 +159,10 @@ export default async function ProjectsPage({ params }: PageProps) {
               url: getProjectUrl(projectId),
             })}
           />
-          <ProjectDetails project={basicProject} />
+          <ProjectDetails
+            project={basicProject}
+            longDescription={longDescription}
+          />
           <DiscoverMoreProjects />
         </Container>
       );

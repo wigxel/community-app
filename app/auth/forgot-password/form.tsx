@@ -74,6 +74,7 @@ export default function ForgotPasswordForm() {
 
         <Form {...form}>
           <form
+            method="post"
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >

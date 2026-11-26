@@ -60,7 +60,7 @@ export function ProjectFormItem() {
             }}
           />
 
-          <DescriptionField name="description" />
+          <DescriptionField name="description" label="Short description" />
         </div>
 
         {/* Timeline */}

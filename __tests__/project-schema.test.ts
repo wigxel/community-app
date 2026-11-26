@@ -403,3 +403,35 @@ describe("projectSchema", () => {
       ).toBe(true);
   });
 });
+
+describe("longDescription word limit", () => {
+  const validBase = {
+    ...base,
+    timeline: { start: { year: "2024" }, end: null as unknown as null },
+    ongoing: true,
+  };
+
+  it("passes when omitted or within 5000 words", () => {
+    expect(parse({ ...validBase, longDescription: undefined }).success).toBe(
+      true,
+    );
+    expect(
+      parse({ ...validBase, longDescription: "one two three" }).success,
+    ).toBe(true);
+  });
+
+  it("passes at exactly 5000 words", () => {
+    const words = Array.from({ length: 5000 }, () => "w").join(" ");
+    expect(parse({ ...validBase, longDescription: words }).success).toBe(true);
+  });
+
+  it("fails over 5000 words", () => {
+    const words = Array.from({ length: 5001 }, () => "w").join(" ");
+    const res = parse({ ...validBase, longDescription: words });
+    expect(res.success).toBe(false);
+    if (!res.success)
+      expect(res.error.issues.some((i) => /5000 words/.test(i.message))).toBe(
+        true,
+      );
+  });
+});

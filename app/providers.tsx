@@ -2,6 +2,7 @@
 
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { ConvexReactClient } from "convex/react";
+import { usePathname } from "next/navigation";
 import posthog from "posthog-js";
 import { type ReactNode, useEffect, useRef } from "react";
 import { Toaster } from "sonner";
@@ -40,6 +41,11 @@ type ProvidersProps = {
 
 function Providers(props: ProvidersProps) {
   const { children, initialToken } = props;
+  const pathname = usePathname();
+
+  const position = pathname?.startsWith("/dashboard")
+    ? "top-center"
+    : "bottom-right";
 
   return (
     <ConvexBetterAuthProvider
@@ -49,7 +55,7 @@ function Providers(props: ProvidersProps) {
     >
       <PostHogIdentity />
       {children}
-      <Toaster position="bottom-right" richColors />
+      <Toaster position={position} richColors />
     </ConvexBetterAuthProvider>
   );
 }

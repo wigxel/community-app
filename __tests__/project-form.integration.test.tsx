@@ -95,7 +95,11 @@ const MOCK_PROJECT = {
 function setupConvexMocks(project: Record<string, unknown> = MOCK_PROJECT) {
   mockUseQuery.mockReset();
   mockUseMutation.mockReset();
-  mockUseQuery.mockReturnValue(Result.ok(project));
+  // getProject returns a Result; getProjectDescription returns markdown|null.
+  mockUseQuery.mockImplementation(
+    (_fn: unknown, args?: Record<string, unknown>) =>
+      args && "projectId" in args ? null : Result.ok(project),
+  );
   const noop = vi.fn().mockResolvedValue({ _tag: "Right", right: {} });
   mockUseMutation.mockReturnValue(noop);
 }

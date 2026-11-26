@@ -16,6 +16,7 @@ import { Result } from "~/lib/result";
 import { toast } from "~/lib/toast";
 import { projectSchema as projectFormSchema } from "~/lib/validators/schema";
 import { HoveringFormActions } from "../shared/hovering-form-action";
+import { DescriptionSection } from "./description-section";
 import { buildLinkUrl, stripToPath } from "./link-row";
 import { LinksSection } from "./links-section";
 import { pendingFiles } from "./media-row";
@@ -27,6 +28,7 @@ const EMPTY_PROJECT = {
   userId: "",
   title: "",
   description: "",
+  longDescription: "",
   timeline: { start: null, end: null },
   ongoing: false,
   media: [],
@@ -52,12 +54,21 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
     mode === "edit" ? { id: projectId ?? null } : "skip",
   );
 
+  // Long-form Markdown lives in its own table; legacy projects return null.
+  const longDescription = useQuery(
+    api.projectDescription.getProjectDescription,
+    mode === "edit" && projectId
+      ? { projectId: projectId as Id<"project"> }
+      : "skip",
+  );
+
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const getStorageUrl = useMutation(api.files.getStorageUrl);
   const createProject = useMutation(api.project.createProject);
   const updateProject = useMutation(api.project.updateProject);
 
-  const isLoading = mode === "edit" && project === undefined;
+  const isLoading =
+    mode === "edit" && (project === undefined || longDescription === undefined);
   const isError =
     mode === "edit" &&
     Result.match(project, {
@@ -98,6 +109,7 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
         reset(
           {
             ...projectData,
+            longDescription: longDescription ?? "",
             tags: projectData.tags ?? [],
             link: projectData.link.map((l) => ({
               ...l,
@@ -113,7 +125,7 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
 
       return () => clearTimeout(id);
     }
-  }, [mode, projectData, reset]);
+  }, [mode, projectData, longDescription, reset]);
 
   async function uploadPendingFiles(
     projectData: ProjectFormValues,
@@ -168,11 +180,15 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
           .map((l) => ({ ...l, value: buildLinkUrl(l.tag, l.value) })),
       };
 
+      // The long-form Markdown is stored in its own table, not on `project`.
+      const { longDescription, ...project } = cleanedProject;
+
       if (mode === "edit") {
         if (!projectId) throw new Error("projectId is required for edit mode");
 
         const result = await updateProject({
-          project: { ...cleanedProject, _id: projectId as Id<"project"> },
+          project: { ...project, _id: projectId as Id<"project"> },
+          longDescription,
         });
         if (result._tag === "Left") {
           toast.error(result.left.join("\n"));
@@ -181,7 +197,10 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
       }
 
       if (mode === "create") {
-        const result = await createProject({ project: cleanedProject });
+        const result = await createProject({
+          project,
+          longDescription,
+        });
         if (result._tag === "Left") {
           toast.error(result.left.join("\n"));
           return;
@@ -190,8 +209,9 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
 
       captureEvent("project_saved", {
         mode,
-        has_media: cleanedProject.media.length > 0,
-        has_links: cleanedProject.link.length > 0,
+        has_media: project.media.length > 0,
+        has_links: project.link.length > 0,
+        has_long_description: (longDescription ?? "").trim() !== "",
       });
 
       toast.success(
@@ -241,6 +261,9 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mx-auto mt-16 flex max-w-3xl flex-col gap-8">
           <ProjectFormItem />
+
+          {/* Full Description Section */}
+          <DescriptionSection />
 
           {/* Media Section */}
           <MediaSection />
