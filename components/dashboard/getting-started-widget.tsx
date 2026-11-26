@@ -5,17 +5,40 @@ import { usePaginatedQuery } from "convex/react";
 import { Circle, CircleCheckIcon, MinusIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import React from "react";
+import { useSyncExternalStore } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { api } from "~/convex/_generated/api";
 import { useAuthProfile } from "~/hooks/use-auth";
 import { safeArray, safeStr } from "~/lib/data.helpers";
 import { cn } from "~/lib/utils";
 
+const EXPANDED_KEY = "getting-started-expanded";
+
+// sessionStorage has no same-tab change event, so toggles dispatch this custom one.
+const EXPANDED_EVENT = "getting-started-expanded:changed";
+
+const subscribeExpanded = (onChange: () => void) => {
+  window.addEventListener(EXPANDED_EVENT, onChange);
+  return () => window.removeEventListener(EXPANDED_EVENT, onChange);
+};
+
+const getIsExpanded = () => sessionStorage.getItem(EXPANDED_KEY) !== "false";
+
 export function GettingStartedWidget() {
   const profile = useAuthProfile();
 
-  const [isExpanded, setIsExpanded] = React.useState(true);
+  const isExpanded = useSyncExternalStore(
+    subscribeExpanded,
+    getIsExpanded,
+    // Collapsed on the initial (server + hydration) render; expands after mount
+    // unless this session collapsed it.
+    () => false,
+  );
+
+  const toggleExpanded = () => {
+    sessionStorage.setItem(EXPANDED_KEY, String(!isExpanded));
+    window.dispatchEvent(new Event(EXPANDED_EVENT));
+  };
 
   const { results: projects } = usePaginatedQuery(
     api.project.listProject,
@@ -67,7 +90,7 @@ export function GettingStartedWidget() {
     <button
       type="button"
       className={cn("z-200 flex items-center gap-2 p-2")}
-      onClick={() => setIsExpanded((expanded) => !expanded)}
+      onClick={toggleExpanded}
     >
       <motion.div
         variants={{
@@ -86,6 +109,8 @@ export function GettingStartedWidget() {
       <CircleProgress className="size-8" progress={progress} />
     </button>
   );
+
+  console.log(isExpanded);
 
   return (
     <>
@@ -108,7 +133,7 @@ export function GettingStartedWidget() {
                 <IconButton
                   type="button"
                   className="absolute end-0 top-0"
-                  onClick={() => setIsExpanded((visible) => !visible)}
+                  onClick={toggleExpanded}
                   variant={"unset"}
                 >
                   <MinusIcon strokeWidth={1} />
