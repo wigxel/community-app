@@ -47,7 +47,7 @@ function LandingProjectCard(props: LandingProjectCardProps) {
       href={
         isQuickPreview
           ? { pathname, hash: `#preview:${project._id}` }
-          : `/projects/${project._id}`
+          : `/projects/${project.slug ?? project._id}`
       }
       scroll={false}
       onClick={handleNavigation}
