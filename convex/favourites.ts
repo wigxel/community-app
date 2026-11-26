@@ -1,6 +1,24 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+import { type MutationCtx, mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
+
+/**
+ * Bump the denormalized `project.favouriteCount` alongside every favourite
+ * insert/delete, so `getProjectFavourite` never counts rows itself.
+ */
+async function bumpFavouriteCount(
+  ctx: MutationCtx,
+  projectId: Id<"project">,
+  delta: number,
+): Promise<void> {
+  const project = await ctx.db.get(projectId);
+  if (!project) return;
+
+  await ctx.db.patch(projectId, {
+    favouriteCount: Math.max(0, (project.favouriteCount ?? 0) + delta),
+  });
+}
 
 /**
  * Toggle a project favourite for the authenticated user.
@@ -23,6 +41,7 @@ export const toggle = mutation({
 
     if (existing) {
       await ctx.db.delete(existing._id);
+      await bumpFavouriteCount(ctx, projectId, -1);
       return false;
     }
 
@@ -30,6 +49,7 @@ export const toggle = mutation({
       userId: authUser._id,
       projectId,
     });
+    await bumpFavouriteCount(ctx, projectId, 1);
     return true;
   },
 });
@@ -43,12 +63,9 @@ export const getProjectFavourite = query({
     projectId: v.id("project"),
   },
   handler: async (ctx, { projectId }) => {
-    const all = await ctx.db
-      .query("projectFavourites")
-      .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
-      .collect();
-
-    const count = all.length;
+    // Count is denormalized on the project row — no row scan.
+    const project = await ctx.db.get(projectId);
+    const count = project?.favouriteCount ?? 0;
 
     let isFavourited: boolean | null = null;
     try {

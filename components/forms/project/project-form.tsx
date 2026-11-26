@@ -2,7 +2,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import posthog from "posthog-js";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -11,6 +10,8 @@ import { useUnsavedChangesGuard } from "~/components/providers/navigation-protec
 import { Button } from "~/components/ui/button";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
+import { useFormDebug } from "~/hooks/useFormDebug";
+import { captureEvent } from "~/lib/analytics";
 import { Result } from "~/lib/result";
 import { toast } from "~/lib/toast";
 import { projectSchema as projectFormSchema } from "~/lib/validators/schema";
@@ -94,6 +95,8 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
     reset,
     formState: { isDirty },
   } = form;
+
+  useFormDebug(form);
 
   const { ConfirmationDialog, navigate } = useUnsavedChangesGuard({
     isDirty,
@@ -203,17 +206,12 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
         }
       }
 
-      if (
-        process.env.NEXT_PUBLIC_POSTHOG_KEY &&
-        process.env.NEXT_PUBLIC_POSTHOG_HOST
-      ) {
-        posthog.capture("project_saved", {
-          mode,
-          has_media: project.media.length > 0,
-          has_links: project.link.length > 0,
-          has_long_description: (longDescription ?? "").trim() !== "",
-        });
-      }
+      captureEvent("project_saved", {
+        mode,
+        has_media: project.media.length > 0,
+        has_links: project.link.length > 0,
+        has_long_description: (longDescription ?? "").trim() !== "",
+      });
 
       toast.success(
         mode === "create"

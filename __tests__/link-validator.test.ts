@@ -50,12 +50,20 @@ describe("projectLinkSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts other with valid URL", () => {
+  it("accepts other with a bare host and path", () => {
+    const result = projectLinkSchema.safeParse({
+      tag: "other",
+      value: "example.com/page",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects other that already includes the scheme", () => {
     const result = projectLinkSchema.safeParse({
       tag: "other",
       value: "https://example.com/page",
     });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it("rejects other with plain text", () => {
@@ -68,7 +76,7 @@ describe("projectLinkSchema", () => {
 
   it("rejects invalid tag", () => {
     const result = projectLinkSchema.safeParse({
-      tag: "linkedin",
+      tag: "twitter",
       value: "user",
     });
     expect(result.success).toBe(false);

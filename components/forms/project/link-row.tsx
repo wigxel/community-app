@@ -1,8 +1,9 @@
 "use client";
 import { IconButton } from "@hyperbridge/ui";
-import { GlobeIcon, MinusIcon } from "lucide-react";
+import { GlobeIcon, GripVertical, MinusIcon } from "lucide-react";
+import { Reorder, useDragControls } from "motion/react";
 import { type Control, Controller } from "react-hook-form";
-import { Behance, Figma, Github } from "~/components/icons";
+import { Behance, Figma, Github, LinkedIn } from "~/components/icons";
 import { Input } from "~/components/ui/input";
 import {
   Select,
@@ -30,11 +31,18 @@ const LINK_TAGS = [
     placeholder: "project-id",
   },
   {
-    prefix: "behance.com/",
+    prefix: "behance.net/",
     value: "behance",
     label: "Behance",
     icon: <Behance size={"1em"} />,
     placeholder: "project-id",
+  },
+  {
+    prefix: "linkedin.com/",
+    value: "linkedin",
+    label: "LinkedIn",
+    icon: <LinkedIn size={"1em"} />,
+    placeholder: "in/username or company/name",
   },
   {
     prefix: "https://",
@@ -45,23 +53,28 @@ const LINK_TAGS = [
   },
 ] as const;
 
-const normalizeUrl = (val: string) => {
-  if (!val) return val;
-  if (val.startsWith("www.")) return `https://${val}`;
-  return val;
-};
+const stripScheme = (val: string) => val.replace(/^https?:\/\//i, "");
 
-const MATCHABLE_HOSTS = ["github.com", "figma.com", "behance.net"];
+const MATCHABLE_HOSTS = [
+  "github.com",
+  "figma.com",
+  "behance.net",
+  "linkedin.com",
+];
 
-const HOST_TAG_MAP: Record<string, "github" | "figma" | "behance"> = {
+const HOST_TAG_MAP: Record<
+  string,
+  "github" | "figma" | "behance" | "linkedin"
+> = {
   "github.com": "github",
   "figma.com": "figma",
   "behance.net": "behance",
+  "linkedin.com": "linkedin",
 };
 
 export function detectTagFromUrl(
   url: string,
-): "github" | "figma" | "behance" | null {
+): "github" | "figma" | "behance" | "linkedin" | null {
   try {
     const { hostname } = new URL(url);
     const bare = hostname.replace(/^www\./, "");
@@ -72,7 +85,8 @@ export function detectTagFromUrl(
 }
 
 export function stripToPath(url: string, tag: string): string {
-  if (tag === "other" || !url.startsWith("http")) return url;
+  if (tag === "other") return stripScheme(url);
+  if (!url.startsWith("http")) return url;
   try {
     const { pathname, search, hash } = new URL(url);
     const path = pathname.replace(/^\//, "");
@@ -83,11 +97,13 @@ export function stripToPath(url: string, tag: string): string {
 }
 
 export function buildLinkUrl(tag: string, value: string): string {
-  if (tag === "other" || value.startsWith("http")) return value;
+  if (value.startsWith("http")) return value;
   const prefixMap: Record<string, string> = {
     github: "https://github.com/",
     figma: "https://figma.com/",
     behance: "https://behance.net/",
+    linkedin: "https://www.linkedin.com/",
+    other: "https://",
   };
   return (prefixMap[tag] ?? "") + value;
 }
@@ -108,13 +124,16 @@ export function extractLinkValue(url: string): string | null {
 
 interface LinkRowProps {
   linkIndex: number;
+  /** Field id from useFieldArray — the Reorder.Item identity. */
+  value: string;
   control: Control<ProjectFormValues>;
   remove: (i: number) => void;
   error: string | undefined;
 }
 
 export default function LinkRow(props: LinkRowProps) {
-  const { linkIndex, control, remove, error } = props;
+  const { linkIndex, value, control, remove, error } = props;
+  const dragControls = useDragControls();
 
   return (
     <Controller
@@ -125,78 +144,100 @@ export default function LinkRow(props: LinkRowProps) {
         const match = LINK_TAGS.find((linkType) => linkType.value === tag);
 
         return (
-          <div
-            title={error}
-            className={cn(
-              "focus-within:bg-card hover:bg-card relative flex grow basis-3/5 items-center rounded-xl px-2 py-2",
-              {
-                "border-destructive border": error,
-              },
-            )}
+          <Reorder.Item
+            as="div"
+            value={value}
+            dragListener={false}
+            dragControls={dragControls}
+            className="relative"
           >
-            <Select
-              value={field.value?.tag ?? "other"}
-              onValueChange={(val) =>
-                field.onChange({ ...field.value, tag: val })
-              }
+            <div
+              title={error}
+              className={cn(
+                "focus-within:bg-card hover:bg-card relative flex grow basis-3/5 items-center rounded-xl px-2 py-2",
+                {
+                  "border-destructive border": error,
+                },
+              )}
             >
-              <SelectTrigger className="w-20 grow-0! border-none shadow-none">
-                <SelectValue />
-              </SelectTrigger>
+              <button
+                type="button"
+                aria-label="Drag to reorder"
+                title="Drag to reorder"
+                className="text-muted-foreground/40 hover:text-muted-foreground -ms-1 shrink-0 cursor-grab touch-none self-stretch px-1"
+                onPointerDown={(event) => dragControls.start(event)}
+              >
+                <GripVertical size={16} />
+              </button>
 
-              <SelectContent>
-                {LINK_TAGS.map((linkType) => (
-                  <SelectItem key={linkType.value} value={linkType.value}>
-                    <span className="inline-flex items-center gap-2">
-                      {linkType.icon}
-                      <span className="sr-only">{linkType.label}</span>
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {match ? (
-              <span className="text-foreground shrink-0 px-2 text-sm whitespace-nowrap">
-                {match?.prefix}
-              </span>
-            ) : null}
-
-            <Input
-              aria-label={`Link ${linkIndex + 1} value`}
-              value={field.value?.value ?? ""}
-              placeholder={match?.placeholder}
-              className="text-foreground bg-muted placeholder:text-muted-foreground w-full text-sm"
-              onChange={(e) => {
-                return field.onChange({
-                  ...field.value,
-                  value: normalizeUrl(e.target.value),
-                });
-              }}
-              onPaste={(e) => {
-                const pasted = e.clipboardData.getData("text");
-                const fullUrl = extractLinkValue(pasted);
-                if (fullUrl) {
-                  e.preventDefault();
-                  const detectedTag = detectTagFromUrl(fullUrl);
-                  const nextTag = detectedTag ?? field.value?.tag ?? "other";
-                  field.onChange({
-                    tag: nextTag,
-                    value: stripToPath(fullUrl, nextTag),
-                  });
+              <Select
+                value={field.value?.tag ?? "other"}
+                onValueChange={(val) =>
+                  field.onChange({ ...field.value, tag: val })
                 }
-              }}
-            />
+              >
+                <SelectTrigger className="w-20 grow-0! border-none shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
 
-            <IconButton
-              type="button"
-              variant="destructive"
-              className="ms-2 shrink-0"
-              onClick={() => remove(linkIndex)}
-            >
-              <MinusIcon />
-            </IconButton>
-          </div>
+                <SelectContent>
+                  {LINK_TAGS.map((linkType) => (
+                    <SelectItem key={linkType.value} value={linkType.value}>
+                      <span className="inline-flex items-center gap-2">
+                        {linkType.icon}
+                        <span className="sr-only">{linkType.label}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {match ? (
+                <span className="text-foreground shrink-0 px-2 text-sm whitespace-nowrap">
+                  {match?.prefix}
+                </span>
+              ) : null}
+
+              <Input
+                aria-label={`Link ${linkIndex + 1} value`}
+                ref={field.ref}
+                value={field.value?.value ?? ""}
+                placeholder={match?.placeholder}
+                className="text-foreground bg-muted placeholder:text-muted-foreground w-full text-sm"
+                onChange={(e) => {
+                  return field.onChange({
+                    ...field.value,
+                    value:
+                      tag === "other"
+                        ? stripScheme(e.target.value)
+                        : e.target.value,
+                  });
+                }}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData("text");
+                  const fullUrl = extractLinkValue(pasted);
+                  if (fullUrl) {
+                    e.preventDefault();
+                    const detectedTag = detectTagFromUrl(fullUrl);
+                    const nextTag = detectedTag ?? field.value?.tag ?? "other";
+                    field.onChange({
+                      tag: nextTag,
+                      value: stripToPath(fullUrl, nextTag),
+                    });
+                  }
+                }}
+              />
+
+              <IconButton
+                type="button"
+                variant="destructive"
+                className="ms-2 shrink-0"
+                onClick={() => remove(linkIndex)}
+              >
+                <MinusIcon />
+              </IconButton>
+            </div>
+          </Reorder.Item>
         );
       }}
     />

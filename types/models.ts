@@ -5,6 +5,13 @@ export interface ProfileLocation {
   country: string;
 }
 
+/** Owner-private rate; public consumers only ever see `rateBand`. */
+export interface ProfileRate {
+  amount: number;
+  /** ISO 4217 code, defaults to NGN. */
+  currency?: string;
+}
+
 export interface Profile {
   userId?: string;
   firstName: string;
@@ -24,6 +31,10 @@ export interface Profile {
   skills?: string[];
   verified: boolean;
   projectCount?: number;
+  /** Exact rate — owner-only. Public profile queries omit this. */
+  rate?: ProfileRate | null;
+  /** Public affordability indicator (₦ / ₦₦ / ₦₦₦ / ₦₦₦₦). */
+  rateBand?: string | null;
 }
 
 export interface ProfileWorkExperience {
@@ -53,7 +64,7 @@ export interface Link {
 }
 
 export interface ProjectLink {
-  tag: "github" | "figma" | "behance" | "other";
+  tag: "github" | "figma" | "behance" | "linkedin" | "other";
   value: string;
 }
 
@@ -89,8 +100,9 @@ export type TimelineDate =
   | { month: string; year: string };
 
 export type BasicProject = Project & {
-  ownerName: string;
-  username: string;
+  ownerName: string | null;
+  username: string | null;
+  lastUpdatedAt?: number;
 };
 
 export interface Project extends Doc<"project"> {
@@ -103,6 +115,8 @@ export interface Project extends Doc<"project"> {
   media: Media[];
   link: ProjectLink[];
 }
+
+export type FullProject = BasicProject;
 
 export type FavouritedProject = Project & {
   favouritedAt: number;

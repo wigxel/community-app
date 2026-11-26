@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -41,6 +41,15 @@ vi.mock("motion/react", () => ({
     },
   ),
   AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+  Reorder: {
+    Group: ({ children }: { children?: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+    Item: ({ children }: { children?: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+  },
+  useDragControls: () => ({ start: vi.fn() }),
 }));
 
 vi.mock("convex/react", () => ({
@@ -192,7 +201,7 @@ describe("ProjectForm integration", () => {
 
     const { user } = renderForm();
     await waitForLinkReady();
-    expect(getLinkInput()).toHaveValue("https://example.com");
+    expect(getLinkInput()).toHaveValue("example.com");
 
     await act(async () => {
       await user.click(getLinkInput());
@@ -226,6 +235,23 @@ describe("ProjectForm integration", () => {
         value: "https://github.com/acme/web-app",
       });
     });
+  });
+
+  it("focuses the invalid link input on submit", async () => {
+    const updateProject = setupUpdateProjectMock();
+    const { user } = renderForm();
+    await waitForLinkReady();
+
+    await fillRequiredFields(user);
+    await user.clear(getLinkInput());
+
+    const submitButton = screen.getByRole("button", { name: /save/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(getLinkInput()).toHaveFocus();
+    });
+    expect(updateProject).not.toHaveBeenCalled();
   });
 
   it("submits with correct tag after paste auto-switch", async () => {

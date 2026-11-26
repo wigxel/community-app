@@ -1,11 +1,19 @@
 import { queryGeneric as query } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { ProfileImpl } from "../lib/factories/profile";
+import {
+  formatDate,
+  monthlyEquivalent,
+  RATE_LOCK_MS,
+  RATE_UNIT_SCHEMA,
+  rateBand,
+  rateUnlocksAt,
+} from "../lib/rate-band";
 import { Result } from "../lib/result";
 import { validateUsernameFormat } from "../lib/username";
 import type { Profile, TalentProfile } from "../types/models";
 import type { Id } from "./_generated/dataModel";
-import { mutation } from "./_generated/server";
+import { mutation, type QueryCtx } from "./_generated/server";
 import { authComponent } from "./auth";
 import { seedProjectCount } from "./project";
 
@@ -59,13 +67,27 @@ export const listProfile = query({
           totalYearsOfExperience,
           // @todo: Implement seniority feature — derive from leaderboard score or user input
           seniority: "none",
+          rateBand: user.rate ? rateBand(user.rate.amount) : null,
         };
       }),
     );
 
-    return enrichedUsers;
+    // Talent listing is public: never expose exact rates.
+    return enrichedUsers.map(({ rate: _rate, ...user }) => user);
   },
 });
+
+// Resolves a stored image value to a display URL: storage ids → signed URL,
+// legacy string URLs / data URLs pass through unchanged.
+// ponytail: prefix heuristic to tell ids from URLs; add a kind field if that ever breaks
+async function imageUrl(
+  ctx: Pick<QueryCtx, "storage">,
+  value: Id<"_storage"> | string | null | undefined,
+): Promise<string | null> {
+  if (!value) return null;
+  if (/^(https?:|data:)/.test(value)) return value;
+  return await ctx.storage.getUrl(value as Id<"_storage">);
+}
 
 export const getProfileByUsername = query({
   args: { username: v.string() },
@@ -80,6 +102,34 @@ export const getProfileByUsername = query({
     if (!user) return null;
 
     const title = user.title ? await ctx.db.get(user.title) : null;
+    // Public profile: exact rate is owner-only; expose the band instead.
+    const { rate, ...publicUser } = user;
+    const [profileImage, coverImage] = await Promise.all([
+      imageUrl(ctx, user.profileImage),
+      imageUrl(ctx, user.coverImage),
+    ]);
+    return {
+      ...publicUser,
+      profileImage,
+      coverImage,
+      title,
+      rateBand: rate ? rateBand(rate.amount) : null,
+    };
+  },
+});
+
+export const getProfileByAuthId = query({
+  args: { userId: v.string() },
+  async handler(ctx, args) {
+    const user = await ctx.db
+      .query("profile")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId.toLowerCase()))
+      .unique();
+
+    if (!user) return null;
+
+    const title = user.title ? await ctx.db.get(user.title) : null;
+
     return { ...user, title };
   },
 });
@@ -122,7 +172,11 @@ export const getProfile = query({
       if (!user) return null;
 
       const title = user.title ? await ctx.db.get(user.title) : null;
-      return { ...user, title };
+      const [profileImage, coverImage] = await Promise.all([
+        imageUrl(ctx, user.profileImage),
+        imageUrl(ctx, user.coverImage),
+      ]);
+      return { ...user, profileImage, coverImage, title };
     } catch {
       // If authentication fails, return null instead of throwing
       return null;
@@ -243,6 +297,15 @@ export const updateProfile = mutation({
       }),
     ),
     skills: v.optional(v.array(v.id("skills"))),
+    rate: v.optional(
+      v.union(
+        v.null(),
+        v.object({
+          amount: v.number(),
+          currency: v.optional(v.string()),
+        }),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const authUser = await authComponent.getAuthUser(ctx);
@@ -271,8 +334,100 @@ export const updateProfile = mutation({
       ...(args.location !== undefined && { location: args.location }),
       ...(args.links !== undefined && { links: args.links }),
       ...(args.skills !== undefined && { skills: args.skills }),
+      ...(args.rate !== undefined && { rate: args.rate }),
     });
 
     return profile._id;
+  },
+});
+
+// Immediate persistence for profile/cover images: stores Convex storage ids
+// (null clears the field). Legacy string values are only read, never written.
+export const updateProfileImages = mutation({
+  args: {
+    profileImage: v.optional(v.union(v.id("_storage"), v.null())),
+    coverImage: v.optional(v.union(v.id("_storage"), v.null())),
+  },
+  handler: async (ctx, args) => {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) throw new ConvexError("Not authenticated");
+
+    const profile = await ctx.db
+      .query("profile")
+      .withIndex("by_email", (q) => q.eq("email", authUser.email))
+      .unique();
+
+    if (!profile) throw new ConvexError("Profile not found");
+
+    await ctx.db.patch(profile._id, {
+      ...(args.profileImage !== undefined && {
+        profileImage: args.profileImage,
+      }),
+      ...(args.coverImage !== undefined && {
+        coverImage: args.coverImage,
+      }),
+    });
+  },
+});
+
+// Saves the rate wizard's answers. The server derives the monthly-equivalent
+// `amount` from unit/rawAmount (so clients can't send mismatched figures) and
+// stamps `confirmedAt`, which freezes the rate for 6 months.
+export const updateProfileRate = mutation({
+  args: {
+    rate: v.union(
+      v.null(),
+      v.object({
+        unit: RATE_UNIT_SCHEMA,
+        rawAmount: v.number(),
+        projectDays: v.optional(v.number()),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) throw new ConvexError("Not authenticated");
+
+    const profile = await ctx.db
+      .query("profile")
+      .withIndex("by_email", (q) => q.eq("email", authUser.email))
+      .unique();
+
+    if (!profile) throw new ConvexError("Profile not found");
+
+    const now = Date.now();
+    if (
+      profile.rate?.confirmedAt &&
+      now - profile.rate.confirmedAt < RATE_LOCK_MS
+    ) {
+      throw new ConvexError(
+        `Your rate is locked. You can update it again on ${formatDate(
+          rateUnlocksAt(profile.rate.confirmedAt),
+        )}.`,
+      );
+    }
+
+    if (!args.rate) {
+      await ctx.db.patch(profile._id, { rate: null });
+      return;
+    }
+
+    const { unit, rawAmount, projectDays } = args.rate;
+    if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
+      throw new ConvexError("Rate must be a positive number");
+    }
+    if (unit === "project" && (!projectDays || projectDays <= 0)) {
+      throw new ConvexError("Project duration must be at least one day");
+    }
+
+    await ctx.db.patch(profile._id, {
+      rate: {
+        amount: monthlyEquivalent(unit, rawAmount, projectDays),
+        unit,
+        rawAmount,
+        ...(unit === "project" && { projectDays }),
+        confirmedAt: now,
+      },
+    });
   },
 });

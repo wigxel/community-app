@@ -72,6 +72,7 @@ body {
   --brand-primary: #dff538;
 
   --radius: 0.625rem;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: var(--brand-black-450);
@@ -109,6 +110,10 @@ body {
 
   --project-card-media-radius: 1.8em;
   --project-card-media-padding: 0.6em;
+
+  --app-card-gap: 0.375rem;
+  --app-card-radius: 1.5rem;
+  --app-card-inner-radius: calc(var(--app-card-radius) - var(--app-card-gap));
 }
 
 .dark {

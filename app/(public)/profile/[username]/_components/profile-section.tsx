@@ -2,7 +2,7 @@
 import { MapPin } from "lucide-react";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
-import { ProjectLinkIcon } from "~/components/atoms";
+import { ProjectLinkIcon, RateBandDisplay } from "~/components/atoms";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { SectionCard } from "~/components/layouts/section-card";
 import { ProfileAvatar } from "~/components/profile/avatar";
@@ -52,6 +52,13 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
               <div className="text-2xl font-semibold">{seniority}</div>
             </div>
             <div>
+              <div className="text-muted-foreground text-sm">Rate</div>
+              <RateBandDisplay
+                band={profile.rateBand}
+                className="text-2xl font-semibold"
+              />
+            </div>
+            <div>
               <div className="text-muted-foreground text-sm">Projects</div>
               <div className="text-2xl font-semibold">
                 {profile.projectCount ?? 0}
@@ -68,7 +75,7 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
             </div>
           )}
 
-          <div className="text-muted-foreground mx-auto -mb-4 flex items-center justify-start gap-1 text-sm">
+          <div className="text-muted-foreground mx-auto -mb-4 flex items-center justify-center gap-1 text-sm">
             <MapPin size={"1.2em"} />
             &nbsp;
             {LocationImpl.basic(profile.location)}

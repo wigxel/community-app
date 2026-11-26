@@ -2,7 +2,12 @@ export const MAX_PROJECT_TAGS = 8;
 export const MAX_TAG_LENGTH = 32;
 
 export function normalizeTag(raw: string): string {
-  return raw.trim().replace(/\s+/g, " ");
+  return raw
+    .trim()
+    .replace(/^#+/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 export function hasTag(tags: readonly string[], candidate: string): boolean {
