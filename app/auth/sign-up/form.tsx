@@ -127,6 +127,7 @@ export default function SignUpForm(props: SignUpFormProps) {
 
         <Form {...form}>
           <form
+            method="post"
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
