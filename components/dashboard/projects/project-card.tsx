@@ -23,7 +23,9 @@ import {
   Edit,
   ExternalLink,
   EyeIcon,
+  EyeOff,
   FileText,
+  Globe,
   PencilIcon,
   Video,
 } from "lucide-react";
@@ -245,6 +247,24 @@ export function PrivateProjectCard(project: Project) {
   const router = useRouter();
   const editLink = `/dashboard/projects/edit/${project._id}`;
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const setProjectPublished = useMutation(api.project.setProjectPublished);
+  const isUnpublished = project.published === false;
+
+  const togglePublished = async () => {
+    try {
+      await setProjectPublished({
+        _id: project._id,
+        published: isUnpublished,
+      });
+      toast.success(
+        isUnpublished
+          ? "Project published"
+          : "Project unpublished — it is now hidden from the public site",
+      );
+    } catch {
+      toast.error("Failed to update project");
+    }
+  };
 
   return (
     <>
@@ -252,7 +272,13 @@ export function PrivateProjectCard(project: Project) {
         <ProjectCardRoot project={project}>
           <PreventPropagation>
             <div className="absolute inset-x-0 z-20 flex justify-between px-3 pt-1">
-              <div className="filler" />
+              {isUnpublished ? (
+                <span className="bg-brand-black-450/50 rounded-full border border-amber-400/30 px-2.5 py-0.5 text-xs font-medium text-amber-200 backdrop-blur-md">
+                  Unpublished
+                </span>
+              ) : (
+                <div className="filler" />
+              )}
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -271,6 +297,14 @@ export function PrivateProjectCard(project: Project) {
                       Preview project
                     </DropdownMenuItem>
                   </Link>
+                  <DropdownMenuItem onClick={() => void togglePublished()}>
+                    {isUnpublished ? (
+                      <Globe className="text-muted-foreground" />
+                    ) : (
+                      <EyeOff className="text-muted-foreground" />
+                    )}
+                    {isUnpublished ? "Publish project" : "Unpublish project"}
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push(editLink)}>
                     <PencilIcon className="text-muted-foreground" />
                     Edit project

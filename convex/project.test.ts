@@ -560,6 +560,145 @@ describe("project search", () => {
   });
 });
 
+describe("publication status", () => {
+  let t: ReturnType<typeof convexTest>;
+  let projectId: Id<"project">;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    t = convexTest(schema, modules);
+    mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
+
+    await t.mutation(api.project.createProject, { project: validProject() });
+    await t.finishInProgressScheduledFunctions();
+    const projects = await t.query(api.project.listProjectByUserId, {
+      userId: FAKE_USER._id,
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+    projectId = projects.page[0]._id;
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("defaults new projects to published", async () => {
+    const doc = await t.run((ctx) => ctx.db.get(projectId));
+    expect(doc?.published).toBe(true);
+  });
+
+  it("lets the owner unpublish and publish again", async () => {
+    await t.mutation(api.project.setProjectPublished, {
+      _id: projectId,
+      published: false,
+    });
+    expect((await t.run((ctx) => ctx.db.get(projectId)))?.published).toBe(
+      false,
+    );
+
+    await t.mutation(api.project.setProjectPublished, {
+      _id: projectId,
+      published: true,
+    });
+    expect((await t.run((ctx) => ctx.db.get(projectId)))?.published).toBe(true);
+  });
+
+  it("rejects unpublishing someone else's project", async () => {
+    mockGetAuthUser.mockResolvedValue({
+      _id: "user_other_456",
+      email: "other@example.com",
+    } as any);
+    await expect(
+      t.mutation(api.project.setProjectPublished, {
+        _id: projectId,
+        published: false,
+      }),
+    ).rejects.toThrow("Unauthorized action");
+  });
+
+  it("throws when not authenticated", async () => {
+    mockGetAuthUser.mockResolvedValue(null);
+    await expect(
+      t.mutation(api.project.setProjectPublished, {
+        _id: projectId,
+        published: false,
+      }),
+    ).rejects.toThrow("Not authenticated");
+  });
+
+  it("hides unpublished projects from getProject and public listings", async () => {
+    await t.mutation(api.project.setProjectPublished, {
+      _id: projectId,
+      published: false,
+    });
+
+    const fetched = await t.query(api.project.getProject, { id: projectId });
+    expect(fetched).toHaveProperty("left");
+    expect(
+      (
+        await t.query(api.project.listProjectByUserId, {
+          userId: FAKE_USER._id,
+          paginationOpts: { numItems: 10, cursor: null },
+        })
+      ).page,
+    ).toHaveLength(0);
+    expect(
+      (
+        await t.query(api.project.listAll, {
+          paginationOpts: { numItems: 10, cursor: null },
+        })
+      ).page,
+    ).toHaveLength(0);
+    expect(
+      (
+        await t.query(api.project.search, {
+          q: "Test Project",
+          paginationOpts: { numItems: 10, cursor: null },
+        })
+      ).page,
+    ).toHaveLength(0);
+
+    // The owner's dashboard listing still shows it.
+    expect(
+      (
+        await t.query(api.project.listProject, {
+          paginationOpts: { numItems: 10, cursor: null },
+        })
+      ).page,
+    ).toHaveLength(1);
+  });
+
+  it("keeps published projects publicly readable and listed", async () => {
+    const project = await t.query(api.project.getProject, { id: projectId });
+    expect(project).toHaveProperty("right");
+    expect(
+      (
+        await t.query(api.project.listAll, {
+          paginationOpts: { numItems: 10, cursor: null },
+        })
+      ).page,
+    ).toHaveLength(1);
+  });
+
+  it("treats legacy projects with no published field as published", async () => {
+    await t.run((ctx) =>
+      ctx.db.insert("project", {
+        ...validProject(),
+        title: "Legacy Project",
+        // no `published` field
+      }),
+    );
+
+    const listed = await t.query(api.project.listAll, {
+      paginationOpts: { numItems: 10, cursor: null },
+    });
+    expect(listed.page).toHaveLength(2);
+    const fetched = await t.query(api.project.getProject, { id: projectId });
+    expect(fetched).toHaveProperty("right");
+  });
+});
+
 describe("long-form project descriptions (projectDescription table)", () => {
   let t: ReturnType<typeof convexTest>;
 
