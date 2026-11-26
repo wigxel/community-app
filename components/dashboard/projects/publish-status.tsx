@@ -12,7 +12,10 @@ import { cn } from "~/lib/utils";
  * updates when a save lands. Reflects what the public site shows right
  * now, not the unsaved checkbox in the form.
  */
-export function PublishStatus(props: { projectId: string }) {
+
+export type PublishStatusProps = { projectId: string };
+
+export function PublishStatus(props: PublishStatusProps) {
   const project = useQuery(api.project.getProject, { id: props.projectId });
 
   const data = Result.match(project, {
