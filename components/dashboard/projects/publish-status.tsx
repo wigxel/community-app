@@ -6,12 +6,7 @@ import { api } from "~/convex/_generated/api";
 import { Result } from "~/lib/result";
 import { cn } from "~/lib/utils";
 
-/**
- * Saved publication state of the project, shown opposite the page heading.
- * Reads the same query the edit form uses (Convex dedupes them) and live-
- * updates when a save lands. Reflects what the public site shows right
- * now, not the unsaved checkbox in the form.
- */
+// Reflects the saved state (what the public site shows), not the unsaved checkbox.
 
 export type PublishStatusProps = { projectId: string };
 

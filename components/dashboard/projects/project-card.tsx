@@ -299,7 +299,6 @@ export function PrivateProjectCard(project: Project) {
                   </Link>
                   <DropdownMenuItem
                     disabled={isToggling}
-                    // Keep the menu open while the toggle is in flight.
                     onSelect={(event) => event.preventDefault()}
                     onClick={() => void togglePublished()}
                   >

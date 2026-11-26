@@ -647,14 +647,12 @@ describe("publication status", () => {
       published: false,
     });
 
-    // Public visitors get the same "Not found" as a missing id…
     mockGetAuthUser.mockResolvedValue(null);
     const visitorFetch = await t.query(api.project.getProject, {
       id: projectId,
     });
     expect(visitorFetch).toHaveProperty("left");
 
-    // …and so do authenticated non-owners.
     mockGetAuthUser.mockResolvedValue({
       ...FAKE_USER,
       _id: "user_other_456",
@@ -664,7 +662,6 @@ describe("publication status", () => {
     });
     expect(otherFetch).toHaveProperty("left");
 
-    // …but the owner still gets the doc, so the edit page can load it.
     mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
     const ownerFetch = await t.query(api.project.getProject, { id: projectId });
     expect(ownerFetch).toHaveProperty("right");
@@ -693,7 +690,6 @@ describe("publication status", () => {
       ).page,
     ).toHaveLength(0);
 
-    // The owner's dashboard listing still shows it.
     expect(
       (
         await t.query(api.project.listProject, {
@@ -720,7 +716,6 @@ describe("publication status", () => {
       ctx.db.insert("project", {
         ...validProject(),
         title: "Legacy Project",
-        // no `published` field
       }),
     );
 
