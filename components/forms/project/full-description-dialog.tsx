@@ -25,12 +25,14 @@ interface FullDescriptionDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function BubbleButton(props: {
+type BubbleButtonProps = {
   title: string;
   icon: React.ElementType;
   active: boolean;
   onClick: () => void;
-}) {
+};
+
+function BubbleButton(props: BubbleButtonProps) {
   const Icon = props.icon;
   return (
     <Button
