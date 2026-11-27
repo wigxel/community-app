@@ -56,7 +56,7 @@ export default function Projects() {
       <EmptyState isEmpty={isEmpty}>
         <EmptyState.Content className="my-32">
           <Image
-            src="/assets/images/add-files.png"
+            src="/assets/images/add-files.webp"
             width={120}
             height={120}
             className="aspect-square w-40"

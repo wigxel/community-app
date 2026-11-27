@@ -40,7 +40,7 @@ export default function FavouritesPage() {
         <EmptyState isEmpty={favourites.length === 0}>
           <EmptyStateContent>
             <Image
-              src="/assets/images/add-files.png"
+              src="/assets/images/add-files.webp"
               width={120}
               height={120}
               className="aspect-square w-40"
