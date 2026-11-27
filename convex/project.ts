@@ -10,6 +10,7 @@ import { v } from "convex/values";
 import { Either } from "effect";
 import { countWords, MAX_PROJECT_DESCRIPTION_WORDS } from "../lib/markdown";
 import { Result, type ResultShape } from "../lib/result";
+import { projectSlug } from "../lib/slug";
 import { MAX_PROJECT_TAGS, MAX_TAG_LENGTH, normalizeTags } from "../lib/tags";
 import type { BasicProject, Project } from "../types/models";
 import { api, internal } from "./_generated/api";
@@ -222,6 +223,29 @@ export const getProject = query({
   },
 });
 
+export const getProjectBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const doc = await ctx.db
+      .query("project")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+
+    if (doc == null) {
+      return Result.error("Not found");
+    }
+
+    // Same gate as `getProject`: unpublished projects 404 for everyone but
+    // the owner, who previews their own draft.
+    if (doc.published === false) {
+      const authUser = await authComponent.getAuthUser(ctx);
+      if (authUser?._id !== doc.userId) return Result.error("Not found");
+    }
+
+    return Result.ok(await toStandardProject(ctx, doc));
+  },
+});
+
 /**
  * Insert, replace, or remove the long-form Markdown row for a project.
  * Empty/whitespace markdown removes the row so cleared fields don't leave
@@ -305,6 +329,12 @@ export const createProject = mutation({
       lastUpdatedAt: Date.now(),
     });
 
+    // The suffix derives from the doc id, so it needs the id the insert
+    // just minted; the args never carry a usable slug.
+    await ctx.db.patch(projectId, {
+      slug: projectSlug(projectId, args.project.title),
+    });
+
     await bumpProjectCount(ctx, authUser.email, 1);
 
     if (args.longDescription !== undefined)
@@ -381,6 +411,9 @@ export const updateProject = mutation({
     await ctx.db.patch(existingProject._id, {
       ...projectData,
       tags,
+      // Rename → regenerate the kebab portion; the doc-id-derived suffix is
+      // deterministic, so it is preserved. The old slug URL 404s (accepted).
+      slug: projectSlug(existingProject._id, projectData.title),
       lastUpdatedAt: Date.now(),
     });
 
@@ -504,6 +537,29 @@ export const backfillProjectTags = internalMutation({
       if (!changed) continue;
 
       await ctx.db.patch(project._id, { tags: normalized });
+      updated++;
+    }
+
+    return { updated };
+  },
+});
+
+/**
+ * One-off: derive `slug` for projects created before slugs existed. Run per
+ * deployment with:
+ *   bunx convex run project:backfillProjectSlugs
+ */
+export const backfillProjectSlugs = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    let updated = 0;
+
+    for await (const project of ctx.db.query("project")) {
+      if (project.slug) continue;
+
+      await ctx.db.patch(project._id, {
+        slug: projectSlug(project._id, project.title),
+      });
       updated++;
     }
 
