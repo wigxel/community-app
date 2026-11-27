@@ -120,13 +120,14 @@ function ProfileTooltipSkeleton() {
   );
 }
 
-function ProfileTooltipBody({
-  name,
-  username,
-}: {
+type ProfileTooltipBodyProps = {
   name: string;
   username: string;
-}) {
+};
+
+function ProfileTooltipBody(props: ProfileTooltipBodyProps) {
+  const { name, username } = props;
+
   // Queries only subscribe while this body is mounted (i.e. while hovered).
   // ponytail: profiles.ts uses queryGeneric, so this query's inferred type is
   // any; narrow locally until profiles.ts uses the generated server `query`.

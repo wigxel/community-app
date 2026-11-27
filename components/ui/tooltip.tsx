@@ -9,14 +9,17 @@ const TooltipProvider = TooltipPrimitive.Provider;
 
 // Self-contained: folds a Provider in, so call sites never need one. Pass
 // `delayDuration` on `Tooltip` (Root) to override the default.
-const Tooltip = ({
-  delayDuration = 0,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>) => (
-  <TooltipProvider delayDuration={delayDuration}>
-    <TooltipPrimitive.Root {...props} />
-  </TooltipProvider>
-);
+function Tooltip(
+  props: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>,
+) {
+  const { delayDuration = 0, ...restProps } = props;
+
+  return (
+    <TooltipProvider delayDuration={delayDuration}>
+      <TooltipPrimitive.Root {...restProps} />
+    </TooltipProvider>
+  );
+}
 
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
