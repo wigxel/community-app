@@ -4,7 +4,6 @@ import { Marquee } from "~/components/molecules/marquee";
 import { api } from "~/convex/_generated/api";
 import { safeArray } from "~/lib/data.helpers";
 
-// @todo: create a query for this and integrate. query should be list featured.
 export async function DiscoverMoreProjects() {
   const { page: projects } = await fetchQuery(api.project.listAll, {
     paginationOpts: {

@@ -3,6 +3,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 import { api } from "./_generated/api";
 import schema from "./schema";
+import { clampProfileText, PROFILE_TEXT_CAPS } from "./profiles";
 
 const modules = import.meta.glob("./**/*.ts");
 
@@ -113,5 +114,49 @@ describe("profile image resolution", () => {
 
     expect(seeded?.profileImage).toBe("https://i.pravatar.cc/?img=10");
     expect(uploaded?.profileImage).toContain("/api/storage/");
+  });
+});
+
+describe("profile text caps", () => {
+  it("clamps over-long text and drops extra array items", () => {
+    const long = "x".repeat(1000);
+    const clamped = clampProfileText({
+      firstName: long,
+      lastName: long,
+      phoneNumbers: ["1", "2", "3", "4", "5", "6"],
+      shortBio: long,
+      interests: Array.from({ length: 30 }, () => "i".repeat(100)),
+      links: Array.from({ length: 12 }, () => ({
+        tag: long,
+        title: long,
+        value: long,
+      })),
+      location: { city: long, country: "Nigeria" },
+    });
+
+    expect(clamped.firstName).toHaveLength(PROFILE_TEXT_CAPS.firstName);
+    expect(clamped.lastName).toHaveLength(PROFILE_TEXT_CAPS.lastName);
+    expect(clamped.phoneNumbers).toHaveLength(PROFILE_TEXT_CAPS.phoneNumbers);
+    expect(clamped.shortBio).toHaveLength(PROFILE_TEXT_CAPS.shortBio);
+    expect(clamped.interests?.length).toBe(PROFILE_TEXT_CAPS.interests);
+    expect(clamped.interests?.[0]).toHaveLength(PROFILE_TEXT_CAPS.interest);
+    expect(clamped.links?.length).toBe(PROFILE_TEXT_CAPS.links);
+    expect(clamped.links?.[0]?.value).toHaveLength(PROFILE_TEXT_CAPS.linkValue);
+    expect(clamped.location?.city).toHaveLength(PROFILE_TEXT_CAPS.city);
+    expect(clamped.location?.country).toBe("Nigeria");
+  });
+
+  it("leaves short values and null images alone", () => {
+    const clamped = clampProfileText({
+      firstName: "Ada",
+      lastName: "Okafor",
+      phoneNumbers: [],
+      profileImage: null,
+    });
+
+    expect(clamped.firstName).toBe("Ada");
+    expect(clamped.profileImage).toBeNull();
+    expect(clamped.shortBio).toBeUndefined();
+    expect(clamped.interests).toBeUndefined();
   });
 });

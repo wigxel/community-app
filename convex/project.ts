@@ -68,7 +68,12 @@ async function toStandardProject(
 
   if (!project?.userId) {
     // @ts-expect-error @todo: fix typing later
-    return { ...project, username: DEFAULT_USERNAME, ownerName: null };
+    return {
+      ...project,
+      username: DEFAULT_USERNAME,
+      ownerName: null,
+      ownerImage: null,
+    };
   }
 
   const profile = await ctx.runQuery(api.profiles.getProfileByAuthId, {
@@ -77,7 +82,12 @@ async function toStandardProject(
 
   if (!profile) {
     // @ts-expect-error @todo: fix typing later
-    return { ...project, username: DEFAULT_USERNAME, ownerName: null };
+    return {
+      ...project,
+      username: DEFAULT_USERNAME,
+      ownerName: null,
+      ownerImage: null,
+    };
   }
 
   // @ts-expect-error @todo: fix typing later
@@ -85,6 +95,7 @@ async function toStandardProject(
     ...project,
     username: profile?.username ?? DEFAULT_USERNAME,
     ownerName: `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim(),
+    ownerImage: profile?.profileImage ?? null,
   };
 }
 
