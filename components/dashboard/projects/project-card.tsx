@@ -49,6 +49,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { api } from "~/convex/_generated/api";
+import { ProjectImpl } from "~/lib/factories/project";
 import { toast } from "~/lib/toast";
 import type { Project, TimelineDate } from "~/types/models";
 
@@ -291,7 +292,7 @@ export function PrivateProjectCard(project: Project) {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end">
-                  <Link href={`/projects/${project._id}`} target="_blank">
+                  <Link href={ProjectImpl.url(project)} target="_blank">
                     <DropdownMenuItem>
                       <EyeIcon className="text-muted-foreground" />
                       Preview project

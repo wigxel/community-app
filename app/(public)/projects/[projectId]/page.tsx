@@ -7,6 +7,7 @@ import { Container } from "~/components/layouts/container";
 import { DiscoverMoreProjects } from "~/components/organism/discover-more-projects";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
+import { ProjectImpl } from "~/lib/factories/project";
 import { Result } from "~/lib/result";
 import type { BasicProject } from "~/types/models";
 
@@ -30,7 +31,8 @@ const baseUrl = (
   process.env.NEXT_PUBLIC_APP_URL || "https://community-app-wigxel.vercel.app"
 ).replace(/\/+$/, "");
 
-const getProjectUrl = (slug: string) => `${baseUrl}/projects/${slug}`;
+const getProjectUrl = (project: BasicProject) =>
+  `${baseUrl}${ProjectImpl.url(project)}`;
 
 /**
  * Resolve the route param: it is usually a slug, but a raw doc id still works
@@ -119,7 +121,7 @@ export async function generateMetadata({
   const description =
     project.description || `Explore ${project.title} on Reveer.`;
 
-  const projectUrl = getProjectUrl(loaded.slug);
+  const projectUrl = getProjectUrl(loaded.project);
 
   const firstPhoto = project.media.find((media) => media.type === "photo");
 
@@ -177,7 +179,7 @@ export default async function ProjectsPage({ params }: PageProps) {
       <JsonLd
         data={getProjectJsonLd({
           project: loaded.project,
-          url: getProjectUrl(loaded.slug),
+          url: getProjectUrl(loaded.project),
         })}
       />
       <ProjectDetails

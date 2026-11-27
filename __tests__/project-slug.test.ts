@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ProjectImpl } from "~/lib/factories/project";
 import {
   MAX_SLUG_KEBAB,
   projectSlug,
@@ -41,6 +42,24 @@ describe("projectIdSuffix", () => {
     expect(projectIdSuffix("jx726ky5pqj784n6c1frshbafs8gjcth")).not.toBe(
       projectIdSuffix("jx71cyx6wbzzkw305awtxcc04h8gk1jn"),
     );
+  });
+});
+
+describe("ProjectImpl.url", () => {
+  it("prefers the slug", () => {
+    expect(
+      ProjectImpl.url({ _id: "abc123", slug: "my-cool-app-a1b2c3" } as any),
+    ).toBe("/projects/my-cool-app-a1b2c3");
+  });
+
+  it("falls back to the doc id for legacy rows", () => {
+    expect(ProjectImpl.url({ _id: "abc123" } as any)).toBe("/projects/abc123");
+  });
+
+  it("returns # for invalid input", () => {
+    expect(ProjectImpl.url(null)).toBe("#");
+    expect(ProjectImpl.url(undefined)).toBe("#");
+    expect(ProjectImpl.url({ slug: "no-id" } as any)).toBe("#");
   });
 });
 
