@@ -235,6 +235,13 @@ export const getProjectBySlug = query({
       return Result.error("Not found");
     }
 
+    // Same gate as `getProject`: unpublished projects 404 for everyone but
+    // the owner, who previews their own draft.
+    if (doc.published === false) {
+      const authUser = await authComponent.getAuthUser(ctx);
+      if (authUser?._id !== doc.userId) return Result.error("Not found");
+    }
+
     return Result.ok(await toStandardProject(ctx, doc));
   },
 });

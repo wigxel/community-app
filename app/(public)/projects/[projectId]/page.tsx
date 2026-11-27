@@ -1,12 +1,15 @@
 import { fetchQuery } from "convex/nextjs";
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { ProjectDetails } from "~/app/_components/project-details";
+import { UnpublishedPreviewFab } from "~/app/_components/unpublished-preview-fab";
 import { Container } from "~/components/layouts/container";
 import { DiscoverMoreProjects } from "~/components/organism/discover-more-projects";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
+import { fetchAuthQuery } from "~/lib/auth-server";
 import { ProjectImpl } from "~/lib/factories/project";
 import { Result } from "~/lib/result";
 import type { BasicProject } from "~/types/models";
@@ -17,14 +20,22 @@ type PageProps = {
   params: Promise<{ projectId: string }>;
 };
 
-const getProject = cache(async (id: string) => {
-  return await fetchQuery(api.project.getProject, { id }).catch(() => null);
+// Draft Mode bypasses the ISR cache automatically, so draft viewers get a
+// fresh per-request render while everyone else keeps the cached one.
+const getProject = cache(async (id: string, draft: boolean) => {
+  return draft
+    ? await fetchAuthQuery(api.project.getProject, { id }).catch(() => null)
+    : await fetchQuery(api.project.getProject, { id }).catch(() => null);
 });
 
-const getProjectBySlug = cache(async (slug: string) => {
-  return await fetchQuery(api.project.getProjectBySlug, { slug }).catch(
-    () => null,
-  );
+const getProjectBySlug = cache(async (slug: string, draft: boolean) => {
+  return draft
+    ? await fetchAuthQuery(api.project.getProjectBySlug, { slug }).catch(
+        () => null,
+      )
+    : await fetchQuery(api.project.getProjectBySlug, { slug }).catch(
+        () => null,
+      );
 });
 
 const baseUrl = (
@@ -39,15 +50,15 @@ const getProjectUrl = (project: BasicProject) =>
  * by redirecting to its slug URL. Legacy projects without a slug render under
  * the doc id until backfill.
  */
-const loadProject = async (param: string) => {
-  const bySlug = await getProjectBySlug(param);
+const loadProject = async (param: string, draft: boolean) => {
+  const bySlug = await getProjectBySlug(param, draft);
   const slugProject = Result.match(bySlug, {
     error: () => null,
     success: (data) => data,
   });
   if (slugProject) return { project: slugProject, slug: param };
 
-  const byId = await getProject(param);
+  const byId = await getProject(param, draft);
   return Result.match(byId, {
     error: () => null,
     success: (project) => {
@@ -99,16 +110,34 @@ function JsonLd(props: JsonLdProps) {
   );
 }
 
+async function exitPreview() {
+  "use server";
+  const draft = await draftMode();
+  draft.disable();
+  redirect("/dashboard/projects");
+}
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { projectId: param } = await params;
-  const loaded = await loadProject(param);
+  const draft = await draftMode();
+  const loaded = await loadProject(param, draft.isEnabled);
 
   if (!loaded) {
     return {
       title: "Project Not Found",
       description: "The requested project could not be found.",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  if (draft.isEnabled && !loaded.project.published) {
+    return {
+      title: loaded.project.title,
       robots: {
         index: false,
         follow: false,
@@ -164,7 +193,8 @@ export async function generateMetadata({
 
 export default async function ProjectsPage({ params }: PageProps) {
   const { projectId: param } = await params;
-  const loaded = await loadProject(param);
+  const draft = await draftMode();
+  const loaded = await loadProject(param, draft.isEnabled);
 
   if (!loaded) notFound();
 
@@ -176,6 +206,13 @@ export default async function ProjectsPage({ params }: PageProps) {
 
   return (
     <Container level={"max"}>
+      {draft.isEnabled && !loaded.project.published && (
+        <UnpublishedPreviewFab
+          projectId={loaded.project._id}
+          exitPreview={exitPreview}
+        />
+      )}
+
       <JsonLd
         data={getProjectJsonLd({
           project: loaded.project,
