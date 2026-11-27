@@ -14,6 +14,7 @@ import type * as blurhash from "../blurhash.js";
 import type * as crons from "../crons.js";
 import type * as email from "../email.js";
 import type * as favourites from "../favourites.js";
+import type * as featuredProjects from "../featuredProjects.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as leaderboard from "../leaderboard.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   email: typeof email;
   favourites: typeof favourites;
+  featuredProjects: typeof featuredProjects;
   files: typeof files;
   http: typeof http;
   leaderboard: typeof leaderboard;

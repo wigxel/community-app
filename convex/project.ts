@@ -425,6 +425,15 @@ export const deleteProject = mutation({
       await ctx.db.delete(fav._id);
     }
 
+    // Drop it from the featured snapshot until the next recompute.
+    for await (const row of ctx.db
+      .query("featuredProjects")
+      .withIndex("by_projectId", (q) =>
+        q.eq("projectId", existingProject._id),
+      )) {
+      await ctx.db.delete(row._id);
+    }
+
     // Remove the long-form description row so it can't orphan.
     for await (const row of ctx.db
       .query("projectDescription")
@@ -532,6 +541,39 @@ export const listAll = query({
         records.page.map(async (project) => toStandardProject(ctx, project)),
       ),
     };
+  },
+});
+
+export const FEATURED_LIMIT = 20;
+
+/**
+ * Featured projects for the landing page, read from the daily
+ * `featuredProjects` snapshot. Falls back to the latest projects while the
+ * snapshot is empty (fresh deployment, before the first cron run).
+ */
+export const listFeatured = query({
+  args: {},
+  handler: async (ctx): Promise<BasicProject[]> => {
+    const rows = await ctx.db
+      .query("featuredProjects")
+      .withIndex("by_rank")
+      .take(FEATURED_LIMIT);
+
+    const projects =
+      rows.length > 0
+        ? (await Promise.all(rows.map((row) => ctx.db.get(row.projectId))))
+            // Skip projects deleted or unpublished since the last recompute.
+            .filter(
+              (doc): doc is Doc<"project"> =>
+                doc !== null && doc.published !== false,
+            )
+        : await ctx.db
+            .query("project")
+            .order("desc")
+            .filter((q) => q.neq(q.field("published"), false))
+            .take(FEATURED_LIMIT);
+
+    return Promise.all(projects.map((doc) => toStandardProject(ctx, doc)));
   },
 });
 
