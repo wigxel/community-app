@@ -22,6 +22,7 @@ import { LinksSection } from "./links-section";
 import { pendingFiles } from "./media-row";
 import { MediaSection } from "./media-section";
 import { ProjectFormItem } from "./project-form-item";
+import { PublishSection } from "./publish-section";
 import { TaxonomySection } from "./taxonomy-section";
 
 const EMPTY_PROJECT = {
@@ -31,6 +32,7 @@ const EMPTY_PROJECT = {
   longDescription: "",
   timeline: { start: null, end: null },
   ongoing: false,
+  published: true,
   media: [],
   link: [],
   tags: [],
@@ -110,6 +112,9 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
           {
             ...projectData,
             longDescription: longDescription ?? "",
+            // Absent reads as published; make it concrete so the save
+            // always writes a boolean.
+            published: projectData.published ?? true,
             tags: projectData.tags ?? [],
             link: projectData.link.map((l) => ({
               ...l,
@@ -260,6 +265,8 @@ export function ProjectForm({ mode, projectId }: ProjectFormProps) {
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mx-auto mt-16 flex max-w-3xl flex-col gap-8">
+          <PublishSection />
+
           <ProjectFormItem />
 
           {/* Full Description Section */}

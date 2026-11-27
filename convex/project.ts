@@ -184,6 +184,7 @@ export const listProjectByUserId = query({
     const result = await ctx.db
       .query("project")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.neq(q.field("published"), false))
       .order("desc")
       .paginate({
         ...args.paginationOpts,
@@ -207,8 +208,15 @@ export const getProject = query({
       .filter((q) => q.eq(q.field("_id"), args.id))
       .first();
 
-    if (doc == null) {
-      return Result.error("Not found");
+    if (doc == null) return Result.error("Not found");
+
+    // Unpublished projects are not publicly accessible: callers get the
+    // same "Not found" result as a missing id, so the public detail page
+    // renders its not-found state (already noindex). The owner still gets
+    // the doc so the dashboard edit page can load and publish it.
+    if (doc.published === false) {
+      const authUser = await authComponent.getAuthUser(ctx);
+      if (authUser?._id !== doc.userId) return Result.error("Not found");
     }
 
     return Result.ok(await toStandardProject(ctx, doc));
@@ -310,6 +318,7 @@ export const createProject = mutation({
       ...args.project,
       tags,
       userId: authUser._id,
+      published: args.project.published ?? true,
       lastUpdatedAt: Date.now(),
     });
 
@@ -455,6 +464,25 @@ export const deleteProject = mutation({
   },
 });
 
+export const setProjectPublished = mutation({
+  args: { _id: v.id("project"), published: v.boolean() },
+  handler: async (ctx, args) => {
+    const authUser = await authComponent.getAuthUser(ctx);
+    if (!authUser) throw new Error("Not authenticated");
+
+    const existingProject = await ctx.db.get(args._id);
+    if (!existingProject) throw new Error("Project not found");
+
+    if (existingProject.userId !== authUser._id)
+      throw new Error("Unauthorized action");
+
+    await ctx.db.patch(existingProject._id, {
+      published: args.published,
+      lastUpdatedAt: Date.now(),
+    });
+  },
+});
+
 export const updateProjectMedia = internalMutation({
   args: {
     projectId: v.id("project"),
@@ -540,6 +568,7 @@ export const listAll = query({
   ): Promise<PaginationResult<BasicProject>> => {
     const records = await ctx.db
       .query("project")
+      .filter((q) => q.neq(q.field("published"), false))
       .order("desc")
       .paginate({
         ...paginationOpts,
@@ -574,6 +603,7 @@ export const search = query({
     const records = await ctx.db
       .query("project")
       .withSearchIndex("search_title", (s) => s.search("title", trimmed))
+      .filter((q) => q.neq(q.field("published"), false))
       .paginate({
         ...paginationOpts,
         numItems: Math.min(50, paginationOpts.numItems),
