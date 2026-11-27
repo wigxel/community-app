@@ -170,4 +170,33 @@ describe("ProfileImpl", () => {
       expect(ProfileImpl.computeTotalYearsOfExperience(experiences)).toBe(0);
     });
   });
+
+  describe("seniority", () => {
+    it("returns none for no experience", () => {
+      expect(ProfileImpl.seniority(0)).toBe("none");
+      expect(ProfileImpl.seniority(undefined)).toBe("none");
+    });
+
+    it("bands by years of experience", () => {
+      expect(ProfileImpl.seniority(1)).toBe("junior");
+      expect(ProfileImpl.seniority(2)).toBe("mid-level");
+      expect(ProfileImpl.seniority(4)).toBe("mid-level");
+      expect(ProfileImpl.seniority(5)).toBe("senior");
+      expect(ProfileImpl.seniority(9)).toBe("senior");
+      expect(ProfileImpl.seniority(10)).toBe("principal");
+    });
+  });
+
+  describe("seniorityLabel", () => {
+    it("capitalizes the level", () => {
+      expect(ProfileImpl.seniorityLabel("senior")).toBe("Senior");
+      expect(ProfileImpl.seniorityLabel("mid-level")).toBe("Mid-level");
+      expect(ProfileImpl.seniorityLabel("principal")).toBe("Principal");
+    });
+
+    it("returns placeholder for none or missing", () => {
+      expect(ProfileImpl.seniorityLabel("none")).toBe("--");
+      expect(ProfileImpl.seniorityLabel(undefined)).toBe("--");
+    });
+  });
 });

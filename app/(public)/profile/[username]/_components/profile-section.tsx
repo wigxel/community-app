@@ -17,9 +17,6 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
 
   const profile_links = safeArray(profile.links);
 
-  /* @todo: integrate seniority — leaderboard score vs user-selected */
-  const seniority = "Senior";
-
   return (
     <div className="flex flex-col items-stretch gap-y-4">
       <SectionCard className="flex flex-col items-stretch">
@@ -49,7 +46,9 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
           </div>*/}
             <div>
               <div className="text-muted-foreground text-sm">Ranking</div>
-              <div className="text-2xl font-semibold">{seniority}</div>
+              <div className="text-2xl font-semibold">
+                {ProfileImpl.seniorityLabel(profile.seniority)}
+              </div>
             </div>
             <div>
               <div className="text-muted-foreground text-sm">Rate</div>
