@@ -1,7 +1,6 @@
 "use client";
 import { MapPin } from "lucide-react";
 import Link from "next/link";
-import Balancer from "react-wrap-balancer";
 import { ProjectLinkIcon, RateBandDisplay } from "~/components/atoms";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { SectionCard } from "~/components/layouts/section-card";
@@ -70,9 +69,7 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
           {/* Short Bio */}
           {profile.shortBio && (
             <div>
-              <p className="text-sm">
-                <Balancer>{profile.shortBio}</Balancer>
-              </p>
+              <p className="text-sm text-pretty">{profile.shortBio}</p>
             </div>
           )}
 
