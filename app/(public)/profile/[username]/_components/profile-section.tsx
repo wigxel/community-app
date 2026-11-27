@@ -44,12 +44,14 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
             <div className="text-sm text-muted-foreground">Followers</div>
             <div className="text-2xl font-semibold">8K</div>
           </div>*/}
-            <div>
-              <div className="text-muted-foreground text-sm">Ranking</div>
-              <div className="text-2xl font-semibold">
-                {ProfileImpl.seniorityLabel(profile.seniority)}
+            {profile.seniority && profile.seniority !== "none" && (
+              <div>
+                <div className="text-muted-foreground text-sm">Ranking</div>
+                <div className="text-2xl font-semibold">
+                  {ProfileImpl.seniorityLabel(profile.seniority)}
+                </div>
               </div>
-            </div>
+            )}
             <div>
               <div className="text-muted-foreground text-sm">Rate</div>
               <RateBandDisplay
