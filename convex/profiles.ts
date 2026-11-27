@@ -119,6 +119,7 @@ export const getProfileByUsername = query({
       imageUrl(ctx, user.profileImage),
       imageUrl(ctx, user.coverImage),
     ]);
+
     return {
       ...publicUser,
       profileImage,
