@@ -204,6 +204,16 @@ const schema = defineSchema({
     .index("by_projectId", ["projectId"])
     .index("by_userId_projectId", ["userId", "projectId"]),
 
+  // Daily snapshot of featured projects (see convex/featuredProjects.ts).
+  featuredProjects: defineTable({
+    projectId: v.id("project"),
+    rank: v.number(),
+    favouriteCount: v.number(),
+    computedAt: v.number(),
+  })
+    .index("by_rank", ["rank"])
+    .index("by_projectId", ["projectId"]),
+
   leaderboardIndex: defineTable({
     profileId: v.id("profile"),
     titleId: v.id("titles"),
