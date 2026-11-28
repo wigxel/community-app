@@ -1,3 +1,4 @@
+import { fetchQuery } from "convex/nextjs";
 import { Briefcase, MapPinIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -7,7 +8,6 @@ import { QueryBasedSearchInput } from "~/components/molecules/search-input";
 import { ProfileAvatar } from "~/components/profile/avatar";
 import { Badge } from "~/components/ui/badge";
 import { api } from "~/convex/_generated/api";
-import { fetchAuthQuery } from "~/lib/auth-server";
 import { safeArray } from "~/lib/data.helpers";
 import { ProfileImpl } from "~/lib/factories/profile";
 import {
@@ -23,8 +23,12 @@ export const metadata: Metadata = {
   description: "Find the right talent for your project",
 };
 
+// Both catalog queries are public and identity-blind, so the page is
+// cacheable; searchParams still force per-request rendering for filters.
+export const revalidate = 30;
+
 export async function getTitles() {
-  const titles = await fetchAuthQuery(api.titles.listTitles, {});
+  const titles = await fetchQuery(api.titles.listTitles, {});
   const safeTitles = safeArray(titles);
 
   const getTitleId = (role: string) => {
@@ -51,7 +55,7 @@ async function TalentsCatalog({ searchParams }: PageProps) {
 
   const titleId = getTitleId(role);
 
-  const profiles = await fetchAuthQuery(api.profiles.listProfile, {
+  const profiles = await fetchQuery(api.profiles.listProfile, {
     searchTerm: q || undefined,
     titleId: titleId || undefined,
   });
@@ -106,7 +110,7 @@ async function TalentsCatalog({ searchParams }: PageProps) {
 }
 
 async function _RoleFiltersDropdown() {
-  const titles = await fetchAuthQuery(api.titles.listTitles, {});
+  const titles = await fetchQuery(api.titles.listTitles, {});
 
   return <RoleFilter titles={titles} />;
 }

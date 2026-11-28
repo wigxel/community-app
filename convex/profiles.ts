@@ -17,6 +17,79 @@ import { mutation, type QueryCtx } from "./_generated/server";
 import { authComponent } from "./auth";
 import { seedProjectCount } from "./project";
 
+// Hard caps for user-entered profile text, clamped (not rejected) so saves
+// never fail on length. ponytail: server-side only; add maxLength to the
+// profile form inputs if silent truncation surprises anyone.
+export const PROFILE_TEXT_CAPS = {
+  firstName: 80,
+  lastName: 80,
+  phoneNumber: 40,
+  phoneNumbers: 5,
+  shortBio: 280,
+  interest: 60,
+  interests: 20,
+  linkTag: 40,
+  linkTitle: 80,
+  linkValue: 512,
+  links: 10,
+  city: 80,
+  country: 80,
+  imageUrl: 512,
+} as const;
+
+const clamp = (s: string, max: number) =>
+  s.length > max ? s.slice(0, max) : s;
+const clampNullable = (s: string | null, max: number) =>
+  s === null ? null : clamp(s, max);
+
+export function clampProfileText(args: {
+  firstName: string;
+  lastName: string;
+  phoneNumbers: string[];
+  shortBio?: string;
+  profileImage?: string | null;
+  coverImage?: string | null;
+  interests?: string[];
+  links?: { tag: string; title: string; value: string }[];
+  location?: { city: string; country: string };
+}) {
+  const caps = PROFILE_TEXT_CAPS;
+  return {
+    firstName: clamp(args.firstName, caps.firstName),
+    lastName: clamp(args.lastName, caps.lastName),
+    phoneNumbers: args.phoneNumbers
+      .slice(0, caps.phoneNumbers)
+      .map((p) => clamp(p, caps.phoneNumber)),
+    ...(args.shortBio !== undefined && {
+      shortBio: clamp(args.shortBio, caps.shortBio),
+    }),
+    ...(args.profileImage !== undefined && {
+      profileImage: clampNullable(args.profileImage, caps.imageUrl),
+    }),
+    ...(args.coverImage !== undefined && {
+      coverImage: clampNullable(args.coverImage, caps.imageUrl),
+    }),
+    ...(args.interests !== undefined && {
+      interests: args.interests
+        .slice(0, caps.interests)
+        .map((i) => clamp(i, caps.interest)),
+    }),
+    ...(args.links !== undefined && {
+      links: args.links.slice(0, caps.links).map((l) => ({
+        tag: clamp(l.tag, caps.linkTag),
+        title: clamp(l.title, caps.linkTitle),
+        value: clamp(l.value, caps.linkValue),
+      })),
+    }),
+    ...(args.location !== undefined && {
+      location: {
+        city: clamp(args.location.city, caps.city),
+        country: clamp(args.location.country, caps.country),
+      },
+    }),
+  };
+}
+
 export const listProfile = query({
   args: {
     titleId: v.optional(v.id("titles")),
@@ -102,6 +175,12 @@ export const getProfileByUsername = query({
     if (!user) return null;
 
     const title = user.title ? await ctx.db.get(user.title) : null;
+    // Resolve skill IDs to names for public display.
+    const resolvedSkills = (
+      await Promise.all(
+        (user.skills ?? []).map((skillId: Id<"skills">) => ctx.db.get(skillId)),
+      )
+    ).filter(Boolean);
     // Public profile: exact rate is owner-only; expose the band instead.
     const { rate, ...publicUser } = user;
     const [profileImage, coverImage] = await Promise.all([
@@ -113,6 +192,7 @@ export const getProfileByUsername = query({
       profileImage,
       coverImage,
       title,
+      resolvedSkills,
       rateBand: rate ? rateBand(rate.amount) : null,
     };
   },
@@ -129,8 +209,9 @@ export const getProfileByAuthId = query({
     if (!user) return null;
 
     const title = user.title ? await ctx.db.get(user.title) : null;
+    const profileImage = await imageUrl(ctx, user.profileImage);
 
-    return { ...user, title };
+    return { ...user, title, profileImage };
   },
 });
 
@@ -319,20 +400,8 @@ export const updateProfile = mutation({
     if (!profile) throw new ConvexError("Profile not found");
 
     await ctx.db.patch(profile._id, {
-      firstName: args.firstName,
-      lastName: args.lastName,
-      phoneNumbers: args.phoneNumbers,
+      ...clampProfileText(args),
       ...(args.title !== undefined && { title: args.title }),
-      ...(args.shortBio !== undefined && { shortBio: args.shortBio }),
-      ...(args.profileImage !== undefined && {
-        profileImage: args.profileImage,
-      }),
-      ...(args.coverImage !== undefined && {
-        coverImage: args.coverImage,
-      }),
-      ...(args.interests !== undefined && { interests: args.interests }),
-      ...(args.location !== undefined && { location: args.location }),
-      ...(args.links !== undefined && { links: args.links }),
       ...(args.skills !== undefined && { skills: args.skills }),
       ...(args.rate !== undefined && { rate: args.rate }),
     });
