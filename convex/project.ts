@@ -60,7 +60,7 @@ export function isStartAfterEnd(
   return Result.ok(start > end);
 }
 
-async function toStandardProject(
+export async function toStandardProject(
   ctx: GenericQueryCtx<AnyDataModel>,
   project: Doc<"project">,
 ): Promise<BasicProject> {

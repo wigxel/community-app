@@ -235,6 +235,16 @@ const schema = defineSchema({
     .index("by_titleId_ranking", ["titleId", "ranking"])
     .index("by_profileId_titleId", ["profileId", "titleId"]),
 
+  // Daily snapshot of the featured-projects ranking shown by the landing
+  // "Discover more..." marquee. One row per ranked project; replaced
+  // wholesale by featured.recomputeFeatured (cron 30 0 * * * UTC).
+  featuredProjects: defineTable({
+    projectId: v.id("project"),
+    rank: v.number(),
+    favouriteCount: v.number(),
+    computedAt: v.number(),
+  }).index("by_rank", ["rank"]),
+
   migrations: defineTable({
     name: v.string(),
     type: v.string(),
