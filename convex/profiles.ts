@@ -192,7 +192,7 @@ export const getProfileByUsername = query({
         (user.skills ?? []).map((skillId: Id<"skills">) => ctx.db.get(skillId)),
       )
     ).filter(Boolean);
-    
+
     // Public profile: exact rate is owner-only; expose the band instead.
     const { rate, ...publicUser } = user;
     const [profileImage, coverImage] = await Promise.all([
