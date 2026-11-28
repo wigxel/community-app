@@ -1,7 +1,8 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import { Logout } from "iconsax-reactjs";
-import { UserIcon } from "lucide-react";
+import { CircleUserRound, UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
@@ -13,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { api } from "~/convex/_generated/api";
 import { authClient } from "~/lib/auth-client";
 import { SettingsIcon } from "../icons";
 
@@ -22,6 +24,10 @@ type AuthUserMenuProps = {
 
 export function AuthUserMenu({ className }: AuthUserMenuProps) {
   const router = useRouter();
+  const profile = useQuery(api.profiles.getProfile);
+  const profileHref = profile?.username
+    ? `/profile/${profile.username}`
+    : "/dashboard/profile";
 
   async function handleSignOut() {
     const { error } = await authClient.signOut();
@@ -57,6 +63,13 @@ export function AuthUserMenu({ className }: AuthUserMenuProps) {
           <Link href="/dashboard">
             <UserIcon className="text-muted-foreground" />
             <span className="text-base">Account</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href={profileHref}>
+            <CircleUserRound className="text-muted-foreground" />
+            <span className="text-base">Profile</span>
           </Link>
         </DropdownMenuItem>
 

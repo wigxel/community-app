@@ -1,5 +1,6 @@
 import { differenceInMonths, differenceInYears } from "date-fns";
 import { isEmpty } from "effect/String";
+import type { SeniorityLevel } from "../../types/models";
 
 type MaybeName = { firstName?: string; lastName?: string } | null | undefined;
 
@@ -56,5 +57,21 @@ export const ProfileImpl = {
         return sum + (years > 0 ? years : 0);
       }, 0),
     );
+  },
+
+  // ponytail: thresholds are a product guess (junior <2, mid <5, senior <10,
+  // principal 10+); nudge the cutoffs when real data says otherwise.
+  seniority(totalYearsOfExperience: number | null | undefined): SeniorityLevel {
+    const years = totalYearsOfExperience ?? 0;
+    if (years <= 0) return "none";
+    if (years >= 10) return "principal";
+    if (years >= 5) return "senior";
+    if (years >= 2) return "mid-level";
+    return "junior";
+  },
+
+  seniorityLabel(level: SeniorityLevel | null | undefined): string {
+    if (!level || level === "none") return "--";
+    return level.charAt(0).toUpperCase() + level.slice(1);
   },
 };

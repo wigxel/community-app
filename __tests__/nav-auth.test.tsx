@@ -35,7 +35,11 @@ const AUTHENTICATED_SESSION = {
   isPending: false,
 };
 
-const PROFILE = { firstName: "Nightmore", lastName: "Doe" };
+const PROFILE = {
+  firstName: "Nightmore",
+  lastName: "Doe",
+  username: "nightmore",
+};
 
 function menuItemHref(name: string) {
   return screen
@@ -101,11 +105,25 @@ describe("NavAuth", () => {
     await screen.findByRole("menuitem", { name: "Account" });
 
     expect(menuItemHref("Account")).toBe("/dashboard");
+    expect(menuItemHref("Profile")).toBe("/profile/nightmore");
     expect(menuItemHref("Settings")).toBe("/dashboard/settings/profile");
 
     await user.click(screen.getByRole("menuitem", { name: "Logout" }));
 
     await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
     expect(push).toHaveBeenCalledWith("/");
+  });
+
+  it("links to the dashboard profile route while the profile is loading", async () => {
+    const user = userEvent.setup();
+    useSession.mockReturnValue(AUTHENTICATED_SESSION);
+    mockUseQuery.mockReturnValue(null);
+
+    render(<NavAuth />);
+
+    await user.click(screen.getByRole("button", { name: "Open account menu" }));
+    await screen.findByRole("menuitem", { name: "Profile" });
+
+    expect(menuItemHref("Profile")).toBe("/dashboard/profile");
   });
 });

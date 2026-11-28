@@ -1,7 +1,6 @@
 "use client";
 import { MapPin } from "lucide-react";
 import Link from "next/link";
-import Balancer from "react-wrap-balancer";
 import { ProjectLinkIcon, RateBandDisplay } from "~/components/atoms";
 import { EmptyState } from "~/components/layouts/empty-state";
 import { SectionCard } from "~/components/layouts/section-card";
@@ -16,9 +15,6 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
   const { profile } = props;
 
   const profile_links = safeArray(profile.links);
-
-  /* @todo: integrate seniority — leaderboard score vs user-selected */
-  const seniority = "Senior";
 
   return (
     <div className="flex flex-col items-stretch gap-y-4">
@@ -47,10 +43,14 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
             <div className="text-sm text-muted-foreground">Followers</div>
             <div className="text-2xl font-semibold">8K</div>
           </div>*/}
-            <div>
-              <div className="text-muted-foreground text-sm">Ranking</div>
-              <div className="text-2xl font-semibold">{seniority}</div>
-            </div>
+            {profile.seniority && profile.seniority !== "none" && (
+              <div>
+                <div className="text-muted-foreground text-sm">Ranking</div>
+                <div className="text-2xl font-semibold">
+                  {ProfileImpl.seniorityLabel(profile.seniority)}
+                </div>
+              </div>
+            )}
             <div>
               <div className="text-muted-foreground text-sm">Rate</div>
               <RateBandDisplay
@@ -69,9 +69,7 @@ export function ProfileDetailsSection(props: ProfileDetailsSectionProps) {
           {/* Short Bio */}
           {profile.shortBio && (
             <div>
-              <p className="text-sm">
-                <Balancer>{profile.shortBio}</Balancer>
-              </p>
+              <p className="text-sm text-pretty">{profile.shortBio}</p>
             </div>
           )}
 

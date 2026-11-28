@@ -31,6 +31,10 @@ export interface Profile {
   skills?: string[];
   verified: boolean;
   projectCount?: number;
+  /** Summed years across the user's work-experience entries. */
+  totalYearsOfExperience?: number;
+  /** Derived from `totalYearsOfExperience` (see ProfileImpl.seniority). */
+  seniority?: SeniorityLevel;
   /** Exact rate — owner-only. Public profile queries omit this. */
   rate?: ProfileRate | null;
   /** Public affordability indicator (₦ / ₦₦ / ₦₦₦ / ₦₦₦₦). */

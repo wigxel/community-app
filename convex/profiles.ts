@@ -138,8 +138,7 @@ export const listProfile = query({
           ...user,
           title,
           totalYearsOfExperience,
-          // @todo: Implement seniority feature — derive from leaderboard score or user input
-          seniority: "none",
+          seniority: ProfileImpl.seniority(totalYearsOfExperience),
           rateBand: user.rate ? rateBand(user.rate.amount) : null,
         };
       }),
@@ -175,23 +174,39 @@ export const getProfileByUsername = query({
     if (!user) return null;
 
     const title = user.title ? await ctx.db.get(user.title) : null;
+
+    const workExps = user.userId
+      ? await ctx.db
+          .query("workExperience")
+          .withIndex("by_userId", (q) => q.eq("userId", user.userId))
+          .collect()
+      : [];
+
+    const totalYearsOfExperience = ProfileImpl.computeTotalYearsOfExperience(
+      workExps.map((exp) => ({ timeline: exp.timeline })),
+    );
+
     // Resolve skill IDs to names for public display.
     const resolvedSkills = (
       await Promise.all(
         (user.skills ?? []).map((skillId: Id<"skills">) => ctx.db.get(skillId)),
       )
     ).filter(Boolean);
+
     // Public profile: exact rate is owner-only; expose the band instead.
     const { rate, ...publicUser } = user;
     const [profileImage, coverImage] = await Promise.all([
       imageUrl(ctx, user.profileImage),
       imageUrl(ctx, user.coverImage),
     ]);
+
     return {
       ...publicUser,
       profileImage,
       coverImage,
       title,
+      totalYearsOfExperience,
+      seniority: ProfileImpl.seniority(totalYearsOfExperience),
       resolvedSkills,
       rateBand: rate ? rateBand(rate.amount) : null,
     };
