@@ -1,12 +1,16 @@
 import { fetchQuery } from "convex/nextjs";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { draftMode } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { ProjectDetails } from "~/app/_components/project-details";
+import { UnpublishedPreviewFab } from "~/app/_components/unpublished-preview-fab";
 import { Container } from "~/components/layouts/container";
 import { DiscoverMoreProjects } from "~/components/organism/discover-more-projects";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
+import { fetchAuthQuery } from "~/lib/auth-server";
+import { ProjectImpl } from "~/lib/factories/project";
 import { Result } from "~/lib/result";
 import type { BasicProject } from "~/types/models";
 
@@ -16,15 +20,53 @@ type PageProps = {
   params: Promise<{ projectId: string }>;
 };
 
-const getProject = cache(async (id: string) => {
-  return await fetchQuery(api.project.getProject, { id }).catch(() => null);
+// Draft Mode bypasses the ISR cache automatically, so draft viewers get a
+// fresh per-request render while everyone else keeps the cached one.
+const getProject = cache(async (id: string, draft: boolean) => {
+  return draft
+    ? await fetchAuthQuery(api.project.getProject, { id }).catch(() => null)
+    : await fetchQuery(api.project.getProject, { id }).catch(() => null);
+});
+
+const getProjectBySlug = cache(async (slug: string, draft: boolean) => {
+  return draft
+    ? await fetchAuthQuery(api.project.getProjectBySlug, { slug }).catch(
+        () => null,
+      )
+    : await fetchQuery(api.project.getProjectBySlug, { slug }).catch(
+        () => null,
+      );
 });
 
 const baseUrl = (
   process.env.NEXT_PUBLIC_APP_URL || "https://community-app-wigxel.vercel.app"
 ).replace(/\/+$/, "");
 
-const getProjectUrl = (projectId: string) => `${baseUrl}/projects/${projectId}`;
+const getProjectUrl = (project: BasicProject) =>
+  `${baseUrl}${ProjectImpl.url(project)}`;
+
+/**
+ * Resolve the route param: it is usually a slug, but a raw doc id still works
+ * by redirecting to its slug URL. Legacy projects without a slug render under
+ * the doc id until backfill.
+ */
+const loadProject = async (param: string, draft: boolean) => {
+  const bySlug = await getProjectBySlug(param, draft);
+  const slugProject = Result.match(bySlug, {
+    error: () => null,
+    success: (data) => data,
+  });
+  if (slugProject) return { project: slugProject, slug: param };
+
+  const byId = await getProject(param, draft);
+  return Result.match(byId, {
+    error: () => null,
+    success: (project) => {
+      if (project.slug) redirect(`/projects/${project.slug}`);
+      return { project, slug: project._id };
+    },
+  });
+};
 
 function getProjectJsonLd({
   project,
@@ -68,18 +110,21 @@ function JsonLd(props: JsonLdProps) {
   );
 }
 
+async function exitPreview() {
+  "use server";
+  const draft = await draftMode();
+  draft.disable();
+  redirect("/dashboard/projects");
+}
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { projectId } = await params;
-  const project_response = await getProject(projectId);
+  const { projectId: param } = await params;
+  const draft = await draftMode();
+  const loaded = await loadProject(param, draft.isEnabled);
 
-  const project = Result.match(project_response, {
-    error: () => null,
-    success: (data) => data,
-  });
-
-  if (!project) {
+  if (!loaded) {
     return {
       title: "Project Not Found",
       description: "The requested project could not be found.",
@@ -90,11 +135,22 @@ export async function generateMetadata({
     };
   }
 
+  if (draft.isEnabled && !loaded.project.published) {
+    return {
+      title: loaded.project.title,
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const project = loaded.project;
   const title = project.title;
   const description =
     project.description || `Explore ${project.title} on Reveer.`;
 
-  const projectUrl = getProjectUrl(projectId);
+  const projectUrl = getProjectUrl(loaded.project);
 
   const firstPhoto = project.media.find((media) => media.type === "photo");
 
@@ -136,36 +192,38 @@ export async function generateMetadata({
 }
 
 export default async function ProjectsPage({ params }: PageProps) {
-  const { projectId } = await params;
+  const { projectId: param } = await params;
+  const draft = await draftMode();
+  const loaded = await loadProject(param, draft.isEnabled);
 
-  const [project_response, longDescription] = await Promise.all([
-    getProject(projectId),
-    // Legacy projects have no long-form row (null); invalid ids throw → null.
-    fetchQuery(api.projectDescription.getProjectDescription, {
-      projectId: projectId as Id<"project">,
-    }).catch(() => null),
-  ]);
+  if (!loaded) notFound();
 
-  return Result.match(project_response, {
-    error: () => notFound(),
-    success: (project) => {
-      const basicProject = project as BasicProject;
+  // Legacy projects have no long-form row (null); invalid ids throw → null.
+  const longDescription = await fetchQuery(
+    api.projectDescription.getProjectDescription,
+    { projectId: loaded.project._id as Id<"project"> },
+  ).catch(() => null);
 
-      return (
-        <Container level={"max"}>
-          <JsonLd
-            data={getProjectJsonLd({
-              project: basicProject,
-              url: getProjectUrl(projectId),
-            })}
-          />
-          <ProjectDetails
-            project={basicProject}
-            longDescription={longDescription}
-          />
-          <DiscoverMoreProjects />
-        </Container>
-      );
-    },
-  });
+  return (
+    <Container level={"max"}>
+      {draft.isEnabled && !loaded.project.published && (
+        <UnpublishedPreviewFab
+          projectId={loaded.project._id}
+          exitPreview={exitPreview}
+        />
+      )}
+
+      <JsonLd
+        data={getProjectJsonLd({
+          project: loaded.project,
+          url: getProjectUrl(loaded.project),
+        })}
+      />
+      <ProjectDetails
+        project={loaded.project}
+        longDescription={longDescription}
+      />
+      <DiscoverMoreProjects />
+    </Container>
+  );
 }

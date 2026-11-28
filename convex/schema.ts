@@ -60,6 +60,9 @@ export const project_schema = {
   userId: v.string(),
   lastUpdatedAt: v.optional(v.number()),
   title: v.string(),
+  // Readable public URL key: kebab-case title + 6-char doc-id suffix.
+  // Derived in project.createProject / updateProject; backfilled for legacy
+  // rows. Absent only briefly before backfill.
   slug: v.optional(v.string()),
   // Denormalized running total of `projectFavourites` rows for this project.
   // Maintained by favourites.toggle; legacy projects read as 0.
@@ -179,6 +182,7 @@ const schema = defineSchema({
 
   project: defineTable(project_schema)
     .index("by_userId", ["userId"])
+    .index("by_slug", ["slug"])
     .searchIndex("search_title", { searchField: "title" }),
 
   // Long-form Markdown description, kept off `project` so feed/list payloads

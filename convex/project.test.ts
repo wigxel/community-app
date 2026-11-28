@@ -666,6 +666,28 @@ describe("publication status", () => {
     const ownerFetch = await t.query(api.project.getProject, { id: projectId });
     expect(ownerFetch).toHaveProperty("right");
 
+    // getProjectBySlug serves the public detail page and gets the same gate.
+    const doc = await t.run((ctx) => ctx.db.get(projectId));
+    const slug = doc?.slug as string;
+
+    mockGetAuthUser.mockResolvedValue(null);
+    expect(
+      await t.query(api.project.getProjectBySlug, { slug }),
+    ).toHaveProperty("left");
+
+    mockGetAuthUser.mockResolvedValue({
+      ...FAKE_USER,
+      _id: "user_other_456",
+    } as any);
+    expect(
+      await t.query(api.project.getProjectBySlug, { slug }),
+    ).toHaveProperty("left");
+
+    mockGetAuthUser.mockResolvedValue(FAKE_USER as any);
+    expect(
+      await t.query(api.project.getProjectBySlug, { slug }),
+    ).toHaveProperty("right");
+
     expect(
       (
         await t.query(api.project.listProjectByUserId, {

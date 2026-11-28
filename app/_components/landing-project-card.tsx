@@ -11,6 +11,7 @@ import {
   ProjectCardOwner,
   ProjectCardRoot,
 } from "~/components/molecules/project-card";
+import { ProjectImpl } from "~/lib/factories/project";
 // import { FeatureFlags } from "~/lib/constants";
 import type { BasicProject } from "~/types/models";
 
@@ -47,7 +48,7 @@ function LandingProjectCard(props: LandingProjectCardProps) {
       href={
         isQuickPreview
           ? { pathname, hash: `#preview:${project._id}` }
-          : `/projects/${project._id}`
+          : ProjectImpl.url(project)
       }
       scroll={false}
       onClick={handleNavigation}

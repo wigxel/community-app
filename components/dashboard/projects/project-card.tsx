@@ -49,6 +49,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { api } from "~/convex/_generated/api";
+import { ProjectImpl } from "~/lib/factories/project";
 import { toast } from "~/lib/toast";
 import type { Project, TimelineDate } from "~/types/models";
 
@@ -291,12 +292,23 @@ export function PrivateProjectCard(project: Project) {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end">
-                  <Link href={`/projects/${project._id}`} target="_blank">
+                  {/* Draft Mode entry point for unpublished drafts; a plain
+                      anchor because prefetching a route handler link would
+                      enable the cookie before the owner clicks. */}
+                  <a
+                    href={
+                      isUnpublished
+                        ? `/api/preview?projectId=${project._id}`
+                        : ProjectImpl.url(project)
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     <DropdownMenuItem>
                       <EyeIcon className="text-muted-foreground" />
                       Preview project
                     </DropdownMenuItem>
-                  </Link>
+                  </a>
                   <DropdownMenuItem
                     disabled={isToggling}
                     onSelect={(event) => event.preventDefault()}

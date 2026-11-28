@@ -9,6 +9,7 @@ import {
 } from "react";
 import { MediaThumb } from "~/app/_components/MediaThumb";
 import { HeartIcon } from "~/components/icons";
+import { ProfileTooltip } from "~/components/molecules/project-card/profile-tooltip";
 import { ProfileAvatar } from "~/components/profile/avatar";
 import { cn } from "~/lib/utils";
 import type { BasicProject, Media, Project } from "~/types/models";
@@ -148,21 +149,26 @@ const ProjectCardOwner = forwardRef<HTMLDivElement, ProjectCardOwnerProps>(
       ownerName ?? ("ownerName" in project ? project.ownerName : "");
     const resolvedUsername =
       username ?? ("username" in project ? project.username : null);
+    const ownerImage =
+      "ownerImage" in project ? (project.ownerImage ?? undefined) : undefined;
 
     return (
-      <div
+      <ProfileTooltip
         ref={ref}
+        name={resolvedName || resolvedUsername || "--"}
+        username={resolvedUsername}
         className={cn("inline-flex items-center gap-[0.6em]", className)}
         {...props}
       >
         <ProfileAvatar
           className="size-[2.4em] rounded-full"
           name={resolvedName ?? ""}
+          src={ownerImage}
         />
         <h3 className="text-foreground line-clamp-1 max-w-[15ch] truncate text-sm font-semibold">
           {resolvedUsername ?? "--"}
         </h3>
-      </div>
+      </ProfileTooltip>
     );
   },
 );

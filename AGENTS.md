@@ -8,6 +8,21 @@ Convex agent skills for common tasks can be installed by running `npx convex ai-
 
 <!-- convex-ai-end -->
 
+## GitHub issues
+
+When creating GitHub issues (feature requests especially), follow the template
+at `.github/ISSUE_TEMPLATE/feature_request.md`:
+
+- Title: `[FEATURE] <one line>`, labeled `enhancement`
+  (`gh issue create --label enhancement`).
+- Keep the template's section order: Summary, Problem Statement, Proposed
+  Solution, Affected Area, User Story, Alternatives Considered, Mockup /
+  Reference, Additional Context, and the closing willingness checkboxes.
+- Fill every section; drop one only when it genuinely does not apply. The
+  Affected Area and willingness checkboxes stay in the body, ticked or not.
+- When the issue mirrors a bead, end the body with `Bead: <id>` and comment
+  the issue URL back onto the bead (`bd comment <id> "GitHub issue: <url>"`).
+
 ## Pull requests
 
 Never push to `main`. Every change lands through a PR against `main`.
@@ -205,3 +220,13 @@ bd prime                # Refresh Beads context
 **Architecture in one line:** issues live in a local Dolt DB; sync uses `refs/dolt/data` on your git remote; `.beads/issues.jsonl` is a passive export. See https://github.com/gastownhall/beads/blob/main/docs/SYNC_CONCEPTS.md for details and anti-patterns.
 
 <!-- END BEADS CODEX SETUP -->
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

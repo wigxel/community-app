@@ -106,6 +106,8 @@ export type TimelineDate =
 export type BasicProject = Project & {
   ownerName: string | null;
   username: string | null;
+  /** Signed display URL of the owner's avatar; null when unset or legacy. */
+  ownerImage?: string | null;
   lastUpdatedAt?: number;
 };
 

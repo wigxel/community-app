@@ -38,6 +38,12 @@ export const MediaImpl = {
 export const ProjectImpl = {
   listMedia: (project: MaybeProject) => safeArray(project?.media),
 
+  /** Public project URL. Slug-first; legacy rows fall back to the doc id
+   *  until backfill. Invalid input yields "#" — a no-op link target. */
+  url: (project: MaybeProject) => {
+    return project?._id ? `/projects/${project.slug ?? project._id}` : "#";
+  },
+
   links: (project: MaybeProject) => {
     return safeArray(project?.link).map((bare_link) => {
       return { ...bare_link, ...getLinkMeta(bare_link.tag) };
